@@ -2,15 +2,15 @@
 version: '3.1'
 
 services:
-  template-db:
+  explorer-db:
     image: postgres
-    container_name: template-db
+    container_name: explorer-db
     restart: always
     ports:
-      - 8000:5432
+      - 8012:5432
     environment:
-      POSTGRES_PASSWORD: template123
-      POSTGRES_DB: template
-      POSTGRES_USER: backend
+      POSTGRES_PASSWORD: explorer123
+      POSTGRES_DB: explorer
+      POSTGRES_USER: explorer
   #  volumes:
   #    - /root/dbdata/wwcc:/var/lib/postgresql/data

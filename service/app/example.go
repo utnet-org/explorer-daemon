@@ -1,11 +1,18 @@
 package app
 
 import (
+	"explorer-daemon/pkg"
+	"explorer-daemon/routing/types"
 	"github.com/gofiber/fiber/v2"
-	"go-template/pkg"
-	"go-template/routing/types"
 )
 
+// @Tags Example
+// @Summary Example
+// @Accept json
+// @Description Example API
+// @Param param body types.Example true "Request Params"
+// @Success 200 {object} types.ExampleRes "Success Response"
+// @Router /example [post]
 func Example(c *fiber.Ctx) error {
 	var msgReq types.Example
 	err := c.BodyParser(&msgReq)

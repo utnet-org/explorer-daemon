@@ -1,9 +1,9 @@
 package database
 
 import (
+	"explorer-daemon/config"
+	"explorer-daemon/model"
 	"fmt"
-	"go-template/config"
-	"go-template/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

@@ -1,8 +1,8 @@
 package pkg
 
 import (
+	"explorer-daemon/log"
 	"github.com/sirupsen/logrus"
-	"go-template/log"
 )
 
 const (

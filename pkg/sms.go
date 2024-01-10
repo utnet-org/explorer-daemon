@@ -2,11 +2,11 @@ package pkg
 
 import (
 	"errors"
+	"explorer-daemon/config"
+	"explorer-daemon/routing/types"
 	"fmt"
 	"github.com/vonage/vonage-go-sdk"
 	client "github.com/yunpian/yunpian-go-sdk/sdk"
-	"go-template/config"
-	"go-template/routing/types"
 	"gopkg.in/gomail.v2"
 )
 
@@ -17,7 +17,7 @@ func SendVonageCodeMsg(msgParam types.SengMsg) error {
 	opts := vonage.SMSOpts{
 		Type: "unicode",
 	}
-	response, errResp, err := smsClient.Send("[ISPAY]", msgParam.Area+msgParam.Phone, "Verification code is: "+msgParam.Msg, opts)
+	response, errResp, err := smsClient.Send("[UTILITY]", msgParam.Area+msgParam.Phone, "Verification code is: "+msgParam.Msg, opts)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func SendCheckCodeMessage(msgParam types.SengMsg) error {
 	ypClient := client.New("ec557d72a53ef29f0aa0c39e79d59814")
 	param := client.NewParam(2)
 	param[client.MOBILE] = msgParam.Phone
-	param[client.TEXT] = "【 TreasureBox】您的手机验证码是" + msgParam.Msg + "。本条信息无需回复"
+	param[client.TEXT] = "【UTILITY】您的手机验证码是" + msgParam.Msg + "。本条信息无需回复"
 	r := ypClient.Sms().SingleSend(param)
 	if r.Code != 0 {
 		return errors.New(r.Msg)
