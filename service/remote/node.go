@@ -3,8 +3,10 @@ package remote
 import (
 	"bytes"
 	"encoding/json"
+	"explorer-daemon/config"
+	"explorer-daemon/types"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/rpc"
@@ -25,7 +27,7 @@ type JSONRPCResponse struct {
 }
 
 func Experimental() {
-	conn, err := rpc.DialHTTP("tcp", "http://43.198.88.81:3030") // 替换成实际的地址和端口
+	conn, err := rpc.DialHTTP("tcp", config.NodeAddress) // 替换成实际的地址和端口
 	if err != nil {
 		log.Fatal("Dial error:", err)
 	}
@@ -54,27 +56,34 @@ func Experimental() {
 }
 
 func ExperimentalHttp() {
-	url := "http://43.198.88.81:3030" // 替换成实际的地址
+	url := config.NodeAddress // 替换成实际的地址
 
-	// 准备 JSON 请求体
-	jsonBody := []byte(`{
-		"jsonrpc": "2.0",
-		"id": "dontcare",
-		"method": "EXPERIMENTAL_genesis_config",
-		"params": {
-			"block_id": 1
-		}
-	}`)
+	// 准备请求体结构体
+	requestBody := types.RpcRequest{
+		JsonRpc: "2.0",
+		ID:      "dontcare",
+		Method:  "EXPERIMENTAL_genesis_config",
+		Params: types.BlockReq{
+			BlockID: 1,
+		},
+	}
+
+	// 转换结构体为 JSON 字符串
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		log.Fatal("JSON marshal error:", err)
+	}
 
 	// 发起 HTTP POST 请求
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonBody))
+	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonBody))
+	//resp, err := http.Post(url, "application/json", jsonBody)
 	if err != nil {
 		log.Fatal("HTTP POST error:", err)
 	}
 	defer resp.Body.Close()
 
 	// 读取响应体
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal("Read response error:", err)
 	}

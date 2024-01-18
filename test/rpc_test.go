@@ -12,3 +12,7 @@ func TestRPC(t *testing.T) {
 func TestHttp(t *testing.T) {
 	remote.ExperimentalHttp()
 }
+
+func TestBlockDetails(t *testing.T) {
+	remote.BlockDetails()
+}

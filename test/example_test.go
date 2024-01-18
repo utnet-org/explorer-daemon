@@ -2,7 +2,7 @@ package test
 
 import (
 	"explorer-daemon/pkg"
-	"explorer-daemon/routing/types"
+	"explorer-daemon/types"
 	"fmt"
 	"testing"
 )
