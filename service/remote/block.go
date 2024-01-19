@@ -1,48 +1,64 @@
 package remote
 
 import (
-	"bytes"
-	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
-	"io"
-	"net/http"
 )
 
+/**
+The RPC API enables you to query the network and get details about specific blocks or chunks.
+*/
+
+var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodePortKey)
+
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetails() {
-	url := config.NodeAddress
+func BlockDetailsByFinal() {
 
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "block",
-		Params: types.BlockReq2{
+		Params: types.BlockFinalReq{
 			Finality: "final",
 		},
 	}
 
-	jsonBody, err := json.Marshal(requestBody)
-	fmt.Println("request body:", requestBody)
-	if err != nil {
-		fmt.Println("JSON marshal error:", err)
+	body := SendRemoteCall(requestBody, url)
+
+	fmt.Printf("BlockDetailsByFinal Response:%s", body)
+}
+
+// Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
+func BlockDetailsByBlockId(blockId int) {
+
+	requestBody := types.RpcRequest{
+		JsonRpc: config.JsonRpc,
+		ID:      config.RpcId,
+		Method:  "block",
+		Params: types.BlockIdReq{
+			BlockId: blockId,
+		},
 	}
 
-	// 发起 HTTP POST 请求
-	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonBody))
-	//resp, err := http.Post(url, "application/json", jsonBody)
-	if err != nil {
-		fmt.Println("HTTP POST error:", err)
-	}
-	defer resp.Body.Close()
+	body := SendRemoteCall(requestBody, url)
 
-	// 读取响应体
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Read response error:", err)
+	fmt.Printf("BlockDetailsByBlockId Response:%s", body)
+}
+
+// Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
+func BlockDetailsByBlockHash(blockHash string) {
+
+	requestBody := types.RpcRequest{
+		JsonRpc: config.JsonRpc,
+		ID:      config.RpcId,
+		Method:  "block",
+		Params: types.BlockHashReq{
+			BlockHash: blockHash,
+		},
 	}
 
-	// 打印响应结果
-	fmt.Println("Response:", string(body))
+	body := SendRemoteCall(requestBody, url)
+
+	fmt.Printf("BlockDetailsByBlockHash Response:%s", body)
 }

@@ -63,8 +63,8 @@ func ExperimentalHttp() {
 		JsonRpc: "2.0",
 		ID:      "dontcare",
 		Method:  "EXPERIMENTAL_genesis_config",
-		Params: types.BlockReq{
-			BlockID: 1,
+		Params: types.BlockIdReq{
+			BlockId: 1,
 		},
 	}
 
