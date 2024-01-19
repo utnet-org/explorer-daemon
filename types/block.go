@@ -12,16 +12,17 @@ type BlockHashReq struct {
 	BlockHash string `json:"block_id"`
 }
 
-// Block details response
+// Block Details Response
+
 type BlockDetailsRes struct {
 	CommonRes CommonRes
 	Body      BlockDetailsBody `json:"result"`
 }
 
 type BlockDetailsBody struct {
-	Author string  `json:"author"`
-	Chunks []Chunk `json:"chunks"`
-	Header Header  `json:"header"`
+	Author string             `json:"author"`
+	Chunks []Chunk            `json:"chunks"`
+	Header BlockDetailsHeader `json:"header"`
 }
 
 type Chunk struct {
@@ -45,7 +46,7 @@ type Chunk struct {
 	ValidatorReward      *string  `json:"validator_reward,omitempty"`
 }
 
-type Header struct {
+type BlockDetailsHeader struct {
 	Approvals             []*string   `json:"approvals"`
 	BlockBodyHash         interface{} `json:"block_body_hash"`
 	BlockMerkleRoot       string      `json:"block_merkle_root"`
@@ -81,7 +82,8 @@ type Header struct {
 	ValidatorReward       string      `json:"validator_reward"`
 }
 
-// Block changes response
+// Block Changes Response
+
 type BlockChangesRes struct {
 	CommonRes CommonRes
 	Body      BlockChangesBody `json:"result"`
@@ -95,6 +97,41 @@ type BlockChangesBody struct {
 type Change struct {
 	AccountID string `json:"accountId"`
 	Type      string `json:"type"`
+}
+
+// Chunk Details Response
+
+type ChunkDetailsRes struct {
+	CommonRes CommonRes
+	Body      ChunkDetailsBody `json:"result"`
+}
+
+type ChunkDetailsBody struct {
+	Author       string             `json:"author"`
+	Header       ChunkDetailsHeader `json:"header"`
+	Receipts     []string           `json:"receipts"`
+	Transactions []string           `json:"transactions"`
+}
+
+type ChunkDetailsHeader struct {
+	BalanceBurnt         string   `json:"balanceBurnt"`
+	ChunkHash            string   `json:"chunkHash"`
+	EncodedLength        int64    `json:"encodedLength"`
+	EncodedMerkleRoot    string   `json:"encodedMerkleRoot"`
+	GasLimit             int64    `json:"gasLimit"`
+	GasUsed              int64    `json:"gasUsed"`
+	HeightCreated        int64    `json:"heightCreated"`
+	HeightIncluded       int64    `json:"heightIncluded"`
+	OutcomeRoot          string   `json:"outcomeRoot"`
+	OutgoingReceiptsRoot string   `json:"outgoingReceiptsRoot"`
+	PrevBlockHash        string   `json:"prevBlockHash"`
+	PrevStateRoot        string   `json:"prevStateRoot"`
+	RentPaid             string   `json:"rentPaid"`
+	ShardID              int64    `json:"shardId"`
+	Signature            string   `json:"signature"`
+	TxRoot               string   `json:"txRoot"`
+	ValidatorProposals   []string `json:"validatorProposals"`
+	ValidatorReward      string   `json:"validatorReward"`
 }
 
 // 区块集合
