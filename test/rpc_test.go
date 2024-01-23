@@ -38,6 +38,7 @@ func TestGasPriceByNull(t *testing.T) {
 }
 
 // Protocol
+
 func TestGenesisConfig(t *testing.T) {
 	remote.GenesisConfig()
 }
@@ -51,6 +52,7 @@ func TestProtocolConfigByBlockId(t *testing.T) {
 }
 
 // Network
+
 func TestNetworkNodeStatus(t *testing.T) {
 	remote.NetworkNodeStatus()
 }
@@ -68,6 +70,23 @@ func TestNetworkValidationStatusByNull(t *testing.T) {
 }
 
 // Transaction
+
 func TestTransactionSendAsync(t *testing.T) {
 	remote.TransactionSendAsync()
+}
+
+func TestTransactionSendAwait(t *testing.T) {
+	remote.TransactionSendAwait()
+}
+
+func TestTransactionStatus(t *testing.T) {
+	remote.TransactionStatus()
+}
+
+func TestTransactionStatusReceipts(t *testing.T) {
+	remote.TransactionStatusReceipts()
+}
+
+func TestTransactionReceiptById(t *testing.T) {
+	remote.TransactionReceiptsById("2EbembRPJhREPtmHCrGv3Xtdm3xoc5BMVYHm3b2kjvMY")
 }
