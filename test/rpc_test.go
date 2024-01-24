@@ -1,6 +1,7 @@
 package test
 
 import (
+	"explorer-daemon/pkg"
 	"explorer-daemon/service/remote"
 	"testing"
 )
@@ -14,8 +15,11 @@ func TestHttp(t *testing.T) {
 }
 
 func TestBlockDetailsByFinal(t *testing.T) {
-	remote.BlockDetailsByFinal()
+	res := remote.BlockDetailsByFinal()
+	pkg.PrintStruct(res.Body.Chunks)
+	//fmt.Println("BlockDetailsByFinal bdRes:", res)
 }
+
 func TestBlockDetailsByBlockId(t *testing.T) {
 	remote.BlockDetailsByBlockId(17821130)
 }

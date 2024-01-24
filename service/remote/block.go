@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
@@ -13,7 +14,7 @@ The RPC API enables you to query the network and get details about specific bloc
 var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodePortKey)
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByFinal() {
+func BlockDetailsByFinal() types.BlockDetailsRes {
 
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
@@ -24,9 +25,16 @@ func BlockDetailsByFinal() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	jsonRes := SendRemoteCall(requestBody, url)
 
-	fmt.Printf("BlockDetailsByFinal Response:%s", body)
+	fmt.Printf("BlockDetailsByFinal Json Response:%s", jsonRes)
+	var bdRes types.BlockDetailsRes
+	err := json.Unmarshal(jsonRes, &bdRes)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	fmt.Println("BlockDetailsByFinal bdRes:", bdRes)
+	return bdRes
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.

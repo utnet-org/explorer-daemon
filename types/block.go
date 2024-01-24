@@ -26,28 +26,28 @@ type BlockDetailsBody struct {
 }
 
 type Chunk struct {
-	BalanceBurnt         *string  `json:"balance_burnt,omitempty"`
-	ChunkHash            *string  `json:"chunk_hash,omitempty"`
-	EncodedLength        *int64   `json:"encoded_length,omitempty"`
-	EncodedMerkleRoot    *string  `json:"encoded_merkle_root,omitempty"`
-	GasLimit             *int64   `json:"gas_limit,omitempty"`
-	GasUsed              *int64   `json:"gas_used,omitempty"`
-	HeightCreated        *int64   `json:"height_created,omitempty"`
-	HeightIncluded       *int64   `json:"height_included,omitempty"`
-	OutcomeRoot          *string  `json:"outcome_root,omitempty"`
-	OutgoingReceiptsRoot *string  `json:"outgoing_receipts_root,omitempty"`
-	PrevBlockHash        *string  `json:"prev_block_hash,omitempty"`
-	PrevStateRoot        *string  `json:"prev_state_root,omitempty"`
-	RentPaid             *string  `json:"rent_paid,omitempty"`
-	ShardID              *int64   `json:"shard_id,omitempty"`
-	Signature            *string  `json:"signature,omitempty"`
-	TxRoot               *string  `json:"tx_root,omitempty"`
+	BalanceBurnt         string   `json:"balance_burnt,omitempty"`
+	ChunkHash            string   `json:"chunk_hash,omitempty"`
+	EncodedLength        int64    `json:"encoded_length,omitempty"`
+	EncodedMerkleRoot    string   `json:"encoded_merkle_root,omitempty"`
+	GasLimit             int64    `json:"gas_limit,omitempty"`
+	GasUsed              int64    `json:"gas_used,omitempty"`
+	HeightCreated        int64    `json:"height_created,omitempty"`
+	HeightIncluded       int64    `json:"height_included,omitempty"`
+	OutcomeRoot          string   `json:"outcome_root,omitempty"`
+	OutgoingReceiptsRoot string   `json:"outgoing_receipts_root,omitempty"`
+	PrevBlockHash        string   `json:"prev_block_hash,omitempty"`
+	PrevStateRoot        string   `json:"prev_state_root,omitempty"`
+	RentPaid             string   `json:"rent_paid,omitempty"`
+	ShardID              int64    `json:"shard_id,omitempty"`
+	Signature            string   `json:"signature,omitempty"`
+	TxRoot               string   `json:"tx_root,omitempty"`
 	ValidatorProposals   []string `json:"validator_proposals,omitempty"`
-	ValidatorReward      *string  `json:"validator_reward,omitempty"`
+	ValidatorReward      string   `json:"validator_reward,omitempty"`
 }
 
 type BlockDetailsHeader struct {
-	Approvals             []*string   `json:"approvals"`
+	Approvals             []string    `json:"approvals"`
 	BlockBodyHash         interface{} `json:"block_body_hash"`
 	BlockMerkleRoot       string      `json:"block_merkle_root"`
 	BlockOrdinal          interface{} `json:"block_ordinal"`
