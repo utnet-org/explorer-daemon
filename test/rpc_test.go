@@ -15,7 +15,7 @@ func TestHttp(t *testing.T) {
 }
 
 func TestBlockDetailsByFinal(t *testing.T) {
-	res := remote.BlockDetailsByFinal()
+	res, _ := remote.BlockDetailsByFinal()
 	pkg.PrintStruct(res.Body.Chunks)
 	//fmt.Println("BlockDetailsByFinal bdRes:", res)
 }

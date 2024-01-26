@@ -2,7 +2,7 @@ package web
 
 import (
 	"explorer-daemon/pkg"
-	"explorer-daemon/routing/types"
+	"explorer-daemon/types"
 	"github.com/gofiber/fiber/v2"
 )
 

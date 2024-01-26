@@ -42,7 +42,7 @@ const mapping = `
 var ECLIENT *elastic.Client
 var ECTX context.Context
 
-func Init() {
+func Init() (*elastic.Client, context.Context) {
 	// 创建ES client用于后续操作ES
 	//client, err := es.NewClient(
 	//	// 设置ES服务地址，支持多个地址
@@ -73,7 +73,8 @@ func Init() {
 	// 执行ES请求需要提供一个上下文对象
 	ctx := context.Background()
 	ECTX = ctx
-	mockData(ctx, client)
+	return ECLIENT, ECTX
+	//mockData(ctx, client)
 	//crud(client, ctx)
 }
 
@@ -151,7 +152,7 @@ func crud(client *elastic.Client, ctx context.Context) {
 	}
 }
 
-func insertData(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) {
+func InsertData(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
 	// 确保索引存在
 	createIndexIfNotExists(ctx, client, "block")
 	startTime := time.Now()
@@ -165,9 +166,11 @@ func insertData(ctx context.Context, client *elastic.Client, bb types.BlockDetai
 	_, err := bulkRequest.Do(ctx)
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
 
 	fmt.Println("插入完成")
 	duration := time.Since(startTime)
 	fmt.Printf("耗时: %v\n", duration)
+	return nil
 }

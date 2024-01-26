@@ -14,3 +14,18 @@ services:
       POSTGRES_USER: explorer
   #  volumes:
   #    - /root/dbdata/wwcc:/var/lib/postgresql/data
+
+  elasticview:
+    image: 1340691923/elastic_view:latest
+    container_name: elasticview
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+#    networks:
+#      - ops_default
+    volumes:
+      - ./data:/data
+
+#networks:
+#  ops_default:
+#    external: true

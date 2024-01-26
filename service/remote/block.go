@@ -14,7 +14,7 @@ The RPC API enables you to query the network and get details about specific bloc
 var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodePortKey)
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByFinal() types.BlockDetailsRes {
+func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
 
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
@@ -34,7 +34,7 @@ func BlockDetailsByFinal() types.BlockDetailsRes {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
 	fmt.Println("BlockDetailsByFinal bdRes:", bdRes)
-	return bdRes
+	return bdRes, err
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
