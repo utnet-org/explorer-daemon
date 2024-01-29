@@ -26,10 +26,3 @@ func InitFetchData() {
 	}
 	//}
 }
-
-//func IndexDataToElasticsearch(data types.BlockDetailsRes) error {
-//	// 使用go-elasticsearch库将数据存入Elasticsearch
-//	// 你需要初始化es客户端，并执行相应的索引操作
-//	// 参考 go-elasticsearch 文档：https://pkg.go.dev/github.com/elastic/go-elasticsearch/v8
-//	return nil
-//}
