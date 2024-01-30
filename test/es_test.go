@@ -11,8 +11,8 @@ func TestEsInsert(t *testing.T) {
 	fetch.InitFetchData()
 }
 
-func TestEsQuery(t *testing.T) {
-	es.BlockQuery()
+func TestEsBlockDetailsQuery(t *testing.T) {
+	es.BlockDetailsQuery()
 }
 
 func TestEsQuery2(t *testing.T) {

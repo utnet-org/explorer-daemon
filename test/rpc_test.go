@@ -27,6 +27,11 @@ func TestBlockDetailsByBlockHash(t *testing.T) {
 	remote.BlockDetailsByBlockHash("81k9ked5s34zh13EjJt26mxw5npa485SY4UNoPi6yYLo")
 }
 
+func TestChangeInBlockByFinal(t *testing.T) {
+	res, _ := remote.ChangeInBlockByFinal()
+	pkg.PrintStruct(res.Body)
+}
+
 func TestGasPriceByBlockHeight(t *testing.T) {
 	heights := []int{1}
 	remote.GasPriceByBlockHeight(heights)

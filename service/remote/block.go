@@ -70,3 +70,51 @@ func BlockDetailsByBlockHash(blockHash string) {
 
 	fmt.Printf("BlockDetailsByBlockHash Response:%s", body)
 }
+
+// Returns changes in block for given block height or hash. You can also use finality param to return latest block details.
+func ChangeInBlockByFinal() (types.BlockChangesRes, error) {
+
+	requestBody := types.RpcRequest{
+		JsonRpc: config.JsonRpc,
+		ID:      config.RpcId,
+		Method:  "EXPERIMENTAL_changes_in_block",
+		Params: types.BlockFinalReq{
+			Finality: "final",
+		},
+	}
+
+	jsonRes := SendRemoteCall(requestBody, url)
+
+	fmt.Printf("ChangeInBlockByFinal Json Response:%s", jsonRes)
+	var res types.BlockChangesRes
+	err := json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	fmt.Println("ChangeInBlockByFinal res:", res)
+	return res, err
+}
+
+// Returns details of a specific chunk. You can run a block details query to get a valid chunk hash.
+func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
+
+	requestBody := types.RpcRequest{
+		JsonRpc: config.JsonRpc,
+		ID:      config.RpcId,
+		Method:  "chunk",
+		Params: types.ChunkId{
+			ChunkId: chunkId,
+		},
+	}
+
+	jsonRes := SendRemoteCall(requestBody, url)
+
+	fmt.Printf("ChunkDetailsByChunkId Json Response:%s", jsonRes)
+	var res types.ChunkDetailsRes
+	err := json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	fmt.Println("ChunkDetailsByChunkId res:", res)
+	return res, err
+}

@@ -32,7 +32,7 @@ func ConnectDB() {
 		Colorful:                  true,
 	})
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.EnvLoad("DB_HOST"), port, config.Config("DB_USER"), config.Config("DB_PASSWORD"), config.Config("DB_NAME"))
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.EnvLoad("DB_HOST"), port, config.EnvLoad("DB_USER"), config.EnvLoad("DB_PASSWORD"), config.EnvLoad("DB_NAME"))
 	fmt.Println(dsn)
 	if DB, err = gorm.Open(postgres.Open(dsn),
 		&gorm.Config{

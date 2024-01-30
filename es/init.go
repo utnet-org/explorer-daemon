@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/olivere/elastic/v7"
 	"golang.org/x/net/context"
-	"time"
 )
 
 // 索引mapping定义，这里仿微博消息结构定义
@@ -150,27 +149,4 @@ func crud(client *elastic.Client, ctx context.Context) {
 		// Handle error
 		panic(err)
 	}
-}
-
-func InsertData(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
-	// 确保索引存在
-	createIndexIfNotExists(ctx, client, "block")
-	startTime := time.Now()
-	// 插入
-	bulkRequest := client.Bulk()
-	blk := bb
-
-	req := elastic.NewBulkIndexRequest().Index("block").Doc(blk)
-	bulkRequest = bulkRequest.Add(req)
-	// 每 1 条文档执行一次批量插入
-	_, err := bulkRequest.Do(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	fmt.Println("插入完成")
-	duration := time.Since(startTime)
-	fmt.Printf("耗时: %v\n", duration)
-	return nil
 }

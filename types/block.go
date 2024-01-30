@@ -12,6 +12,16 @@ type BlockHashReq struct {
 	BlockHash string `json:"block_id"`
 }
 
+type ChunkId struct {
+	ChunkId string `json:"chunk_id"`
+}
+
+type BlockDetailsReq struct {
+	BlockId   int    `json:"block_id"`
+	BlockHash string `json:"block_hash"`
+	Finality  string `json:"finality"`
+}
+
 // Block Details Response
 
 type BlockDetailsRes struct {
