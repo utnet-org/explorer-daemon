@@ -1,4 +1,4 @@
-package web
+package api
 
 import (
 	"explorer-daemon/es"
@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Tags BlockDetails
+// @Tags Block
 // @Summary BlockDetails
 // @Accept json
 // @Description BlockDetails API
@@ -22,6 +22,22 @@ func BlockDetails(c *fiber.Ctx) error {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
 	resBody := types.BlockDetailsBody{}
+
+	resBody = es.BlockDetailsQuery()
+	fmt.Println("BlockDetails res success...")
+	pkg.PrintStruct(resBody)
+	return c.JSON(pkg.SuccessResponse(resBody))
+}
+
+// @Tags Block
+// @Summary LastBlock
+// @Accept json
+// @Description LastBlock API
+// @Param param body false "Request Params"
+// @Success 200 {object} types.LastBlockRes "Success Response"
+// @Router /block/details [post]
+func LastBlock(c *fiber.Ctx) error {
+	resBody := types.LastBlockRes{}
 
 	resBody = es.BlockDetailsQuery()
 	fmt.Println("BlockDetails res success...")

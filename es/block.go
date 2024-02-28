@@ -10,14 +10,13 @@ import (
 	"time"
 )
 
-func InsertBlockDetails(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
+func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
 	// 确保索引存在
 	createIndexIfNotExists(ctx, client, "block")
 	startTime := time.Now()
 	// 插入
 	bulkRequest := client.Bulk()
 	blk := bb
-
 	req := elastic.NewBulkIndexRequest().Index("block").Doc(blk)
 	bulkRequest = bulkRequest.Add(req)
 	// 每 1 条文档执行一次批量插入
@@ -26,10 +25,24 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, bb types.Bl
 		fmt.Println(err)
 		return err
 	}
-
 	fmt.Println("插入完成")
 	duration := time.Since(startTime)
 	fmt.Printf("耗时: %v\n", duration)
+	return nil
+}
+
+func InsertBlockDetails(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
+	// Ensure the index exists
+	createIndexIfNotExists(ctx, client, "block")
+	_, err := client.Index().
+		Index("block").
+		BodyJson(bb).
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("InsertBlockDetails Success")
 	return nil
 }
 
@@ -130,6 +143,30 @@ func BlockDetailsQuery() types.BlockDetailsBody {
 		//Sort("created", true). // 根据创建时间排序
 		//From(0).Size(10).      // 分页参数
 		Pretty(true).
+		Do(ECTX)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 打印搜索结果
+	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
+	var body types.BlockDetailsBody
+	for _, hit := range searchResult.Hits.Hits {
+		_ = json.Unmarshal(hit.Source, &body)
+	}
+	pkg.PrintStruct(body)
+	return body
+}
+
+func LastBlockQuery() types.BlockDetailsBody {
+	// 执行搜索
+	searchResult, err := ECLIENT.Search().
+		Index("block").
+		Query(elastic.NewMatchAllQuery()).
+		Source(types.LastBlockRes{}).
+		//Sort("created", true). // 根据创建时间排序
+		//From(0).Size(10).      // 分页参数
+		//Pretty(true).
 		Do(ECTX)
 	if err != nil {
 		fmt.Println(err)

@@ -1,16 +1,17 @@
 package routing
 
 import (
-	"explorer-daemon/service/web"
+	"explorer-daemon/service/api"
 	"github.com/gofiber/fiber/v2"
 )
 
 func Setup(f *fiber.App) {
-	api := f.Group("/api")
+	prep := f.Group("/api")
 
 	//api.Post("/example", app.Example)
-	api.Post("/overview/info", web.OverviewInfo)
+	prep.Post("/overview/info", api.OverviewInfo)
 
 	// block
-	api.Post("/block/details", web.BlockDetails)
+	prep.Post("/block/last", api.LastBlock)
+	prep.Post("/block/details", api.BlockDetails)
 }

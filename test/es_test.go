@@ -12,7 +12,13 @@ func TestEsInsert(t *testing.T) {
 }
 
 func TestEsBlockDetailsQuery(t *testing.T) {
+	es.Init()
 	es.BlockDetailsQuery()
+}
+
+func TestEsLastBlockQuery(t *testing.T) {
+	es.Init()
+	es.LastBlockQuery()
 }
 
 func TestEsQuery2(t *testing.T) {
