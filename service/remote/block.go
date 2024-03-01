@@ -118,3 +118,26 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 	fmt.Println("ChunkDetailsByChunkId res:", res)
 	return res, err
 }
+
+func ChunkDetailsByBlockId(chunkId string) (types.ChunkDetailsRes, error) {
+
+	requestBody := types.RpcRequest{
+		JsonRpc: config.JsonRpc,
+		ID:      config.RpcId,
+		Method:  "chunk",
+		Params: types.ChunkId{
+			ChunkId: chunkId,
+		},
+	}
+
+	jsonRes := SendRemoteCall(requestBody, url)
+
+	fmt.Printf("ChunkDetailsByBlockId Json Response:%s", jsonRes)
+	var res types.ChunkDetailsRes
+	err := json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	fmt.Println("ChunkDetailsByBlockId res:", res)
+	return res, err
+}

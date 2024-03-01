@@ -24,6 +24,9 @@ func BlockDetailsByFinal() {
 	// insert Elasticsearch
 	err = es.InsertBlockDetails(es.ECTX, es.ECLIENT, res.Body)
 	pkg.PrintStruct(res.Body)
+	// 获取chunk hash
+	cHash := res.Body.Chunks[0].ChunkHash
+	ChunkDetailsByChunkId(cHash)
 	if err != nil {
 		fmt.Println("InsertData error:", err)
 		// 处理存储到Elasticsearch的错误
@@ -46,8 +49,15 @@ func BlockChangesByFinal() {
 	}
 }
 
-func ChunkDetailsByChunkId() {
-	_, err := remote.ChunkDetailsByChunkId("")
+func ChunkDetailsByChunkId(chunkHash string) {
+	_, err := remote.ChunkDetailsByChunkId(chunkHash)
+	if err != nil {
+		fmt.Println("rpc error")
+	}
+}
+
+func ChunkDetailsByBlockId() {
+	_, err := remote.ChunkDetailsByBlockId("")
 	if err != nil {
 		fmt.Println("rpc error")
 	}

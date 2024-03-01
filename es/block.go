@@ -165,7 +165,7 @@ func LastBlockQuery() types.BlockDetailsBody {
 		Query(elastic.NewMatchAllQuery()).
 		Source(types.LastBlockRes{}).
 		//Sort("created", true). // 根据创建时间排序
-		//From(0).Size(10).      // 分页参数
+		From(0).Size(10). // 分页参数
 		//Pretty(true).
 		Do(ECTX)
 	if err != nil {
