@@ -16,6 +16,7 @@ func InitFetchData() {
 	//}
 }
 
+// 定时获取最新的block details
 func BlockDetailsByFinal() {
 	res, err := remote.BlockDetailsByFinal()
 	if err != nil {
@@ -26,6 +27,7 @@ func BlockDetailsByFinal() {
 	pkg.PrintStruct(res.Body)
 	// 获取chunk hash
 	cHash := res.Body.Chunks[0].ChunkHash
+	// 获取最新block中的chunk details
 	ChunkDetailsByChunkId(cHash)
 	if err != nil {
 		fmt.Println("InsertData error:", err)
@@ -50,10 +52,13 @@ func BlockChangesByFinal() {
 }
 
 func ChunkDetailsByChunkId(chunkHash string) {
-	_, err := remote.ChunkDetailsByChunkId(chunkHash)
+	res, err := remote.ChunkDetailsByChunkId(chunkHash)
+	// 存入es
+	err = es.InsertChunkDetails(res.Body, chunkHash)
 	if err != nil {
-		fmt.Println("rpc error")
+		fmt.Println("InsertChunkDetails error:", err)
 	}
+	pkg.PrintStruct(res.Body)
 }
 
 func ChunkDetailsByBlockId() {

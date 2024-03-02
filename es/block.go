@@ -68,17 +68,13 @@ func InsertBlockChanges(ctx context.Context, client *elastic.Client, bb types.Bl
 	return nil
 }
 
-func InsertChunkDetails(ctx context.Context, client *elastic.Client, bb types.ChunkDetailsBody) error {
+func InsertChunkDetails(body types.ChunkDetailsBody, chunkHash string) error {
+	ctx := ECTX
+	client := ECLIENT
 	createIndexIfNotExists(ctx, client, "chunk")
 	startTime := time.Now()
-	// insert
-	bulkRequest := client.Bulk()
-	blk := bb
-
-	req := elastic.NewBulkIndexRequest().Index("chunk").Doc(blk)
-	bulkRequest = bulkRequest.Add(req)
-	// 每 1 条文档执行一次批量插入
-	_, err := bulkRequest.Do(ctx)
+	// chunkHash作为唯一doc id
+	_, err := client.Index().Index("chunk").BodyJson(body).Id(chunkHash).Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err
