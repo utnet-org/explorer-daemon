@@ -36,60 +36,62 @@ type BlockDetailsBody struct {
 }
 
 type Chunk struct {
-	BalanceBurnt         string   `json:"balance_burnt,omitempty"`
-	ChunkHash            string   `json:"chunk_hash,omitempty"`
-	EncodedLength        int64    `json:"encoded_length,omitempty"`
-	EncodedMerkleRoot    string   `json:"encoded_merkle_root,omitempty"`
-	GasLimit             int64    `json:"gas_limit,omitempty"`
-	GasUsed              int64    `json:"gas_used,omitempty"`
-	HeightCreated        int64    `json:"height_created,omitempty"`
-	HeightIncluded       int64    `json:"height_included,omitempty"`
-	OutcomeRoot          string   `json:"outcome_root,omitempty"`
-	OutgoingReceiptsRoot string   `json:"outgoing_receipts_root,omitempty"`
-	PrevBlockHash        string   `json:"prev_block_hash,omitempty"`
-	PrevStateRoot        string   `json:"prev_state_root,omitempty"`
-	RentPaid             string   `json:"rent_paid,omitempty"`
-	ShardID              int64    `json:"shard_id,omitempty"`
-	Signature            string   `json:"signature,omitempty"`
-	TxRoot               string   `json:"tx_root,omitempty"`
-	ValidatorProposals   []string `json:"validator_proposals,omitempty"`
-	ValidatorReward      string   `json:"validator_reward,omitempty"`
+	BalanceBurnt             string   `json:"balance_burnt,omitempty"`              // 燃烧的余额
+	ChunkHash                string   `json:"chunk_hash,omitempty"`                 // 区块哈希
+	EncodedLength            int64    `json:"encoded_length,omitempty"`             // 编码长度
+	EncodedMerkleRoot        string   `json:"encoded_merkle_root,omitempty"`        // 编码默克尔根
+	GasLimit                 int64    `json:"gas_limit,omitempty"`                  // Gas 限制
+	GasUsed                  int64    `json:"gas_used,omitempty"`                   // 已使用的 Gas
+	HeightCreated            int64    `json:"height_created,omitempty"`             // 创建高度
+	HeightIncluded           int64    `json:"height_included,omitempty"`            // 包含高度
+	OutcomeRoot              string   `json:"outcome_root,omitempty"`               // 结果根
+	OutgoingReceiptsRoot     string   `json:"outgoing_receipts_root,omitempty"`     // 发出的收据根
+	PrevBlockHash            string   `json:"prev_block_hash,omitempty"`            // 上一个区块哈希
+	PrevStateRoot            string   `json:"prev_state_root,omitempty"`            // 上一个状态根
+	RentPaid                 string   `json:"rent_paid,omitempty"`                  // 租金支付
+	ShardID                  int64    `json:"shard_id,omitempty"`                   // 分片ID
+	Signature                string   `json:"signature,omitempty"`                  // 签名
+	TxRoot                   string   `json:"tx_root,omitempty"`                    // 交易根
+	ValidatorFrozenProposals []string `json:"validator_frozen_proposals,omitempty"` // 验证者冻结提案
+	ValidatorPowerProposals  []string `json:"validator_power_proposals,omitempty"`  // 验证者权力提案
+	ValidatorReward          string   `json:"validator_reward,omitempty"`           // 验证者奖励
 }
 
 type BlockDetailsHeader struct {
-	Approvals             []string    `json:"approvals"`
-	BlockBodyHash         interface{} `json:"block_body_hash"`
-	BlockMerkleRoot       string      `json:"block_merkle_root"`
-	BlockOrdinal          interface{} `json:"block_ordinal"`
-	ChallengesResult      []string    `json:"challenges_result"`
-	ChallengesRoot        string      `json:"challenges_root"`
-	ChunkHeadersRoot      string      `json:"chunk_headers_root"`
-	ChunkMask             []bool      `json:"chunk_mask"`
-	ChunkReceiptsRoot     string      `json:"chunk_receipts_root"`
-	ChunkTxRoot           string      `json:"chunk_tx_root"`
-	ChunksIncluded        int64       `json:"chunks_included"`
-	EpochID               string      `json:"epoch_id"`
-	EpochSyncDataHash     interface{} `json:"epoch_sync_data_hash"`
-	GasPrice              string      `json:"gas_price"`
-	Hash                  string      `json:"hash"`
-	Height                int64       `json:"height"`
-	LastDsFinalBlock      string      `json:"last_ds_final_block"`
-	LastFinalBlock        string      `json:"last_final_block"`
-	LatestProtocolVersion int64       `json:"latest_protocol_version"`
-	NextBpHash            string      `json:"next_bp_hash"`
-	NextEpochID           string      `json:"next_epoch_id"`
-	OutcomeRoot           string      `json:"outcome_root"`
-	PrevHash              string      `json:"prev_hash"`
-	PrevHeight            interface{} `json:"prev_height"`
-	PrevStateRoot         string      `json:"prev_state_root"`
-	RandomValue           string      `json:"random_value"`
-	RentPaid              string      `json:"rent_paid"`
-	Signature             string      `json:"signature"`
-	Timestamp             int64       `json:"timestamp"`
-	TimestampNanosec      string      `json:"timestamp_nanosec"`
-	TotalSupply           string      `json:"total_supply"`
-	ValidatorProposals    []string    `json:"validator_proposals"`
-	ValidatorReward       string      `json:"validator_reward"`
+	Approvals                []string    `json:"approvals"`                  // 确认
+	BlockBodyHash            string      `json:"block_body_hash"`            // 区块体哈希
+	BlockMerkleRoot          string      `json:"block_merkle_root"`          // 区块默克尔根
+	BlockOrdinal             int64       `json:"block_ordinal"`              // 区块序号
+	ChallengesResult         []string    `json:"challenges_result"`          // 挑战结果
+	ChallengesRoot           string      `json:"challenges_root"`            // 挑战根
+	ChunkHeadersRoot         string      `json:"chunk_headers_root"`         // 区块头根
+	ChunkMask                []bool      `json:"chunk_mask"`                 // 区块掩码
+	ChunkReceiptsRoot        string      `json:"chunk_receipts_root"`        // 区块收据根
+	ChunkTxRoot              string      `json:"chunk_tx_root"`              // 区块交易根
+	ChunksIncluded           int64       `json:"chunks_included"`            // 包含的区块数
+	EpochID                  string      `json:"epoch_id"`                   // 时代ID
+	EpochSyncDataHash        interface{} `json:"epoch_sync_data_hash"`       // 时代同步数据哈希
+	GasPrice                 string      `json:"gas_price"`                  // Gas 价格
+	Hash                     string      `json:"hash"`                       // 哈希
+	Height                   int64       `json:"height"`                     // 高度
+	LastDsFinalBlock         string      `json:"last_ds_final_block"`        // 上一个DS最终区块
+	LastFinalBlock           string      `json:"last_final_block"`           // 上一个最终区块
+	LatestProtocolVersion    int64       `json:"latest_protocol_version"`    // 最新协议版本
+	NextBpHash               string      `json:"next_bp_hash"`               // 下一个BP哈希
+	NextEpochID              string      `json:"next_epoch_id"`              // 下一个时代ID
+	OutcomeRoot              string      `json:"outcome_root"`               // 结果根
+	PrevHash                 string      `json:"prev_hash"`                  // 上一个哈希
+	PrevHeight               int64       `json:"prev_height"`                // 上一个高度
+	PrevStateRoot            string      `json:"prev_state_root"`            // 上一个状态根
+	RandomValue              string      `json:"random_value"`               // 随机值
+	RentPaid                 string      `json:"rent_paid"`                  // 租金支付
+	Signature                string      `json:"signature"`                  // 签名
+	Timestamp                int64       `json:"timestamp"`                  // 时间戳
+	TimestampNanosec         string      `json:"timestamp_nanosec"`          // 时间戳纳秒
+	TotalSupply              string      `json:"total_supply"`               // 总供应量
+	ValidatorFrozenProposals []string    `json:"validator_frozen_proposals"` // 验证者冻结提案
+	ValidatorPowerProposals  []string    `json:"validator_power_proposals"`  // 验证者权力提案
+	ValidatorReward          string      `json:"validator_reward"`           // 验证者奖励
 }
 
 // Block Changes Response
@@ -124,22 +126,22 @@ type ChunkDetailsBody struct {
 }
 
 type ChunkDetailsHeader struct {
-	BalanceBurnt         string   `json:"balanceBurnt"`
-	ChunkHash            string   `json:"chunkHash"`
-	EncodedLength        int64    `json:"encodedLength"`
-	EncodedMerkleRoot    string   `json:"encodedMerkleRoot"`
-	GasLimit             int64    `json:"gasLimit"`
-	GasUsed              int64    `json:"gasUsed"`
-	HeightCreated        int64    `json:"heightCreated"`
-	HeightIncluded       int64    `json:"heightIncluded"`
-	OutcomeRoot          string   `json:"outcomeRoot"`
-	OutgoingReceiptsRoot string   `json:"outgoingReceiptsRoot"`
-	PrevBlockHash        string   `json:"prevBlockHash"`
-	PrevStateRoot        string   `json:"prevStateRoot"`
-	RentPaid             string   `json:"rentPaid"`
-	ShardID              int64    `json:"shardId"`
+	BalanceBurnt         string   `json:"balance_burnt"`
+	ChunkHash            string   `json:"chunk_hash"`
+	EncodedLength        int64    `json:"encoded_length"`
+	EncodedMerkleRoot    string   `json:"encoded_merkle_root"`
+	GasLimit             int64    `json:"gas_limit"`
+	GasUsed              int64    `json:"gas_used"`
+	HeightCreated        int64    `json:"height_created"`
+	HeightIncluded       int64    `json:"height_included"`
+	OutcomeRoot          string   `json:"outcome_root"`
+	OutgoingReceiptsRoot string   `json:"outgoing_receipts_root"`
+	PrevBlockHash        string   `json:"prev_block_hash"`
+	PrevStateRoot        string   `json:"prev_state_root"`
+	RentPaid             string   `json:"rent_paid"`
+	ShardID              int64    `json:"shard_id"`
 	Signature            string   `json:"signature"`
-	TxRoot               string   `json:"txRoot"`
-	ValidatorProposals   []string `json:"validatorProposals"`
-	ValidatorReward      string   `json:"validatorReward"`
+	TxRoot               string   `json:"tx_root"`
+	ValidatorProposals   []string `json:"validator_proposals"`
+	ValidatorReward      string   `json:"validator_reward"`
 }

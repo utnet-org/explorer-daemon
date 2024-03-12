@@ -31,12 +31,27 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 	return nil
 }
 
-func InsertBlockDetails(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
+func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsBody) error {
+
+	sBody := types.BlockDetailsStoreBody{
+		Author:     body.Author,
+		Chunks:     body.Chunks,
+		Header:     body.Header,
+		Hash:       body.Header.Hash,
+		ChunkHash:  body.Chunks[0].ChunkHash,
+		Height:     body.Header.Height,
+		Timestamp:  body.Header.Timestamp,
+		PrevHash:   body.Header.PrevHash,
+		PrevHeight: body.Header.PrevHeight,
+		GasLimit:   body.Chunks[0].GasLimit,
+		GasPrice:   body.Header.GasPrice,
+	}
 	// Ensure the index exists
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
 		Index("block").
-		BodyJson(bb).
+		Id(sBody.Hash).
+		BodyJson(sBody).
 		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -83,6 +98,23 @@ func InsertChunkDetails(body types.ChunkDetailsBody, chunkHash string) error {
 	fmt.Println("chunk details insert success")
 	duration := time.Since(startTime)
 	fmt.Printf("elapsed time: %v\n", duration)
+	return nil
+}
+
+func InsertLastHeight(height int64) error {
+	// 确保索引存在
+	createIndexIfNotExists(ECTX, ECLIENT, "last_height")
+	// 插入
+	_, err := ECLIENT.Index().
+		Index("last_height").
+		Id("latest").
+		BodyJson(map[string]interface{}{"latest_height": height}).
+		Do(ECTX)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("InsertLastHeight Success")
 	return nil
 }
 
@@ -154,26 +186,54 @@ func BlockDetailsQuery() types.BlockDetailsBody {
 	return body
 }
 
-func LastBlockQuery() types.BlockDetailsBody {
+func LastBlockQuery(ctx context.Context, client *elastic.Client) types.BlockDetailsBody {
+	lastHeight, err := LastHeightQuery(ctx, client)
+	if err != nil {
+		fmt.Println("LastHeightQuery error:", err)
+		return types.BlockDetailsBody{}
+	}
 	// 执行搜索
-	searchResult, err := ECLIENT.Search().
+	searchResult, err := client.Search().
 		Index("block").
-		Query(elastic.NewMatchAllQuery()).
-		Source(types.LastBlockRes{}).
-		//Sort("created", true). // 根据创建时间排序
-		From(0).Size(10). // 分页参数
-		//Pretty(true).
-		Do(ECTX)
+		Query(elastic.NewRangeQuery("header.height").Lte(lastHeight)).
+		Sort("header.height", false).
+		Size(10).
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// 打印搜索结果
-	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
+	fmt.Printf("共查询到 %d 条数据\n", searchResult.TotalHits())
 	var body types.BlockDetailsBody
-	for _, hit := range searchResult.Hits.Hits {
+	for index, hit := range searchResult.Hits.Hits {
+		fmt.Printf("第 %d 条数据\n", index+1)
 		_ = json.Unmarshal(hit.Source, &body)
+		pkg.PrintStruct(body)
 	}
-	pkg.PrintStruct(body)
 	return body
+}
+
+func LastHeightQuery(ctx context.Context, client *elastic.Client) (int, error) {
+	// 查询最新 height
+	latestHeightResult, err := client.Get().
+		Index("last_height").
+		Id("latest").
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	type LatestHeight struct {
+		Height int `json:"latest_height"`
+	}
+
+	var latestHeight LatestHeight
+	err = json.Unmarshal(latestHeightResult.Source, &latestHeight)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	return latestHeight.Height, nil
 }

@@ -39,7 +39,7 @@ func BlockDetails(c *fiber.Ctx) error {
 func LastBlock(c *fiber.Ctx) error {
 	resBody := types.LastBlockRes{}
 
-	resBody = es.BlockDetailsQuery()
+	resBody = es.LastBlockQuery()
 	fmt.Println("BlockDetails res success...")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))

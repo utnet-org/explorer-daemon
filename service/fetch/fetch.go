@@ -24,11 +24,13 @@ func BlockDetailsByFinal() {
 	}
 	// insert Elasticsearch
 	err = es.InsertBlockDetails(es.ECTX, es.ECLIENT, res.Body)
+	err = es.InsertLastHeight(res.Body.Header.Height)
 	pkg.PrintStruct(res.Body)
 	// 获取chunk hash
 	cHash := res.Body.Chunks[0].ChunkHash
 	// 获取最新block中的chunk details
 	ChunkDetailsByChunkId(cHash)
+	fmt.Printf("chunk hash:%s", cHash)
 	if err != nil {
 		fmt.Println("InsertData error:", err)
 		// 处理存储到Elasticsearch的错误
