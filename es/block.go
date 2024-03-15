@@ -32,7 +32,6 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 }
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsBody) error {
-
 	sBody := types.BlockDetailsStoreBody{
 		Author:     body.Author,
 		Chunks:     body.Chunks,
@@ -186,32 +185,40 @@ func BlockDetailsQuery() types.BlockDetailsBody {
 	return body
 }
 
-func LastBlockQuery(ctx context.Context, client *elastic.Client) types.BlockDetailsBody {
+func LastBlockQuery() []types.LastBlockRes {
+	client := ECLIENT
+	ctx := ECTX
 	lastHeight, err := LastHeightQuery(ctx, client)
 	if err != nil {
 		fmt.Println("LastHeightQuery error:", err)
-		return types.BlockDetailsBody{}
+		return []types.LastBlockRes{}
 	}
-	// 执行搜索
+	// 创建一个范围查询，查询高度小于最新高度的前10个区块
+	rangeQuery := elastic.NewRangeQuery("height").To(lastHeight)
+	//rangeQuery := elastic.NewTermQuery("height", lastHeight)
 	searchResult, err := client.Search().
 		Index("block").
-		Query(elastic.NewRangeQuery("header.height").Lte(lastHeight)).
-		Sort("header.height", false).
-		Size(10).
+		Query(rangeQuery).
+		//Sort("height", false).
+		Size(1).
 		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
+		return []types.LastBlockRes{}
 	}
 
 	// 打印搜索结果
 	fmt.Printf("共查询到 %d 条数据\n", searchResult.TotalHits())
-	var body types.BlockDetailsBody
+	//var body types.LastBlockRes
+	var blocks []types.LastBlockRes
 	for index, hit := range searchResult.Hits.Hits {
+		var body types.LastBlockRes
 		fmt.Printf("第 %d 条数据\n", index+1)
 		_ = json.Unmarshal(hit.Source, &body)
 		pkg.PrintStruct(body)
+		blocks = append(blocks, body)
 	}
-	return body
+	return blocks
 }
 
 func LastHeightQuery(ctx context.Context, client *elastic.Client) (int, error) {

@@ -37,9 +37,10 @@ func BlockDetails(c *fiber.Ctx) error {
 // @Success 200 {object} types.LastBlockRes "Success Response"
 // @Router /block/details [post]
 func LastBlock(c *fiber.Ctx) error {
-	resBody := types.LastBlockRes{}
-
-	resBody = es.LastBlockQuery()
+	res := es.LastBlockQuery()
+	resBody := types.LastBlockResList{
+		LastBlockList: res,
+	}
 	fmt.Println("BlockDetails res success...")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))

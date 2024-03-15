@@ -17,8 +17,8 @@ func TestEsBlockDetailsQuery(t *testing.T) {
 }
 
 func TestEsLastBlockQuery(t *testing.T) {
-	client, ctx := es.Init()
-	es.LastBlockQuery(ctx, client)
+	es.Init()
+	es.LastBlockQuery()
 }
 
 func TestEsQuery2(t *testing.T) {
