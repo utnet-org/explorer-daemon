@@ -33,17 +33,18 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsBody) error {
 	sBody := types.BlockDetailsStoreBody{
-		Author:     body.Author,
-		Chunks:     body.Chunks,
-		Header:     body.Header,
-		Hash:       body.Header.Hash,
-		ChunkHash:  body.Chunks[0].ChunkHash,
-		Height:     body.Header.Height,
-		Timestamp:  body.Header.Timestamp,
-		PrevHash:   body.Header.PrevHash,
-		PrevHeight: body.Header.PrevHeight,
-		GasLimit:   body.Chunks[0].GasLimit,
-		GasPrice:   body.Header.GasPrice,
+		Author:           body.Author,
+		Chunks:           body.Chunks,
+		Header:           body.Header,
+		Hash:             body.Header.Hash,
+		ChunkHash:        body.Chunks[0].ChunkHash,
+		Height:           body.Header.Height,
+		Timestamp:        body.Header.Timestamp,
+		TimestampNanoSec: body.Header.TimestampNanosec,
+		PrevHash:         body.Header.PrevHash,
+		PrevHeight:       body.Header.PrevHeight,
+		GasLimit:         body.Chunks[0].GasLimit,
+		GasPrice:         body.Header.GasPrice,
 	}
 	// Ensure the index exists
 	createIndexIfNotExists(ctx, client, "block")

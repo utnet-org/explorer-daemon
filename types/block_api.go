@@ -20,13 +20,14 @@ type Block struct {
 }
 
 type LastBlockRes struct {
-	Height    int64  `json:"height"`
-	Hash      string `json:"hash"`       //交易Hash
-	ChunkHash string `json:"chunk_hash"` //chunkHash
-	Timestamp int64  `json:"timestamp"`  //时间
-	AccountId string `json:"author"`     //矿工
-	GasPrice  int    `json:"gas_price"`  //Gas价格
-	GasLimit  int    `json:"gas_limit"`  //Gas限制
+	Height           int64  `json:"height"`
+	Hash             string `json:"hash"`              //交易Hash
+	ChunkHash        string `json:"chunk_hash"`        //chunkHash
+	Timestamp        int64  `json:"timestamp"`         //时间
+	TimestampNanoSec string `json:"timestamp_nanosec"` //时间
+	Author           string `json:"author"`            //矿工
+	GasPrice         int    `json:"gas_price"`         //Gas价格
+	GasLimit         int    `json:"gas_limit"`         //Gas限制
 	//
 	//TransactionsAgg struct {
 	//	Count int `json:"count"` //交易
