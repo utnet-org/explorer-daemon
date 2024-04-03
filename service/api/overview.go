@@ -1,8 +1,8 @@
-package web
+package api
 
 import (
 	"explorer-daemon/pkg"
-	"explorer-daemon/routing/types"
+	"explorer-daemon/types"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -10,8 +10,8 @@ import (
 // @Summary OverviewInfo
 // @Accept json
 // @Description OverviewInfo API
-// @Param param body false "Request Params"
-// @Success 200 {object} types.OverviewInfo "Success Response"
+// @Param param body types.Example false "Request Params"
+// @Success 200 {object} types.ExampleRes "Success Response"
 // @Router /overview/info [post]
 func OverviewInfo(c *fiber.Ctx) error {
 	//fmt.Print("开始模拟")

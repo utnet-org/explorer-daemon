@@ -2,7 +2,9 @@ package pkg
 
 import (
 	"explorer-daemon/log"
+	"fmt"
 	"github.com/sirupsen/logrus"
+	"reflect"
 )
 
 const (
@@ -38,5 +40,20 @@ func MessageResponse(code int, msg, msgZh string) JSONResponse {
 			Message   string `json:"message"`
 			MessageZh string `json:"message_zh"`
 		}{msg, msgZh},
+	}
+}
+
+func PrintStruct(s interface{}) {
+	val := reflect.ValueOf(s)
+
+	if val.Kind() == reflect.Struct {
+		for i := 0; i < val.NumField(); i++ {
+			field := val.Type().Field(i)
+			fieldValue := val.Field(i)
+
+			fmt.Printf("%s: %v\n", field.Name, fieldValue.Interface())
+		}
+	} else {
+		fmt.Println("Not a struct.")
 	}
 }

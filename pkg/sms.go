@@ -3,7 +3,7 @@ package pkg
 import (
 	"errors"
 	"explorer-daemon/config"
-	"explorer-daemon/routing/types"
+	"explorer-daemon/types"
 	"fmt"
 	"github.com/vonage/vonage-go-sdk"
 	client "github.com/yunpian/yunpian-go-sdk/sdk"
