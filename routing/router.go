@@ -11,6 +11,8 @@ func Setup(f *fiber.App) {
 	//api.Post("/example", app.Example)
 	prep.Post("/overview/info", api.OverviewInfo)
 
+	prep.Post("/search/filter", api.OverviewInfo)
+
 	// block
 	prep.Post("/block/last", api.LastBlock)
 	prep.Post("/block/details", api.BlockDetails)

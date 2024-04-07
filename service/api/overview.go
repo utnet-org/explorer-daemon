@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Tags OverviewInfo
+// @Tags Overview
 // @Summary OverviewInfo
 // @Accept json
 // @Description OverviewInfo API
