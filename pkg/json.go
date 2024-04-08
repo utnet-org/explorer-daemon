@@ -45,7 +45,6 @@ func MessageResponse(code int, msg, msgZh string) JSONResponse {
 
 func PrintStruct(s interface{}) {
 	val := reflect.ValueOf(s)
-
 	if val.Kind() == reflect.Struct {
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
@@ -53,7 +52,15 @@ func PrintStruct(s interface{}) {
 
 			fmt.Printf("%s: %v\n", field.Name, fieldValue.Interface())
 		}
+	} else if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+		for i := 0; i < val.NumField(); i++ {
+			field := val.Type().Field(i)
+			fieldValue := val.Field(i)
+
+			fmt.Printf("%s: %v\n", field.Name, fieldValue.Interface())
+		}
 	} else {
-		fmt.Println("Not a struct.")
+		fmt.Println("Not a struct or pointer.")
 	}
 }

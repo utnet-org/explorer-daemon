@@ -157,9 +157,6 @@ func BlockQuery2() {
 
 // 查询Block详情
 func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsBody, error) {
-	// 定义要查询的用户
-	//userToQuery := "root"
-	//userToQuery := value
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
@@ -180,10 +177,9 @@ func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.
 		Pretty(true).
 		Do(ECTX)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("[BlockDetailsQuery] error:%s", err)
 		return nil, err
 	}
-	// 打印搜索结果
 	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
 	var body types.BlockDetailsBody
 	for _, hit := range searchResult.Hits.Hits {
