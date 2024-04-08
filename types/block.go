@@ -17,9 +17,11 @@ type ChunkId struct {
 }
 
 type BlockDetailsReq struct {
-	BlockId   int    `json:"block_id"`
-	BlockHash string `json:"block_hash"`
-	Finality  string `json:"finality"`
+	//BlockId   string `json:"block_id"`
+	//BlockHash string `json:"block_hash"`
+	//Finality  string `json:"finality"`
+	QueryWord string `json:"query_word"`
+	QueryType int    `json:"query_type"`
 }
 
 // Block Details Response

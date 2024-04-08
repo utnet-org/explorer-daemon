@@ -8,8 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Tags Block
-// @Summary BlockDetails
+// @Tags Web
+// @Summary [Block] BlockDetails
 // @Accept json
 // @Description BlockDetails API
 // @Param param body types.BlockDetailsReq false "Request Params"
@@ -21,21 +21,21 @@ func BlockDetails(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
-	resBody := types.BlockDetailsBody{}
+	resBody := &types.BlockDetailsBody{}
 
-	resBody = es.BlockDetailsQuery()
-	fmt.Println("BlockDetails res success...")
+	resBody, err = es.BlockDetailsQuery(req.QueryWord, pkg.BlockQueryType(req.QueryType))
+	fmt.Println("[BlockDetails] query res success")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))
 }
 
-// @Tags Block
-// @Summary LastBlock
+// @Tags Web
+// @Summary [Block] LastBlock
 // @Accept json
 // @Description LastBlock API
-// @Param param body false "Request Params"
+// @Param param body nil false "Request Params"
 // @Success 200 {object} types.LastBlockRes "Success Response"
-// @Router /block/details [post]
+// @Router /block/last [post]
 func LastBlock(c *fiber.Ctx) error {
 	res := es.LastBlockQuery()
 	resBody := types.LastBlockResList{

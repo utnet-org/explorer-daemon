@@ -6,8 +6,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Tags OverviewInfo
-// @Summary OverviewInfo
+// @Tags Web
+// @Summary [Overview] OverviewInfo
 // @Accept json
 // @Description OverviewInfo API
 // @Param param body types.Example false "Request Params"

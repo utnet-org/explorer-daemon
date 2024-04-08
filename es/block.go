@@ -155,15 +155,19 @@ func BlockQuery2() {
 	//time.Sleep(100 * time.Millisecond)
 }
 
-func BlockDetailsQuery() types.BlockDetailsBody {
-	//client, ctx := Init()
-	// 定义要查询的用户
-	userToQuery := "root"
-
+// 查询Block详情
+func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsBody, error) {
+	var queryName string
+	switch queryType {
+	case pkg.BlockQueryHeight:
+		queryName = "height"
+	case pkg.BlockQueryHash:
+		queryName = "hash"
+	default:
+		queryName = ""
+	}
 	// 构建一个 term 查询
-	termQuery := elastic.NewTermQuery("author", userToQuery)
-	// 开始计时
-	//startTime := time.Now()
+	termQuery := elastic.NewTermQuery(queryName, queryValue)
 	// 执行搜索
 	searchResult, err := ECLIENT.Search().
 		Index("block").
@@ -173,17 +177,16 @@ func BlockDetailsQuery() types.BlockDetailsBody {
 		Pretty(true).
 		Do(ECTX)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("[BlockDetailsQuery] error:%s", err)
+		return nil, err
 	}
-
-	// 打印搜索结果
 	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
 	var body types.BlockDetailsBody
 	for _, hit := range searchResult.Hits.Hits {
 		_ = json.Unmarshal(hit.Source, &body)
 	}
 	pkg.PrintStruct(body)
-	return body
+	return &body, nil
 }
 
 func LastBlockQuery() []types.LastBlockRes {
