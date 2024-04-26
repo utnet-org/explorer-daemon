@@ -62,24 +62,18 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 }
 
 func InsertBlockChanges(ctx context.Context, client *elastic.Client, bb types.BlockChangesBody) error {
-	createIndexIfNotExists(ctx, client, "block_change")
-	startTime := time.Now()
-	// insert
-	bulkRequest := client.Bulk()
-	blk := bb
-
-	req := elastic.NewBulkIndexRequest().Index("block_change").Doc(blk)
-	bulkRequest = bulkRequest.Add(req)
-	// 每 1 条文档执行一次批量插入
-	_, err := bulkRequest.Do(ctx)
+	createIndexIfNotExists(ctx, client, "block_changes")
+	fmt.Println("[InsertBlockChanges] BlockHash:", bb.BlockHash)
+	_, err := client.Index().
+		Index("block_changes").
+		BodyJson(bb).
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
 	fmt.Println("block_changes insert success")
-	duration := time.Since(startTime)
-	fmt.Printf("elapsed time: %v\n", duration)
 	return nil
 }
 
@@ -189,40 +183,42 @@ func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.
 	return &body, nil
 }
 
-func LastBlockQuery() []types.LastBlockRes {
+func LastBlockQuery() (*[]types.LastBlockRes, error) {
 	client := ECLIENT
 	ctx := ECTX
 	lastHeight, err := LastHeightQuery(ctx, client)
 	if err != nil {
 		fmt.Println("LastHeightQuery error:", err)
-		return []types.LastBlockRes{}
+		return nil, err
 	}
 	// 创建一个范围查询，查询高度小于最新高度的前10个区块
-	rangeQuery := elastic.NewRangeQuery("height").To(lastHeight)
+	rangeQuery := elastic.NewRangeQuery("height").Lte(lastHeight)
 	//rangeQuery := elastic.NewTermQuery("height", lastHeight)
-	searchResult, err := client.Search().
+	res, err := client.Search().
 		Index("block").
 		Query(rangeQuery).
-		//Sort("height", false).
-		Size(1).
+		Sort("height", false).
+		Size(10).
 		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
-		return []types.LastBlockRes{}
+		return nil, err
 	}
-
-	// 打印搜索结果
-	fmt.Printf("共查询到 %d 条数据\n", searchResult.TotalHits())
-	//var body types.LastBlockRes
 	var blocks []types.LastBlockRes
-	for index, hit := range searchResult.Hits.Hits {
+	for index, hit := range res.Hits.Hits {
 		var body types.LastBlockRes
 		fmt.Printf("第 %d 条数据\n", index+1)
 		_ = json.Unmarshal(hit.Source, &body)
 		pkg.PrintStruct(body)
+		changes, err := QueryFinalBlockChanges(body.Hash)
+		if err != nil {
+			return nil, err
+		}
+		body.Messages = len(changes.Changes)
 		blocks = append(blocks, body)
 	}
-	return blocks
+	fmt.Printf("共查询到 %d 条数据\n", res.TotalHits())
+	return &blocks, nil
 }
 
 func LastHeightQuery(ctx context.Context, client *elastic.Client) (int, error) {
@@ -247,4 +243,25 @@ func LastHeightQuery(ctx context.Context, client *elastic.Client) (int, error) {
 		return 0, err
 	}
 	return latestHeight.Height, nil
+}
+
+func QueryFinalBlockChanges(hash string) (*types.BlockChangesBody, error) {
+	client := ECLIENT
+	ctx := ECTX
+	// Elasticsearch会默认分词，使用block_hash.keyword
+	query := elastic.NewMatchQuery("block_hash.keyword", hash)
+	res, err := client.Search().
+		Index("block_changes").
+		Query(query).
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	var body types.BlockChangesBody
+	for _, hit := range res.Hits.Hits {
+		_ = json.Unmarshal(hit.Source, &body)
+	}
+	pkg.PrintStruct(body)
+	return &body, nil
 }

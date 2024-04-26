@@ -73,7 +73,6 @@ func BlockDetailsByBlockHash(blockHash string) {
 
 // Returns changes in block for given block height or hash. You can also use finality param to return latest block details.
 func ChangeInBlockByFinal() (types.BlockChangesRes, error) {
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -120,7 +119,6 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 }
 
 func ChunkDetailsByBlockId(chunkId string) (types.ChunkDetailsRes, error) {
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,

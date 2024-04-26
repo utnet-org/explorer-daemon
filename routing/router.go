@@ -16,4 +16,5 @@ func Setup(f *fiber.App) {
 	// block
 	prep.Post("/block/last", api.LastBlock)
 	prep.Post("/block/details", api.BlockDetails)
+	prep.Post("/block/changes", api.FinalBlockChanges)
 }

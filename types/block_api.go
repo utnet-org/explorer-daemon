@@ -28,6 +28,7 @@ type LastBlockRes struct {
 	Author           string `json:"author"`            //矿工
 	GasPrice         int    `json:"gas_price"`         //Gas价格
 	GasLimit         int    `json:"gas_limit"`         //Gas限制
+	Messages         int    `json:"messages"`          //消息数
 	//
 	//TransactionsAgg struct {
 	//	Count int `json:"count"` //交易

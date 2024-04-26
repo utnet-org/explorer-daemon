@@ -9,7 +9,7 @@ type BlockFinalReq struct {
 }
 
 type BlockHashReq struct {
-	BlockHash string `json:"block_id"`
+	BlockHash string `json:"block_hash"`
 }
 
 type ChunkId struct {
@@ -104,7 +104,7 @@ type BlockChangesRes struct {
 }
 
 type BlockChangesBody struct {
-	BlockHash string   `json:"blockHash"`
+	BlockHash string   `json:"block_hash"`
 	Changes   []Change `json:"changes"`
 }
 
