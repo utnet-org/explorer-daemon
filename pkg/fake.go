@@ -6,9 +6,13 @@ import (
 	"strconv"
 )
 
-func FakeInt(a, b int) string {
+func FakeIntStr(a, b int) string {
 	str := strconv.Itoa(gofakeit.Number(a, b))
 	return str
+}
+
+func FakeInt(a, b int) int64 {
+	return int64(gofakeit.Number(a, b))
 }
 
 func FakeFloat(a, b float64, place int) string {

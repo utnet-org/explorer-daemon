@@ -23,7 +23,7 @@ func BlockDetails(c *fiber.Ctx) error {
 	}
 	resBody := &types.BlockDetailsBody{}
 
-	resBody, err = es.BlockDetailsQuery(req.QueryWord, pkg.BlockQueryType(req.QueryType))
+	resBody, err = es.GetBlockDetails(req.QueryWord, pkg.BlockQueryType(req.QueryType))
 	fmt.Println("[BlockDetails] query res success")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))
@@ -37,7 +37,7 @@ func BlockDetails(c *fiber.Ctx) error {
 // @Success 200 {object} types.LastBlockRes "Success Response"
 // @Router /block/last [post]
 func LastBlock(c *fiber.Ctx) error {
-	res, _ := es.LastBlockQuery()
+	res, _ := es.GetLastBlocks()
 	//var blocks []types.LastBlockRes
 	//for index, hit := range res {
 	//	var body types.LastBlockRes

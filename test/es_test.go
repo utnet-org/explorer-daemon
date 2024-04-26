@@ -17,9 +17,15 @@ func TestEsBlockDetailsQuery(t *testing.T) {
 	//es.BlockDetailsQuery()
 }
 
-func TestEsLastBlockQuery(t *testing.T) {
+func TestEsGetLastBlocks(t *testing.T) {
 	es.Init()
-	es.LastBlockQuery()
+	es.GetLastBlocks()
+}
+
+func TestEsGetLastBlock(t *testing.T) {
+	es.Init()
+	res, _ := es.GetLastBlock()
+	pkg.PrintStruct(res)
 }
 
 func TestEsQuery2(t *testing.T) {

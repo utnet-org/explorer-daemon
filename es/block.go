@@ -50,7 +50,7 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
 		Index("block").
-		Id(sBody.Hash).
+		//Id(sBody.Hash).
 		BodyJson(sBody).
 		Do(ctx)
 	if err != nil {
@@ -83,7 +83,11 @@ func InsertChunkDetails(body types.ChunkDetailsBody, chunkHash string) error {
 	createIndexIfNotExists(ctx, client, "chunk")
 	startTime := time.Now()
 	// chunkHash作为唯一doc id
-	_, err := client.Index().Index("chunk").BodyJson(body).Id(chunkHash).Do(ctx)
+	_, err := client.Index().
+		Index("chunk").
+		BodyJson(body).
+		//Id(chunkHash).
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -150,7 +154,7 @@ func BlockQuery2() {
 }
 
 // 查询Block详情
-func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsBody, error) {
+func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsBody, error) {
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
@@ -183,12 +187,36 @@ func BlockDetailsQuery(queryValue string, queryType pkg.BlockQueryType) (*types.
 	return &body, nil
 }
 
-func LastBlockQuery() (*[]types.LastBlockRes, error) {
+func GetLastBlock() (*types.BlockDetailsBody, error) {
 	client := ECLIENT
 	ctx := ECTX
-	lastHeight, err := LastHeightQuery(ctx, client)
+	lastHeight, err := GetLastHeight()
 	if err != nil {
-		fmt.Println("LastHeightQuery error:", err)
+		fmt.Println("[GetLastBlock] GetLastHeight error:", err)
+		return nil, err
+	}
+	query := elastic.NewTermQuery("height", lastHeight)
+	res, err := client.Search().
+		Index("block").
+		Query(query).
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	var body types.BlockDetailsBody
+	if res.TotalHits() == 1 {
+		_ = json.Unmarshal(res.Hits.Hits[0].Source, &body)
+	}
+	return &body, nil
+}
+
+func GetLastBlocks() (*[]types.LastBlockRes, error) {
+	client := ECLIENT
+	ctx := ECTX
+	lastHeight, err := GetLastHeight()
+	if err != nil {
+		fmt.Println("GetLastHeight error:", err)
 		return nil, err
 	}
 	// 创建一个范围查询，查询高度小于最新高度的前10个区块
@@ -221,12 +249,12 @@ func LastBlockQuery() (*[]types.LastBlockRes, error) {
 	return &blocks, nil
 }
 
-func LastHeightQuery(ctx context.Context, client *elastic.Client) (int, error) {
+func GetLastHeight() (int, error) {
 	// 查询最新 height
-	latestHeightResult, err := client.Get().
+	latestHeightResult, err := ECLIENT.Get().
 		Index("last_height").
 		Id("latest").
-		Do(ctx)
+		Do(ECTX)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err

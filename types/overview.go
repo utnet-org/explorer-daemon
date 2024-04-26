@@ -1,7 +1,7 @@
 package types
 
 type OverviewInfoRes struct {
-	Height           string `json:"height"`
+	Height           int64  `json:"height"`
 	LatestBlock      string `json:"latestBlock"`
 	TotalPower       string `json:"totalPower"`
 	ActiveMiner      string `json:"activeMiner"`
