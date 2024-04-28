@@ -28,10 +28,10 @@ type BlockDetailsReq struct {
 
 type BlockDetailsRes struct {
 	CommonRes CommonRes
-	Body      BlockDetailsBody `json:"result"`
+	Body      BlockDetailsResult `json:"result"`
 }
 
-type BlockDetailsBody struct {
+type BlockDetailsResult struct {
 	Author string             `json:"author"`
 	Chunks []Chunk            `json:"chunks"`
 	Header BlockDetailsHeader `json:"header"`

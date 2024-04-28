@@ -37,19 +37,18 @@ type Version struct {
 }
 
 // Network Info Response
-
 type NetworkInfoRes struct {
 	CommonRes CommonRes
-	Result    NetworkInfoBody `json:"result"`
+	Result    NetworkInfoResult `json:"result"`
 }
 
-type NetworkInfoBody struct {
-	ActivePeers         []ActivePeer    `json:"activePeers"`
-	KnownProducers      []KnownProducer `json:"knownProducers"`
-	NumActivePeers      int64           `json:"numActivePeers"`
-	PeerMaxCount        int64           `json:"peerMaxCount"`
-	ReceivedBytesPerSEC int64           `json:"receivedBytesPerSec"`
-	SentBytesPerSEC     int64           `json:"sentBytesPerSec"`
+type NetworkInfoResult struct {
+	ActivePeers         []ActivePeer    `json:"active_peers"`           // 活跃的节点列表
+	KnownProducers      []KnownProducer `json:"known_producers"`        // 已知的生产者列表
+	NumActivePeers      int64           `json:"num_active_peers"`       // 活跃节点的数量
+	PeerMaxCount        int64           `json:"peer_max_count"`         // 节点的最大数量限制
+	ReceivedBytesPerSEC int64           `json:"received_bytes_per_sec"` // 每秒接收的字节数
+	SentBytesPerSEC     int64           `json:"sent_bytes_per_sec"`     // 每秒发送的字节数
 }
 
 type ActivePeer struct {

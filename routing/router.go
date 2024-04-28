@@ -1,7 +1,7 @@
 package routing
 
 import (
-	"explorer-daemon/service/api"
+	"explorer-daemon/routing/api"
 	"github.com/gofiber/fiber/v2"
 )
 

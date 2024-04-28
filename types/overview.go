@@ -2,13 +2,13 @@ package types
 
 type OverviewInfoRes struct {
 	Height           int64  `json:"height"`
-	LatestBlock      string `json:"latestBlock"`
+	LatestBlock      string `json:"latest_block"`
 	TotalPower       string `json:"totalPower"`
-	ActiveMiner      string `json:"activeMiner"`
+	ActiveMiner      int64  `json:"active_miner"`
 	BlockReward      string `json:"blockReward"`
 	DayAveReward     string `json:"dayAveReward"`
 	DayProduction    string `json:"dayProduction"`
 	DayMessage       string `json:"dayMessage"`
-	TotalAccount     string `json:"totalAccount"`
+	TotalAccount     int64  `json:"total_account"`
 	AveBlockInterval string `json:"aveBlockInterval"`
 }

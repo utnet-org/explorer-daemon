@@ -21,7 +21,7 @@ func BlockDetails(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
-	resBody := &types.BlockDetailsBody{}
+	resBody := &types.BlockDetailsResult{}
 
 	resBody, err = es.GetBlockDetails(req.QueryWord, pkg.BlockQueryType(req.QueryType))
 	fmt.Println("[BlockDetails] query res success")

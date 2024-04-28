@@ -11,11 +11,8 @@ import (
 The RPC API enables you to query the network and get details about specific blocks or chunks.
 */
 
-var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodePortKey)
-
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
 func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -24,9 +21,7 @@ func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
 			Finality: "final",
 		},
 	}
-
 	jsonRes := SendRemoteCall(requestBody, url)
-
 	fmt.Printf("BlockDetailsByFinal Json Response:%s", jsonRes)
 	var bdRes types.BlockDetailsRes
 	err := json.Unmarshal(jsonRes, &bdRes)

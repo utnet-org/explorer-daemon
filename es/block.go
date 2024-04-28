@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb types.BlockDetailsBody) error {
+func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb types.BlockDetailsResult) error {
 	// 确保索引存在
 	createIndexIfNotExists(ctx, client, "block")
 	startTime := time.Now()
@@ -31,7 +31,7 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 	return nil
 }
 
-func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsBody) error {
+func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
 	sBody := types.BlockDetailsStoreBody{
 		Author:           body.Author,
 		Chunks:           body.Chunks,
@@ -154,7 +154,7 @@ func BlockQuery2() {
 }
 
 // 查询Block详情
-func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsBody, error) {
+func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsResult, error) {
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
@@ -179,7 +179,7 @@ func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.Bl
 		return nil, err
 	}
 	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
-	var body types.BlockDetailsBody
+	var body types.BlockDetailsResult
 	for _, hit := range searchResult.Hits.Hits {
 		_ = json.Unmarshal(hit.Source, &body)
 	}
@@ -187,7 +187,7 @@ func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.Bl
 	return &body, nil
 }
 
-func GetLastBlock() (*types.BlockDetailsBody, error) {
+func GetLastBlock() (*types.BlockDetailsResult, error) {
 	client := ECLIENT
 	ctx := ECTX
 	lastHeight, err := GetLastHeight()
@@ -204,7 +204,7 @@ func GetLastBlock() (*types.BlockDetailsBody, error) {
 		fmt.Println(err)
 		return nil, err
 	}
-	var body types.BlockDetailsBody
+	var body types.BlockDetailsResult
 	if res.TotalHits() == 1 {
 		_ = json.Unmarshal(res.Hits.Hits[0].Source, &body)
 	}

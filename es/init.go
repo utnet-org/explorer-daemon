@@ -77,6 +77,10 @@ func Init() (*elastic.Client, context.Context) {
 	//crud(client, ctx)
 }
 
+func GetESInstance() (*elastic.Client, context.Context) {
+	return ECLIENT, ECTX
+}
+
 func crud(client *elastic.Client, ctx context.Context) {
 	// 首先检测下weibo索引是否存在
 	exists, err := client.IndexExists("weibo").Do(ctx)

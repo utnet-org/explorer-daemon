@@ -3,11 +3,14 @@ package remote
 import (
 	"bytes"
 	"encoding/json"
+	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
 	"io"
 	"net/http"
 )
+
+var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodePortKey)
 
 func SendRemoteCall(requestBody types.RpcRequest, url string) []byte {
 	jsonBody, err := json.Marshal(requestBody)

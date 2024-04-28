@@ -40,3 +40,12 @@ func TestBlockChanges(t *testing.T) {
 	}
 	pkg.PrintStruct(res)
 }
+
+func TestNetWorkInfo(t *testing.T) {
+	es.Init()
+	res, err := es.GetNetWorkInfo()
+	if err != nil {
+		return
+	}
+	pkg.PrintStruct(res)
+}

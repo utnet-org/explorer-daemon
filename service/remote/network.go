@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
@@ -22,7 +23,7 @@ func NetworkNodeStatus() {
 }
 
 // Returns the current state of node network connections (active peers, transmitted data, etc.)
-func NetworkInfo() {
+func NetworkInfo() (*types.NetworkInfoRes, error) {
 	params := make([]interface{}, 0)
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
@@ -30,10 +31,16 @@ func NetworkInfo() {
 		Method:  "network_info",
 		Params:  params,
 	}
+	jsonRes := SendRemoteCall(requestBody, url)
 
-	body := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("NetworkInfo Response:%s", body)
+	fmt.Printf("NetworkInfo Json Response:%s", jsonRes)
+	var res types.NetworkInfoRes
+	err := json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	fmt.Printf("NetworkInfo Response:%s", jsonRes)
+	return &res, nil
 }
 
 //Queries active validators on the network returning details and the state of validation on the blockchain.
