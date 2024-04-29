@@ -4,6 +4,7 @@ import (
 	"explorer-daemon/es"
 	"explorer-daemon/pkg"
 	"explorer-daemon/service/fetch"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
@@ -39,6 +40,12 @@ func TestBlockChanges(t *testing.T) {
 		return
 	}
 	pkg.PrintStruct(res)
+}
+
+func Test24NanoSecTotalAward(t *testing.T) {
+	es.Init()
+	sum := es.QueryBlockReward24h()
+	log.Info("[Test24NanoSecTotalAward] sum:", sum)
 }
 
 func TestNetWorkInfo(t *testing.T) {

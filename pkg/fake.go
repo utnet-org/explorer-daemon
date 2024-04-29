@@ -15,7 +15,12 @@ func FakeInt(a, b int) int64 {
 	return int64(gofakeit.Number(a, b))
 }
 
-func FakeFloat(a, b float64, place int) string {
+func FakeFloat(a, b float64, place int) float64 {
+	f := gofakeit.Float64Range(a, b)
+	return f
+}
+
+func FakeRange(a, b float64, place int) string {
 	f := gofakeit.Float64Range(a, b)
 	formattedFloat := fmt.Sprintf(fmt.Sprintf("%%.%df", place), f)
 	return formattedFloat

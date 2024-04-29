@@ -7,6 +7,7 @@ import (
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -43,8 +44,9 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 		TimestampNanoSec: body.Header.TimestampNanosec,
 		PrevHash:         body.Header.PrevHash,
 		PrevHeight:       body.Header.PrevHeight,
-		GasLimit:         body.Chunks[0].GasLimit,
-		GasPrice:         body.Header.GasPrice,
+		ValidatorReward:  body.Header.ValidatorReward,
+		//GasLimit:         body.Chunks[0].GasLimit,
+		//GasPrice:         body.Header.GasPrice,
 	}
 	// Ensure the index exists
 	createIndexIfNotExists(ctx, client, "block")
@@ -292,4 +294,33 @@ func QueryFinalBlockChanges(hash string) (*types.BlockChangesBody, error) {
 	}
 	pkg.PrintStruct(body)
 	return &body, nil
+}
+
+// 查询24小时所有区块的总产出
+func QueryBlockReward24h() (sum int64) {
+	// 计算24小时前的时间戳（纳秒）
+	nanoSecAgo := pkg.TimeNanoSecAgo()
+	// 创建一个范围查询
+	rangeQuery := elastic.NewRangeQuery("time").Gte(nanoSecAgo)
+	client, ctx := GetESInstance()
+	// 创建一个求和聚合
+	sumAgg := elastic.NewSumAggregation().Field("award")
+
+	// 执行查询
+	searchResult, err := client.Search().
+		Index("block").
+		Query(rangeQuery).
+		Aggregation("total_award", sumAgg).
+		Size(0).
+		Do(ctx)
+	if err != nil {
+		log.Error("Error performing aggregation: %s", err)
+	}
+	// 解析聚合结果
+	if agg, found := searchResult.Aggregations.Sum("total_award"); found && agg.Value != nil {
+		log.Debugf("[QueryBlockReward24h] Total award: %v\n", *agg.Value)
+	} else {
+		log.Debug("No aggregation found or sum is nil")
+	}
+	return sum
 }

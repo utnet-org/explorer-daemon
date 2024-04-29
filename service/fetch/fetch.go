@@ -11,21 +11,22 @@ func InitFetchData() {
 	// 定时执行RPC请求
 	//ticker := time.NewTicker(time.Hour) // 例如，每小时执行一次
 	//for range ticker.C {
-	//BlockDetailsByFinal()
+	BlockDetailsByFinal()
 	//BlockChangesByFinal()
 	//HandleNetworkInfo()
-	HandleChipQuery()
+	//HandleChipQuery()
 	//}
 }
 
 // 定时获取最新的block details
 func BlockDetailsByFinal() {
+	client, ctx := es.GetESInstance()
 	res, err := remote.BlockDetailsByFinal()
 	if err != nil {
 		fmt.Println("rpc error")
 	}
 	// insert Elasticsearch
-	err = es.InsertBlockDetails(es.ECTX, es.ECLIENT, res.Body)
+	err = es.InsertBlockDetails(ctx, client, res.Body)
 	err = es.InsertLastHeight(res.Body.Header.Height)
 	pkg.PrintStruct(res.Body)
 	// 获取chunk hash

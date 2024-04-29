@@ -15,9 +15,9 @@ func TestOverview(t *testing.T) {
 	oi := types.OverviewInfoRes{
 		Height:           pkg.FakeInt(0, 100000),
 		LatestBlock:      pkg.FakeIntStr(10, 120),
-		TotalPower:       pkg.FakeIntStr(10000, 50000),
+		TotalPower:       pkg.FakeInt(10000, 50000),
 		ActiveMiner:      pkg.FakeInt(1000, 5000),
-		BlockReward:      pkg.FakeFloat(0, 1, 3),
+		BlockReward:      pkg.FakeRange(0, 1, 3),
 		DayAveReward:     pkg.FakeFloat(0, 1, 2),
 		DayProduction:    pkg.FakeIntStr(10000, 100000),
 		DayMessage:       pkg.FakeIntStr(10000, 20000),
