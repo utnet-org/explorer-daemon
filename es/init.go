@@ -154,3 +154,16 @@ func crud(client *elastic.Client, ctx context.Context) {
 		panic(err)
 	}
 }
+
+func createIndexIfNotExists(ctx context.Context, client *elastic.Client, indexName string) {
+	exists, err := client.IndexExists(indexName).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	if !exists {
+		_, err := client.CreateIndex(indexName).Do(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}
+}

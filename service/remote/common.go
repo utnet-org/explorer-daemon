@@ -23,8 +23,12 @@ func SendRemoteCall(requestBody types.RpcRequest, url string) []byte {
 	if err != nil {
 		fmt.Println("BlockDetails POST error:", err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
 
+		}
+	}(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
 	return body
 }

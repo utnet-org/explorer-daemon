@@ -13,7 +13,8 @@ func InitFetchData() {
 	//for range ticker.C {
 	//BlockDetailsByFinal()
 	//BlockChangesByFinal()
-	HandleNetworkInfo()
+	//HandleNetworkInfo()
+	HandleChipQuery()
 	//}
 }
 

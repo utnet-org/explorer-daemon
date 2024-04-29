@@ -52,16 +52,3 @@ func mockData(ctx context.Context, client *elastic.Client) {
 	duration := time.Since(startTime)
 	fmt.Printf("耗时: %v\n", duration)
 }
-
-func createIndexIfNotExists(ctx context.Context, client *elastic.Client, indexName string) {
-	exists, err := client.IndexExists(indexName).Do(ctx)
-	if err != nil {
-		panic(err)
-	}
-	if !exists {
-		_, err := client.CreateIndex(indexName).Do(ctx)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
