@@ -54,12 +54,12 @@ func OverviewInfo(c *fiber.Ctx) error {
 		LatestBlock:      lb.TimestampNanosec,
 		TotalPower:       sum,
 		ActiveMiner:      info.NumActivePeers,
-		BlockReward:      pkg.FakeRange(0, 1, 3),
+		BlockReward:      totalReward24,
 		DayAveReward:     aveOut24,
 		DayProduction:    pkg.FakeIntStr(10000, 100000),
 		DayMessage:       pkg.FakeIntStr(10000, 20000),
 		TotalAccount:     info.PeerMaxCount,
-		AveBlockInterval: pkg.FakeIntStr(10, 60),
+		AveBlockInterval: pkg.FakeIntStr(28, 33),
 	}
 	return c.JSON(pkg.SuccessResponse(ex))
 }

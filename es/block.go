@@ -63,18 +63,17 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 	return nil
 }
 
-func InsertBlockChanges(ctx context.Context, client *elastic.Client, bb types.BlockChangesBody) error {
+func InsertBlockChanges(res types.BlockChangesResult) error {
+	client, ctx := GetESInstance()
 	createIndexIfNotExists(ctx, client, "block_changes")
-	fmt.Println("[InsertBlockChanges] BlockHash:", bb.BlockHash)
 	_, err := client.Index().
 		Index("block_changes").
-		BodyJson(bb).
+		BodyJson(res).
 		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-
 	fmt.Println("block_changes insert success")
 	return nil
 }
@@ -156,7 +155,7 @@ func BlockQuery2() {
 }
 
 // 查询Block详情
-func GetBlockDetails(queryValue string, queryType pkg.BlockQueryType) (*types.BlockDetailsResult, error) {
+func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.BlockDetailsResult, error) {
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
@@ -275,7 +274,7 @@ func GetLastHeight() (int, error) {
 	return latestHeight.Height, nil
 }
 
-func QueryFinalBlockChanges(hash string) (*types.BlockChangesBody, error) {
+func QueryFinalBlockChanges(hash string) (*types.BlockChangesResult, error) {
 	client := ECLIENT
 	ctx := ECTX
 	// Elasticsearch会默认分词，使用block_hash.keyword
@@ -288,7 +287,7 @@ func QueryFinalBlockChanges(hash string) (*types.BlockChangesBody, error) {
 		fmt.Println(err)
 		return nil, err
 	}
-	var body types.BlockChangesBody
+	var body types.BlockChangesResult
 	for _, hit := range res.Hits.Hits {
 		_ = json.Unmarshal(hit.Source, &body)
 	}
@@ -301,7 +300,7 @@ func QueryBlockReward24h() (sum int64) {
 	// 计算24小时前的时间戳（纳秒）
 	nanoSecAgo := pkg.TimeNanoSecAgo()
 	// 创建一个范围查询
-	rangeQuery := elastic.NewRangeQuery("time").Gte(nanoSecAgo)
+	rangeQuery := elastic.NewRangeQuery("timestamp_nano").Gte(nanoSecAgo)
 	client, ctx := GetESInstance()
 	// 创建一个求和聚合
 	sumAgg := elastic.NewSumAggregation().Field("award")
@@ -309,6 +308,34 @@ func QueryBlockReward24h() (sum int64) {
 	// 执行查询
 	searchResult, err := client.Search().
 		Index("block").
+		Query(rangeQuery).
+		Aggregation("total_award", sumAgg).
+		Size(0).
+		Do(ctx)
+	if err != nil {
+		log.Error("Error performing aggregation: %s", err)
+	}
+	// 解析聚合结果
+	if agg, found := searchResult.Aggregations.Sum("total_award"); found && agg.Value != nil {
+		log.Debugf("[QueryBlockReward24h] Total award: %v\n", *agg.Value)
+	} else {
+		log.Debug("No aggregation found or sum is nil")
+	}
+	return sum
+}
+
+// 查询24小时消息数量
+func QueryBlockChangeMsg24h() (sum int64) {
+	nanoSecAgo := pkg.TimeNanoSecAgo()
+
+	rangeQuery := elastic.NewRangeQuery("time").Gte(nanoSecAgo)
+	client, ctx := GetESInstance()
+	// 创建一个求和聚合
+	sumAgg := elastic.NewSumAggregation().Field("changes")
+
+	// 执行查询
+	searchResult, err := client.Search().
+		Index("block_changes").
 		Query(rangeQuery).
 		Aggregation("total_award", sumAgg).
 		Size(0).

@@ -23,7 +23,7 @@ func BlockDetails(c *fiber.Ctx) error {
 	}
 	resBody := &types.BlockDetailsResult{}
 
-	resBody, err = es.GetBlockDetails(req.QueryWord, pkg.BlockQueryType(req.QueryType))
+	resBody, err = es.GetBlockDetails(pkg.BlockQueryType(req.QueryType), req.QueryWord)
 	fmt.Println("[BlockDetails] query res success")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))

@@ -5,7 +5,7 @@ type OverviewInfoRes struct {
 	LatestBlock      string  `json:"latest_block"`
 	TotalPower       int64   `json:"total_power"`
 	ActiveMiner      int64   `json:"active_miner"`
-	BlockReward      string  `json:"blockReward"`
+	BlockReward      int64   `json:"block_reward"`
 	DayAveReward     float64 `json:"day_ave_reward"`
 	DayProduction    string  `json:"dayProduction"`
 	DayMessage       string  `json:"dayMessage"`

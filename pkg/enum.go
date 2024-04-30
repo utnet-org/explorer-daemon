@@ -35,3 +35,12 @@ const (
 	BlockQueryHash
 	BlockQueryFinal
 )
+
+// BlockChangeRpcType
+type BlockChangeRpcType int
+
+const (
+	BlockChangeRpcFinal BlockChangeRpcType = iota + 1
+	BlockChangeRpcHeight
+	BlockChangeRpcHash
+)

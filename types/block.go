@@ -28,7 +28,7 @@ type BlockDetailsReq struct {
 
 type BlockDetailsRes struct {
 	CommonRes CommonRes
-	Body      BlockDetailsResult `json:"result"`
+	Result    BlockDetailsResult `json:"result"`
 }
 
 type BlockDetailsResult struct {
@@ -96,16 +96,24 @@ type BlockDetailsHeader struct {
 	ValidatorReward          string      `json:"validator_reward"`           // 验证者奖励
 }
 
+type BlockChangesReq struct {
+	Finality string      `json:"finality"`
+	BlockId  interface{} `json:"block_id"`
+}
+
 // Block Changes Response
 
 type BlockChangesRes struct {
 	CommonRes CommonRes
-	Body      BlockChangesBody `json:"result"`
+	Result    BlockChangesResult `json:"result"`
 }
 
-type BlockChangesBody struct {
-	BlockHash string   `json:"block_hash"`
-	Changes   []Change `json:"changes"`
+type BlockChangesResult struct {
+	Height           int64    `json:"height"`
+	BlockHash        string   `json:"block_hash"`
+	Timestamp        int64    `json:"timestamp"`         // 时间戳
+	TimestampNanosec string   `json:"timestamp_nanosec"` // 时间戳纳秒
+	Changes          []Change `json:"changes"`
 }
 
 type Change struct {

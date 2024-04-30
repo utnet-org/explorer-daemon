@@ -16,7 +16,7 @@ func TestHttp(t *testing.T) {
 
 func TestBlockDetailsByFinal(t *testing.T) {
 	res, _ := remote.BlockDetailsByFinal()
-	pkg.PrintStruct(res.Body.Chunks)
+	pkg.PrintStruct(res.Result.Chunks)
 	//fmt.Println("BlockDetailsByFinal bdRes:", res)
 }
 
@@ -28,8 +28,8 @@ func TestBlockDetailsByBlockHash(t *testing.T) {
 }
 
 func TestChangeInBlockByFinal(t *testing.T) {
-	res, _ := remote.ChangeInBlockByFinal()
-	pkg.PrintStruct(res.Body)
+	//res, _ := remote.ChangeInBlockByFinal()
+	//pkg.PrintStruct(res.Result)
 }
 
 func TestGasPriceByBlockHeight(t *testing.T) {

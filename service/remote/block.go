@@ -3,6 +3,7 @@ package remote
 import (
 	"encoding/json"
 	"explorer-daemon/config"
+	"explorer-daemon/pkg"
 	"explorer-daemon/types"
 	"fmt"
 )
@@ -34,7 +35,6 @@ func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
 func BlockDetailsByBlockId(blockId int) {
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -67,14 +67,19 @@ func BlockDetailsByBlockHash(blockHash string) {
 }
 
 // Returns changes in block for given block height or hash. You can also use finality param to return latest block details.
-func ChangeInBlockByFinal() (types.BlockChangesRes, error) {
+// rpcType 0 final 1 block_id
+func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.BlockChangesRes, error) {
+	var params types.BlockChangesReq
+	if rpcType == pkg.BlockChangeRpcFinal {
+		params.Finality = "final"
+	} else {
+		params.BlockId = value
+	}
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_changes_in_block",
-		Params: types.BlockFinalReq{
-			Finality: "final",
-		},
+		Params:  params,
 	}
 
 	jsonRes := SendRemoteCall(requestBody, url)

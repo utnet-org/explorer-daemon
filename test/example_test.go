@@ -17,7 +17,7 @@ func TestOverview(t *testing.T) {
 		LatestBlock:      pkg.FakeIntStr(10, 120),
 		TotalPower:       pkg.FakeInt(10000, 50000),
 		ActiveMiner:      pkg.FakeInt(1000, 5000),
-		BlockReward:      pkg.FakeRange(0, 1, 3),
+		BlockReward:      pkg.FakeInt(10, 20),
 		DayAveReward:     pkg.FakeFloat(0, 1, 2),
 		DayProduction:    pkg.FakeIntStr(10000, 100000),
 		DayMessage:       pkg.FakeIntStr(10000, 20000),
