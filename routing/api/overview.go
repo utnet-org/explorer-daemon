@@ -39,6 +39,7 @@ func OverviewInfo(c *fiber.Ctx) error {
 		aveOut24 = float64(totalReward24 / sum)
 	}
 
+	totalMsgs24 := es.QueryBlockChangeMsg24h()
 	ex := types.OverviewInfoRes{
 		//Height:           pkg.FakeInt(0, 100000),
 		//LatestBlock:      pkg.FakeIntStr(10, 120),
@@ -57,7 +58,7 @@ func OverviewInfo(c *fiber.Ctx) error {
 		BlockReward:      totalReward24,
 		DayAveReward:     aveOut24,
 		DayProduction:    pkg.FakeIntStr(10000, 100000),
-		DayMessage:       pkg.FakeIntStr(10000, 20000),
+		DayMessages:      totalMsgs24,
 		TotalAccount:     info.PeerMaxCount,
 		AveBlockInterval: pkg.FakeIntStr(28, 33),
 	}

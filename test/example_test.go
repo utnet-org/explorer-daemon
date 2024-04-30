@@ -20,7 +20,7 @@ func TestOverview(t *testing.T) {
 		BlockReward:      pkg.FakeInt(10, 20),
 		DayAveReward:     pkg.FakeFloat(0, 1, 2),
 		DayProduction:    pkg.FakeIntStr(10000, 100000),
-		DayMessage:       pkg.FakeIntStr(10000, 20000),
+		DayMessages:      pkg.FakeInt(10000, 20000),
 		TotalAccount:     pkg.FakeInt(5000, 10000),
 		AveBlockInterval: pkg.FakeIntStr(10, 60),
 	}

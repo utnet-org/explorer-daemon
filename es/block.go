@@ -300,12 +300,10 @@ func QueryBlockReward24h() (sum int64) {
 	// 计算24小时前的时间戳（纳秒）
 	nanoSecAgo := pkg.TimeNanoSecAgo()
 	// 创建一个范围查询
-	rangeQuery := elastic.NewRangeQuery("timestamp_nano").Gte(nanoSecAgo)
+	rangeQuery := elastic.NewRangeQuery("timestamp_nanosec").Gte(nanoSecAgo)
 	client, ctx := GetESInstance()
 	// 创建一个求和聚合
 	sumAgg := elastic.NewSumAggregation().Field("award")
-
-	// 执行查询
 	searchResult, err := client.Search().
 		Index("block").
 		Query(rangeQuery).
@@ -318,6 +316,7 @@ func QueryBlockReward24h() (sum int64) {
 	// 解析聚合结果
 	if agg, found := searchResult.Aggregations.Sum("total_award"); found && agg.Value != nil {
 		log.Debugf("[QueryBlockReward24h] Total award: %v\n", *agg.Value)
+		sum = int64(*agg.Value)
 	} else {
 		log.Debug("No aggregation found or sum is nil")
 	}
@@ -326,26 +325,25 @@ func QueryBlockReward24h() (sum int64) {
 
 // 查询24小时消息数量
 func QueryBlockChangeMsg24h() (sum int64) {
-	nanoSecAgo := pkg.TimeNanoSecAgo()
-
-	rangeQuery := elastic.NewRangeQuery("time").Gte(nanoSecAgo)
 	client, ctx := GetESInstance()
-	// 创建一个求和聚合
-	sumAgg := elastic.NewSumAggregation().Field("changes")
-
-	// 执行查询
+	nanoSecAgo := pkg.TimeNanoSecAgo()
+	rangeQuery := elastic.NewRangeQuery("timestamp_nanosec").Gte(nanoSecAgo)
+	// 使用 Painless 脚本计算数组长度的总和
+	script := "params._source.changes.size()"
+	sumAgg := elastic.NewSumAggregation().Script(elastic.NewScript(script))
 	searchResult, err := client.Search().
 		Index("block_changes").
 		Query(rangeQuery).
-		Aggregation("total_award", sumAgg).
+		Aggregation("total_changes", sumAgg).
 		Size(0).
 		Do(ctx)
 	if err != nil {
 		log.Error("Error performing aggregation: %s", err)
 	}
 	// 解析聚合结果
-	if agg, found := searchResult.Aggregations.Sum("total_award"); found && agg.Value != nil {
-		log.Debugf("[QueryBlockReward24h] Total award: %v\n", *agg.Value)
+	if agg, found := searchResult.Aggregations.Sum("total_changes"); found && agg.Value != nil {
+		log.Debugf("[QueryBlockChangeMsg24h] Total messages: %v\n", *agg.Value)
+		sum = int64(*agg.Value)
 	} else {
 		log.Debug("No aggregation found or sum is nil")
 	}

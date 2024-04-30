@@ -48,6 +48,12 @@ func Test24NanoSecTotalAward(t *testing.T) {
 	log.Info("[Test24NanoSecTotalAward] sum:", sum)
 }
 
+func Test24NanoSecTotalChanges(t *testing.T) {
+	es.Init()
+	sum := es.QueryBlockChangeMsg24h()
+	log.Info("[Test24NanoSecTotalChanges] sum=", sum)
+}
+
 func TestNetWorkInfo(t *testing.T) {
 	es.Init()
 	res, err := es.GetNetWorkInfo()
