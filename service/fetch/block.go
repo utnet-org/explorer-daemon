@@ -19,19 +19,18 @@ func BlockDetailsByFinal() {
 	}
 	err = es.InsertBlockDetails(ctx, client, res.Result)
 	err = es.InsertLastHeight(ctx, client, res.Result.Header.Height)
-	BlockChangesRpc(1, res.Result.Header)
+	HandleBlockChanges(1, res.Result.Header)
 	pkg.PrintStruct(res.Result)
 	// 获取chunk hash
 	cHash := res.Result.Chunks[0].ChunkHash
 	// 获取最新block中的chunk details
-	ChunkDetailsByChunkId(cHash)
-	fmt.Printf("chunk hash:%s", cHash)
+	err = HandleChunkDetailsByChunkId(cHash)
 	if err != nil {
 		fmt.Println("InsertData error:", err)
 	}
 }
 
-func BlockChangesRpc(rpcType pkg.BlockChangeRpcType, header types.BlockDetailsHeader) {
+func HandleBlockChanges(rpcType pkg.BlockChangeRpcType, header types.BlockDetailsHeader) error {
 	var queryValue interface{}
 	if rpcType == pkg.BlockChangeRpcFinal {
 		queryValue = strconv.Itoa(int(header.Height))
@@ -43,26 +42,36 @@ func BlockChangesRpc(rpcType pkg.BlockChangeRpcType, header types.BlockDetailsHe
 	}
 	res, err := remote.ChangesInBlock(rpcType, queryValue)
 	if err != nil {
-		fmt.Println("ChangesInBlock rpc error")
+		log.Errorf("[BlockChangesRpc] ChangesInBlock rpc error: %v", err)
+		return err
 	}
 	res.Result.Height = header.Height
 	res.Result.Timestamp = header.Timestamp
 	res.Result.TimestampNanosec = header.TimestampNanosec
-
-	err = es.InsertBlockChanges(res.Result)
-	pkg.PrintStruct(res.Result)
+	ctx, client := es.GetESInstance()
+	err = es.InsertBlockChanges(ctx, client, res.Result)
 	if err != nil {
-		fmt.Println("InsertData error:", err)
+		log.Errorln("[BlockChangesRpc] InsertData error:", err)
+		return err
 	}
+	log.Debugln("[BlockChangesRpc] HandleBlockChanges success")
+	return nil
 }
 
-func ChunkDetailsByChunkId(chunkHash string) {
+func HandleChunkDetailsByChunkId(chunkHash string) error {
+	log.Infof("[HandleChunkDetailsByChunkId] chunkHash %v", chunkHash)
+	// 获取最新block中的chunk details
 	res, err := remote.ChunkDetailsByChunkId(chunkHash)
-	err = es.InsertChunkDetails(res.Body, chunkHash)
 	if err != nil {
-		fmt.Println("InsertChunkDetails error:", err)
+		log.Errorf("[HandleChunkDetailsByChunkId] ChunkDetailsByChunkId error: %v", err)
+		return err
 	}
-	pkg.PrintStruct(res.Body)
+	err = es.InsertChunkDetails(res.Result, chunkHash)
+	if err != nil {
+		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
+		return err
+	}
+	return nil
 }
 
 func ChunkDetailsByBlockId() {
@@ -106,6 +115,19 @@ func HandleBlock() error {
 		}
 		if _, err = es.UpdateLastHeight(client, ctx, height); err != nil {
 			log.Error("[HandleBlock] UpdateLastHeight error:", err)
+			return err
+		}
+		// get chunk hash
+		chunkHash := res.Result.Chunks[0].ChunkHash
+		// 获取最新block中的chunk details
+		err = HandleChunkDetailsByChunkId(chunkHash)
+		if err != nil {
+			log.Errorf("[HandleBlock] HandleChunkDetailsByChunkId error: %v", err)
+			return err
+		}
+		err = HandleBlockChanges(2, res.Result.Header)
+		if err != nil {
+			log.Errorf("[HandleBlock] HandleBlockChanges error: %v", err)
 			return err
 		}
 		time.Sleep(1 * time.Second)

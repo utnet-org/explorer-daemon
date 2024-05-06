@@ -125,10 +125,10 @@ type Change struct {
 
 type ChunkDetailsRes struct {
 	CommonRes CommonRes
-	Body      ChunkDetailsBody `json:"result"`
+	Result    ChunkDetailsResult `json:"result"`
 }
 
-type ChunkDetailsBody struct {
+type ChunkDetailsResult struct {
 	Author       string             `json:"author"`
 	Header       ChunkDetailsHeader `json:"header"`
 	Receipts     []string           `json:"receipts"`

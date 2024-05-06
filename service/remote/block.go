@@ -86,19 +86,18 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 	}
 
 	jsonRes := SendRemoteCall(requestBody, url)
-	fmt.Printf("ChangeInBlockByFinal Json Response:%s", jsonRes)
+	log.Debugf("[ChangesInBlock] Json Response:%s", jsonRes)
 	var res types.BlockChangesRes
 	err := json.Unmarshal(jsonRes, &res)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		log.Errorf("Error unmarshalling JSON: %v", err)
 	}
-	fmt.Println("ChangeInBlockByFinal res:", res)
+	log.Debugf("ChangeInBlockByFinal res: %v", res)
 	return res, err
 }
 
 // Returns details of a specific chunk. You can run a block details query to get a valid chunk hash.
 func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -107,16 +106,14 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 			ChunkId: chunkId,
 		},
 	}
-
 	jsonRes := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("ChunkDetailsByChunkId Json Response:%s", jsonRes)
+	log.Debugf("ChunkDetailsByChunkId Json Response:%s", jsonRes)
 	var res types.ChunkDetailsRes
 	err := json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
-	fmt.Println("ChunkDetailsByChunkId res:", res)
+	log.Debugln("ChunkDetailsByChunkId res:", res)
 	return res, err
 }
 

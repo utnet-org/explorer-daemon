@@ -60,22 +60,20 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 	return nil
 }
 
-func InsertBlockChanges(res types.BlockChangesResult) error {
-	ctx, client := GetESInstance()
-	createIndexIfNotExists(ctx, client, "block_changes")
+func InsertBlockChanges(ctx context.Context, client *elastic.Client, res types.BlockChangesResult) error {
+	//createIndexIfNotExists(ctx, client, "block_changes")
 	_, err := client.Index().
 		Index("block_changes").
 		BodyJson(res).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	fmt.Println("block_changes insert success")
+	log.Debugln("[InsertBlockChanges] block_changes insert success")
 	return nil
 }
 
-func InsertChunkDetails(body types.ChunkDetailsBody, chunkHash string) error {
+func InsertChunkDetails(body types.ChunkDetailsResult, chunkHash string) error {
 	ctx := ECTX
 	client := ECLIENT
 	createIndexIfNotExists(ctx, client, "chunk")
