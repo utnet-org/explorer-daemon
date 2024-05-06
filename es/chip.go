@@ -31,7 +31,7 @@ func InsertChip(result types.ChipQueryResult) error {
 }
 
 func QueryChipsPower() (sum int64) {
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	// 定义嵌套聚合
 	nestedAgg := elastic.NewNestedAggregation().Path("chips")
 	sumAgg := elastic.NewSumAggregation().Field("chips.power")

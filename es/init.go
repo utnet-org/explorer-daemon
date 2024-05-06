@@ -44,8 +44,8 @@ func Init() (*elastic.Client, context.Context) {
 	//crud(client, ctx)
 }
 
-func GetESInstance() (*elastic.Client, context.Context) {
-	return ECLIENT, ECTX
+func GetESInstance() (context.Context, *elastic.Client) {
+	return ECTX, ECLIENT
 }
 
 func crud(client *elastic.Client, ctx context.Context) {

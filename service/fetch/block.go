@@ -11,14 +11,14 @@ import (
 
 // 定时获取最新的block details
 func BlockDetailsByFinal() {
-	client, ctx := es.GetESInstance()
+	ctx, client := es.GetESInstance()
 	res, err := remote.BlockDetailsByFinal()
 	if err != nil {
 		fmt.Println("rpc error")
 	}
 	// insert Elasticsearch
 	err = es.InsertBlockDetails(ctx, client, res.Result)
-	err = es.InsertLastHeight(res.Result.Header.Height)
+	err = es.InsertLastHeight(ctx, client, res.Result.Header.Height)
 	BlockChangesRpc(1, res.Result.Header)
 	pkg.PrintStruct(res.Result)
 	// 获取chunk hash

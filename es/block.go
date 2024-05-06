@@ -61,7 +61,7 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 }
 
 func InsertBlockChanges(res types.BlockChangesResult) error {
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	createIndexIfNotExists(ctx, client, "block_changes")
 	_, err := client.Index().
 		Index("block_changes").
@@ -97,20 +97,18 @@ func InsertChunkDetails(body types.ChunkDetailsBody, chunkHash string) error {
 	return nil
 }
 
-func InsertLastHeight(height int64) error {
-	// 确保索引存在
-	createIndexIfNotExists(ECTX, ECLIENT, "last_height")
-	// 插入
-	_, err := ECLIENT.Index().
+func InsertLastHeight(ctx context.Context, client *elastic.Client, height int64) error {
+	createIndexIfNotExists(ctx, client, "last_height")
+	_, err := client.Index().
 		Index("last_height").
 		Id("latest").
-		BodyJson(map[string]interface{}{"latest_height": height}).
-		Do(ECTX)
+		BodyJson(map[string]interface{}{"height": height}).
+		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorln("[InsertLastHeight] Create error: ", err)
 		return err
 	}
-	fmt.Println("InsertLastHeight Success")
+	log.Infoln("[InsertLastHeight] Success")
 	return nil
 }
 
@@ -186,7 +184,7 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.Bl
 }
 
 func GetLastBlock() (*types.BlockDetailsResult, error) {
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
 		fmt.Println("[GetLastBlock] GetLastHeight error:", err)
@@ -209,7 +207,7 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 }
 
 func GetLastBlocks() (*[]types.LastBlockRes, error) {
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
 		fmt.Println("GetLastHeight error:", err)
@@ -246,30 +244,40 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 }
 
 func GetLastHeight(client *elastic.Client, ctx context.Context) (int64, error) {
+	// 确保索引存在
+	createIndexIfNotExists(ctx, client, "last_height")
 	// 查询最新 height
 	latestHeightResult, err := client.Get().
 		Index("last_height").
 		Id("latest").
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
-		return 0, err
+		// 检查是否因为索引不存在而出错
+		if elastic.IsNotFound(err) {
+			log.Warningln("[GetLastHeight] Index not found, creating a new one...")
+			if err := InsertLastHeight(ctx, client, 0); err != nil {
+				log.Warningf("[GetLastHeight] Error creating index: %v", err)
+			}
+		} else {
+			log.Fatalf("[GetLastHeight] Error fetching or storing blocks: %v", err)
+			return -1, err
+		}
 	}
 	type LatestHeight struct {
-		Height int64 `json:"latest_height"`
+		Height int64 `json:"height"`
 	}
 	var latestHeight LatestHeight
 	err = json.Unmarshal(latestHeightResult.Source, &latestHeight)
 	if err != nil {
 		fmt.Println(err)
-		return 0, err
+		return -1, err
 	}
 	return latestHeight.Height, nil
 }
 
 func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64) (int64, error) {
 	// 定义在文档不存在时要插入的默认文档
-	upsert := map[string]interface{}{"latest_height": height}
+	upsert := map[string]interface{}{"height": height}
 	latestHeightResult, err := client.Update().
 		Index("last_height").
 		Id("latest").
@@ -286,7 +294,7 @@ func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64)
 		return -1, err
 	}
 	if latestHeightResult.Result != "updated" {
-		log.Error("[UpdateLastHeight] update result:", latestHeightResult.Result)
+		log.Warningln("[UpdateLastHeight] update result:", latestHeightResult.Result)
 		return -1, errors.New("update last height failed")
 	}
 	log.Debug("[UpdateLastHeight] Update last height success height:", height)
@@ -320,7 +328,7 @@ func QueryBlockReward24h() (sum int64) {
 	nanoSecAgo := pkg.TimeNanoSecAgo()
 	// 创建一个范围查询
 	rangeQuery := elastic.NewRangeQuery("timestamp_nanosec").Gte(nanoSecAgo)
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	// 创建一个求和聚合
 	sumAgg := elastic.NewSumAggregation().Field("award")
 	searchResult, err := client.Search().
@@ -344,7 +352,7 @@ func QueryBlockReward24h() (sum int64) {
 
 // 查询24小时消息数量
 func QueryBlockChangeMsg24h() (sum int64) {
-	client, ctx := GetESInstance()
+	ctx, client := GetESInstance()
 	nanoSecAgo := pkg.TimeNanoSecAgo()
 	rangeQuery := elastic.NewRangeQuery("timestamp_nanosec").Gte(nanoSecAgo)
 	// 使用 Painless 脚本计算数组长度的总和

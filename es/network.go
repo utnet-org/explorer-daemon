@@ -22,13 +22,13 @@ func InsertNetWorkInfo(result types.NetworkInfoResult) error {
 }
 
 func GetNetWorkInfo() (*types.NetworkInfoResult, error) {
-	ECLIENT, ECTX = GetESInstance()
+	ctx, client := GetESInstance()
 	query := elastic.NewMatchAllQuery()
-	res, err := ECLIENT.Search().
+	res, err := client.Search().
 		Index("network_info").
 		Query(query).
 		Size(1).
-		Do(ECTX)
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
