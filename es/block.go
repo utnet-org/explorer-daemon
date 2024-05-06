@@ -3,6 +3,7 @@ package es
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"explorer-daemon/pkg"
 	"explorer-daemon/types"
 	"fmt"
@@ -48,18 +49,14 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 		//GasLimit:         body.Chunks[0].GasLimit,
 		//GasPrice:         body.Header.GasPrice,
 	}
-	// Ensure the index exists
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
 		Index("block").
-		//Id(sBody.Hash).
 		BodyJson(sBody).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	fmt.Println("InsertBlockDetails Success")
 	return nil
 }
 
@@ -189,9 +186,8 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.Bl
 }
 
 func GetLastBlock() (*types.BlockDetailsResult, error) {
-	client := ECLIENT
-	ctx := ECTX
-	lastHeight, err := GetLastHeight()
+	client, ctx := GetESInstance()
+	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
 		fmt.Println("[GetLastBlock] GetLastHeight error:", err)
 		return nil, err
@@ -213,9 +209,8 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 }
 
 func GetLastBlocks() (*[]types.LastBlockRes, error) {
-	client := ECLIENT
-	ctx := ECTX
-	lastHeight, err := GetLastHeight()
+	client, ctx := GetESInstance()
+	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
 		fmt.Println("GetLastHeight error:", err)
 		return nil, err
@@ -250,21 +245,19 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 	return &blocks, nil
 }
 
-func GetLastHeight() (int, error) {
+func GetLastHeight(client *elastic.Client, ctx context.Context) (int64, error) {
 	// 查询最新 height
-	latestHeightResult, err := ECLIENT.Get().
+	latestHeightResult, err := client.Get().
 		Index("last_height").
 		Id("latest").
-		Do(ECTX)
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
 	}
-
 	type LatestHeight struct {
-		Height int `json:"latest_height"`
+		Height int64 `json:"latest_height"`
 	}
-
 	var latestHeight LatestHeight
 	err = json.Unmarshal(latestHeightResult.Source, &latestHeight)
 	if err != nil {
@@ -272,6 +265,32 @@ func GetLastHeight() (int, error) {
 		return 0, err
 	}
 	return latestHeight.Height, nil
+}
+
+func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64) (int64, error) {
+	// 定义在文档不存在时要插入的默认文档
+	upsert := map[string]interface{}{"latest_height": height}
+	latestHeightResult, err := client.Update().
+		Index("last_height").
+		Id("latest").
+		Doc(upsert).
+		Upsert(upsert).
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return -1, err
+	}
+	// 强制刷新索引，确保最新的写入立即可见
+	_, err = client.Flush().Index("last_height").Do(ctx)
+	if err != nil {
+		return -1, err
+	}
+	if latestHeightResult.Result != "updated" {
+		log.Error("[UpdateLastHeight] update result:", latestHeightResult.Result)
+		return -1, errors.New("update last height failed")
+	}
+	log.Debug("[UpdateLastHeight] Update last height success height:", height)
+	return height, nil
 }
 
 func QueryFinalBlockChanges(hash string) (*types.BlockChangesResult, error) {

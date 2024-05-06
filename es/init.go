@@ -5,11 +5,52 @@ import (
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
-// 索引mapping定义，这里仿微博消息结构定义
-const mapping = `
+var ECLIENT *elastic.Client
+var ECTX context.Context
+
+func Init() (*elastic.Client, context.Context) {
+	// 创建ES client用于后续操作ES
+	//client, err := es.NewClient(
+	//	// 设置ES服务地址，支持多个地址
+	//	es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
+	//	// 设置基于http base auth验证的账号和密码
+	//	es.SetBasicAuth("user", "secret"))
+	//if err != nil {
+	//	// Handle error
+	//	fmt.Printf("连接失败: %v\n", err)
+	//} else {
+	//	fmt.Println("连接成功")
+	//}
+
+	// 创建client
+	client, err := elastic.NewClient(
+		//es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
+		elastic.SetURL("http://127.0.0.1:9200"),
+		// 禁用嗅探器用于兼容内网ip
+		elastic.SetSniff(false),
+		elastic.SetBasicAuth("user", "nvUt974rcNeg==*k0W3W"))
+	if err != nil {
+		log.Panicln("Elastic connect error:", err)
+	}
+	ECLIENT = client
+	ECTX = context.Background()
+	log.Infoln("Elastic connected")
+	return ECLIENT, ECTX
+	//mockData(ctx, client)
+	//crud(client, ctx)
+}
+
+func GetESInstance() (*elastic.Client, context.Context) {
+	return ECLIENT, ECTX
+}
+
+func crud(client *elastic.Client, ctx context.Context) {
+	// 索引mapping定义，这里仿微博消息结构定义
+	const mapping = `
 {
   "mappings": {
     "properties": {
@@ -37,51 +78,6 @@ const mapping = `
     }
   }
 }`
-
-var ECLIENT *elastic.Client
-var ECTX context.Context
-
-func Init() (*elastic.Client, context.Context) {
-	// 创建ES client用于后续操作ES
-	//client, err := es.NewClient(
-	//	// 设置ES服务地址，支持多个地址
-	//	es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
-	//	// 设置基于http base auth验证的账号和密码
-	//	es.SetBasicAuth("user", "secret"))
-	//if err != nil {
-	//	// Handle error
-	//	fmt.Printf("连接失败: %v\n", err)
-	//} else {
-	//	fmt.Println("连接成功")
-	//}
-
-	// 创建client
-	client, err := elastic.NewClient(
-		//es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
-		elastic.SetURL("http://127.0.0.1:9200"),
-		// 禁用嗅探器用于兼容内网ip
-		elastic.SetSniff(false),
-		elastic.SetBasicAuth("user", "nvUt974rcNeg==*k0W3W"))
-	if err != nil {
-		// Handle error
-		fmt.Printf("连接失败: %v\n", err)
-	} else {
-		ECLIENT = client
-		fmt.Println("连接成功")
-	}
-	// 执行ES请求需要提供一个上下文对象
-	ctx := context.Background()
-	ECTX = ctx
-	return ECLIENT, ECTX
-	//mockData(ctx, client)
-	//crud(client, ctx)
-}
-
-func GetESInstance() (*elastic.Client, context.Context) {
-	return ECLIENT, ECTX
-}
-
-func crud(client *elastic.Client, ctx context.Context) {
 	// 首先检测下weibo索引是否存在
 	exists, err := client.IndexExists("weibo").Do(ctx)
 	if err != nil {

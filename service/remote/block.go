@@ -6,6 +6,7 @@ import (
 	"explorer-daemon/pkg"
 	"explorer-daemon/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 /**
@@ -23,18 +24,18 @@ func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
 		},
 	}
 	jsonRes := SendRemoteCall(requestBody, url)
-	fmt.Printf("BlockDetailsByFinal Json Response:%s", jsonRes)
-	var bdRes types.BlockDetailsRes
-	err := json.Unmarshal(jsonRes, &bdRes)
+	log.Debug("[BlockDetailsByFinal] Rpc Response:%s", jsonRes)
+	var res types.BlockDetailsRes
+	err := json.Unmarshal(jsonRes, &res)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		log.Error("[BlockDetailsByFinal] Error unmarshalling JSON:", err)
 	}
-	fmt.Println("BlockDetailsByFinal bdRes:", bdRes)
-	return bdRes, err
+	log.Debug("[BlockDetailsByFinal] res:", res)
+	return res, err
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByBlockId(blockId int) {
+func BlockDetailsByBlockId(blockId interface{}) (types.BlockDetailsRes, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -43,28 +44,30 @@ func BlockDetailsByBlockId(blockId int) {
 			BlockId: blockId,
 		},
 	}
-
-	body := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("BlockDetailsByBlockId Response:%s", body)
+	jsonRes := SendRemoteCall(requestBody, url)
+	log.Debug("[BlockDetailsByBlockId] Rpc Response:%s", jsonRes)
+	var res types.BlockDetailsRes
+	err := json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		log.Error("[BlockDetailsByBlockId] Error unmarshalling JSON:", err)
+	}
+	log.Debug("[BlockDetailsByBlockId] res:", res)
+	return res, err
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByBlockHash(blockHash string) {
-
-	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
-		ID:      config.RpcId,
-		Method:  "block",
-		Params: types.BlockHashReq{
-			BlockHash: blockHash,
-		},
-	}
-
-	body := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("BlockDetailsByBlockHash Response:%s", body)
-}
+//func BlockDetailsByBlockHash(blockHash string) {
+//	requestBody := types.RpcRequest{
+//		JsonRpc: config.JsonRpc,
+//		ID:      config.RpcId,
+//		Method:  "block",
+//		Params: types.BlockHashReq{
+//			BlockHash: blockHash,
+//		},
+//	}
+//	body := SendRemoteCall(requestBody, url)
+//	fmt.Printf("BlockDetailsByBlockHash Response:%s", body)
+//}
 
 // Returns changes in block for given block height or hash. You can also use finality param to return latest block details.
 // rpcType 0 final 1 block_id
@@ -83,7 +86,6 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 	}
 
 	jsonRes := SendRemoteCall(requestBody, url)
-
 	fmt.Printf("ChangeInBlockByFinal Json Response:%s", jsonRes)
 	var res types.BlockChangesRes
 	err := json.Unmarshal(jsonRes, &res)

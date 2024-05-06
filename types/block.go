@@ -1,7 +1,7 @@
 package types
 
 type BlockIdReq struct {
-	BlockId int `json:"block_id"`
+	BlockId interface{} `json:"block_id"`
 }
 
 type BlockFinalReq struct {

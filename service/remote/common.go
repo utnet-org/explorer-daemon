@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 )
@@ -14,14 +14,13 @@ var url = config.EnvLoad(config.NodeHostKey) + ":" + config.EnvLoad(config.NodeP
 
 func SendRemoteCall(requestBody types.RpcRequest, url string) []byte {
 	jsonBody, err := json.Marshal(requestBody)
-	fmt.Println("request body:", requestBody)
 	if err != nil {
-		fmt.Println("JSON marshal error:", err)
+		log.Error("[SendRemoteCall] JSON marshal error:", err)
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonBody))
 	if err != nil {
-		fmt.Println("BlockDetails POST error:", err)
+		log.Error("[SendRemoteCall] POST error:", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

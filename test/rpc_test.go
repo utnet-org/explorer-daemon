@@ -24,7 +24,7 @@ func TestBlockDetailsByBlockId(t *testing.T) {
 	remote.BlockDetailsByBlockId(17821130)
 }
 func TestBlockDetailsByBlockHash(t *testing.T) {
-	remote.BlockDetailsByBlockHash("81k9ked5s34zh13EjJt26mxw5npa485SY4UNoPi6yYLo")
+	remote.BlockDetailsByBlockId("81k9ked5s34zh13EjJt26mxw5npa485SY4UNoPi6yYLo")
 }
 
 func TestChangeInBlockByFinal(t *testing.T) {
