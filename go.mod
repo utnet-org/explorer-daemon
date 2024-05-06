@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.26.3
-	github.com/gofiber/fiber/v2 v2.52.4
+	github.com/gofiber/fiber/v2 v2.52.1
 	github.com/joho/godotenv v1.5.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/sirupsen/logrus v1.9.3

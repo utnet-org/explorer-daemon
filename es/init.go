@@ -12,7 +12,7 @@ import (
 var ECLIENT *elastic.Client
 var ECTX context.Context
 
-func Init() (*elastic.Client, context.Context) {
+func Init() (context.Context, *elastic.Client) {
 	// 创建ES client用于后续操作ES
 	//client, err := es.NewClient(
 	//	// 设置ES服务地址，支持多个地址
@@ -36,10 +36,10 @@ func Init() (*elastic.Client, context.Context) {
 	if err != nil {
 		log.Panicln("Elastic connect error:", err)
 	}
-	ECLIENT = client
 	ECTX = context.Background()
+	ECLIENT = client
 	log.Infoln("Elastic connected")
-	return ECLIENT, ECTX
+	return ECTX, ECLIENT
 	//mockData(ctx, client)
 	//crud(client, ctx)
 }

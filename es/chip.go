@@ -1,12 +1,13 @@
 package es
 
 import (
+	"context"
 	"explorer-daemon/types"
 	"github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
 )
 
-func InsertChip(result types.ChipQueryResult) error {
+func InsertChip(ctx context.Context, client *elastic.Client, result types.ChipQueryResult) error {
 	//var cs = make([]types.Chip, 0)
 	//cs = append(cs, types.Chip{
 	//	MinerId:   "1",
@@ -17,44 +18,48 @@ func InsertChip(result types.ChipQueryResult) error {
 	//	P2Key:     "123",
 	//})
 	//result.Chip = cs
-	createIndexIfNotExists(ECTX, ECLIENT, "chip")
-	_, err := ECLIENT.Index().
+	createIndexIfNotExists(ctx, client, "chip")
+	_, err := client.Index().
 		Index("chip").
 		BodyJson(&result).
-		Do(ECTX)
+		Do(ctx)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	log.Println("InsertChip Success")
+	log.Debugln("InsertChip Success")
 	return nil
 }
 
-func QueryChipsPower() (sum int64) {
-	ctx, client := GetESInstance()
-	// 定义嵌套聚合
-	nestedAgg := elastic.NewNestedAggregation().Path("chips")
-	sumAgg := elastic.NewSumAggregation().Field("chips.power")
-	nestedAgg.SubAggregation("sum_power", sumAgg)
-
-	// 执行查询
+func QueryChipByHeight(ctx context.Context, client *elastic.Client, height int64) (*elastic.SearchResult, error) {
+	existsQuery := elastic.NewTermQuery("block_height", height)
 	searchResult, err := client.Search().
 		Index("chip").
-		Aggregation("chips_power", nestedAgg).
-		Size(0).
+		Query(existsQuery).
+		//Size(0). // check exist only
 		Do(ctx)
 	if err != nil {
-		log.Error("Error performing aggregation: %s", err)
+		log.Errorf("[QueryChipByHeight] Error searching for height: %s", err)
+		return nil, err
 	}
-	// 解析聚合结果
-	if agg, found := searchResult.Aggregations.Nested("chips_power"); found {
-		if sum, found := agg.Aggregations.Sum("sum_power"); found && sum.Value != nil {
-			log.Debug("[QueryChipsPower] Total power: %v\n", *sum.Value)
-		} else {
-			log.Warn("No sum calculated")
-		}
-	} else {
-		log.Warn("No aggregation found")
+	return searchResult, nil
+}
+
+func QueryChipsPower(ctx context.Context, client *elastic.Client) int64 {
+	sumAgg := elastic.NewSumAggregation().Field("total_power")
+	searchResult, err := client.Search().
+		Index("chip").
+		Aggregation("total_power_sum", sumAgg).
+		Do(ctx)
+	if err != nil {
+		log.Error("[QueryChipsPower] Error performing aggregation: %s", err)
+		return -1
 	}
+	agg, found := searchResult.Aggregations.Sum("total_power_sum")
+	if !found {
+		log.Errorln("[QueryChipsPower] Aggregation not found")
+	}
+	log.Debugf("[QueryChipsPower] Total Power Sum: %v\n", *agg.Value)
+	sum := int64(*agg.Value)
 	return sum
 }

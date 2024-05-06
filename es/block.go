@@ -113,7 +113,7 @@ func InsertLastHeight(ctx context.Context, client *elastic.Client, height int64)
 }
 
 func BlockQuery2() {
-	client, ctx := Init()
+	ctx, client := Init()
 	// 定义要查询的用户
 	userToQuery := "user0" // 假设我们要查询 user123 的推文
 
@@ -187,7 +187,7 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 	ctx, client := GetESInstance()
 	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
-		fmt.Println("[GetLastBlock] GetLastHeight error:", err)
+		log.Errorf("[GetLastBlock] GetLastHeight error: %v\n", err)
 		return nil, err
 	}
 	query := elastic.NewTermQuery("height", lastHeight)
@@ -196,7 +196,7 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 		Query(query).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("[GetLastBlock] Query error: %v\n", err)
 		return nil, err
 	}
 	var body types.BlockDetailsResult
@@ -210,7 +210,7 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 	ctx, client := GetESInstance()
 	lastHeight, err := GetLastHeight(client, ctx)
 	if err != nil {
-		fmt.Println("GetLastHeight error:", err)
+		log.Errorf("[GetLastBlocks] Query error: %v\n", err)
 		return nil, err
 	}
 	// 创建一个范围查询，查询高度小于最新高度的前10个区块
@@ -223,13 +223,13 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 		Size(10).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorln(err)
 		return nil, err
 	}
 	var blocks []types.LastBlockRes
-	for index, hit := range res.Hits.Hits {
+	for _, hit := range res.Hits.Hits {
 		var body types.LastBlockRes
-		fmt.Printf("第 %d 条数据\n", index+1)
+		//fmt.Printf("第 %d 条数据\n", index+1)
 		_ = json.Unmarshal(hit.Source, &body)
 		pkg.PrintStruct(body)
 		changes, err := QueryFinalBlockChanges(body.Hash)
@@ -239,7 +239,7 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 		body.Messages = len(changes.Changes)
 		blocks = append(blocks, body)
 	}
-	fmt.Printf("共查询到 %d 条数据\n", res.TotalHits())
+	log.Debugf("[GetLastBlocks] total %d datas\n", res.TotalHits())
 	return &blocks, nil
 }
 

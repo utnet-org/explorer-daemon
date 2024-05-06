@@ -1,9 +1,7 @@
 package pkg
 
 import (
-	"explorer-daemon/log"
-	"fmt"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"reflect"
 )
 
@@ -30,7 +28,7 @@ func SuccessResponse(data interface{}) JSONResponse {
 
 // MessageResponse returns a JSONResponse with a 'message' key containing the given text.
 func MessageResponse(code int, msg, msgZh string) JSONResponse {
-	log.Log.WithFields(logrus.Fields{
+	log.WithFields(log.Fields{
 		"code":   code,
 		"msg_zh": msgZh,
 	}).Warnf(msg)
@@ -49,18 +47,16 @@ func PrintStruct(s interface{}) {
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
 			fieldValue := val.Field(i)
-
-			fmt.Printf("%s: %v\n", field.Name, fieldValue.Interface())
+			log.Debugf("%s: %v\n", field.Name, fieldValue.Interface())
 		}
 	} else if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
 			fieldValue := val.Field(i)
-
-			fmt.Printf("%s: %v\n", field.Name, fieldValue.Interface())
+			log.Debugf("%s: %v\n", field.Name, fieldValue.Interface())
 		}
 	} else {
-		fmt.Println("Not a struct or pointer.")
+		log.Warningln("[PrintStruct] Not a struct or pointer.")
 	}
 }

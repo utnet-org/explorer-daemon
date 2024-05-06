@@ -54,9 +54,15 @@ func Test24NanoSecTotalChanges(t *testing.T) {
 	log.Info("[Test24NanoSecTotalChanges] sum=", sum)
 }
 
+func TestChipsPower(t *testing.T) {
+	ctx, client := es.Init()
+	sum := es.QueryChipsPower(ctx, client)
+	log.Info("[TestChipsPower] sum=", sum)
+}
+
 func TestNetWorkInfo(t *testing.T) {
-	es.Init()
-	res, err := es.GetNetWorkInfo()
+	ctx, client := es.Init()
+	res, err := es.GetNetworkInfo(ctx, client)
 	if err != nil {
 		return
 	}

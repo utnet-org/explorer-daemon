@@ -5,6 +5,7 @@ import (
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 func ChipsQuery() (types.ChipQueryRes, error) {
@@ -19,12 +20,12 @@ func ChipsQuery() (types.ChipQueryRes, error) {
 		},
 	}
 	jsonRes := SendRemoteCall(requestBody, url)
-	fmt.Printf("[ChipsQuery] Json Response:%s", jsonRes)
+	log.Debugf("[ChipsQuery] Json Response:%s", jsonRes)
 	var res types.ChipQueryRes
 	err := json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		fmt.Println("[ChipsQuery] Error unmarshalling JSON:", err)
 	}
-	fmt.Println("[ChipsQuery] res:", res)
+	log.Debugln("[ChipsQuery] res:", res)
 	return res, err
 }

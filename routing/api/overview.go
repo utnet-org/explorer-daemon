@@ -22,17 +22,18 @@ func OverviewInfo(c *fiber.Ctx) error {
 	//if err != nil {
 	//	return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	//}
+	ctx, client := es.GetESInstance()
 	lastBlock, err := es.GetLastBlock()
 	if err != nil {
 		return err
 	}
 	lb := lastBlock.Header
-	info, err := es.GetNetWorkInfo()
+	info, err := es.GetNetworkInfo(ctx, client)
 	if err != nil {
 		return err
 	}
 
-	sum := es.QueryChipsPower()
+	sum := es.QueryChipsPower(ctx, client)
 	totalReward24 := es.QueryBlockReward24h()
 	var aveOut24 float64
 	if sum != 0 {

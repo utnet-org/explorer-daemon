@@ -5,6 +5,7 @@ import (
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 // Returns general status of a given node (sync status, utility core node version, protocol version, etc), and the current set of validators.
@@ -33,13 +34,13 @@ func NetworkInfo() (*types.NetworkInfoRes, error) {
 	}
 	jsonRes := SendRemoteCall(requestBody, url)
 
-	fmt.Printf("NetworkInfo Json Response:%s", jsonRes)
+	log.Debugf("NetworkInfo Json Response:%s", jsonRes)
 	var res types.NetworkInfoRes
 	err := json.Unmarshal(jsonRes, &res)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		log.Errorln("Error unmarshalling JSON:", err)
 	}
-	fmt.Printf("NetworkInfo Response:%s", jsonRes)
+	log.Debugf("NetworkInfo Response:%s", jsonRes)
 	return &res, nil
 }
 

@@ -16,10 +16,10 @@ func HandleNetworkInfo() error {
 		fmt.Println("rpc error res nil")
 		return err
 	}
-	// insert Elasticsearch
-	err = es.InsertNetWorkInfo(res.Result)
+	ctx, client := es.GetESInstance()
+	err = es.InsertNetworkInfo(ctx, client, res.Result)
 	if err != nil {
-		fmt.Println("[BlockDetailsByFinal] insert error:", err)
+		fmt.Println("[HandleNetworkInfo] insert error:", err)
 		return err
 	}
 	return nil

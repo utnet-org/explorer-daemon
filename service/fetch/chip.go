@@ -3,24 +3,29 @@ package fetch
 import (
 	"explorer-daemon/es"
 	"explorer-daemon/service/remote"
-	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 func HandleChipQuery() error {
 	res, err := remote.ChipsQuery()
 	if err != nil {
-		fmt.Println("rpc error")
+		log.Errorf("[HandleChipQuery] rpc error: %v", err)
 		return err
 	}
-	//if res == nil {
-	//	fmt.Println("rpc error res nil")
-	//	return err
-	//}
-	// insert Elasticsearch
-	err = es.InsertChip(res.Result)
+	ctx, client := es.GetESInstance()
+	qRes, err := es.QueryChipByHeight(ctx, client, res.Result.BlockHeight)
 	if err != nil {
-		fmt.Println("[HandleChipQuery] insert error:", err)
+		log.Errorf("[HandleChipQuery] query error: %v", err)
 		return err
+	}
+	if qRes.TotalHits() > 0 {
+		log.Infof("[HandleChipQuery] Chip data exist, height: %v", res.Result.BlockHeight)
+	} else {
+		err = es.InsertChip(ctx, client, res.Result)
+		if err != nil {
+			log.Errorf("[HandleChipQuery] insert error: %v", err)
+			return err
+		}
 	}
 	return nil
 }

@@ -1,28 +1,30 @@
 package es
 
 import (
+	"context"
 	"encoding/json"
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	log "github.com/sirupsen/logrus"
 )
 
-func InsertNetWorkInfo(result types.NetworkInfoResult) error {
-	createIndexIfNotExists(ECTX, ECLIENT, "network_info")
-	_, err := ECLIENT.Index().
+func InsertNetworkInfo(ctx context.Context, client *elastic.Client, result types.NetworkInfoResult) error {
+	createIndexIfNotExists(ctx, client, "network_info")
+	_, err := client.Index().
 		Index("network_info").
+		Id("network").
 		BodyJson(result).
-		Do(ECTX)
+		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	fmt.Println("InsertNetWorkInfo Success")
+	log.Debugln("InsertNetWorkInfo Success")
 	return nil
 }
 
-func GetNetWorkInfo() (*types.NetworkInfoResult, error) {
-	ctx, client := GetESInstance()
+func GetNetworkInfo(ctx context.Context, client *elastic.Client) (*types.NetworkInfoResult, error) {
 	query := elastic.NewMatchAllQuery()
 	res, err := client.Search().
 		Index("network_info").

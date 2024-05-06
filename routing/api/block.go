@@ -6,6 +6,7 @@ import (
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 // @Tags Web
@@ -50,7 +51,7 @@ func LastBlock(c *fiber.Ctx) error {
 	resBody := types.LastBlockResList{
 		LastBlockList: *res,
 	}
-	fmt.Println("BlockDetails res success...")
+	log.Debugln("BlockDetails res success")
 	pkg.PrintStruct(resBody)
 	return c.JSON(pkg.SuccessResponse(resBody))
 }
