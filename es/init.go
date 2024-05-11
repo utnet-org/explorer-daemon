@@ -36,9 +36,12 @@ func Init() (context.Context, *elastic.Client) {
 	if err != nil {
 		log.Panicln("Elastic connect error:", err)
 	}
-	ECTX = context.Background()
+	ctx := context.Background()
+	ECTX = ctx
 	ECLIENT = client
 	log.Infoln("Elastic connected")
+	CreateCheckIndex(ctx, client)
+	log.Infoln("Elastic completed")
 	return ECTX, ECLIENT
 	//mockData(ctx, client)
 	//crud(client, ctx)
@@ -48,36 +51,58 @@ func GetESInstance() (context.Context, *elastic.Client) {
 	return ECTX, ECLIENT
 }
 
-func crud(client *elastic.Client, ctx context.Context) {
+func CreateCheckIndex(ctx context.Context, client *elastic.Client) {
+	createIndexIfNotExists(ctx, client, "block")
+	createIndexIfNotExists(ctx, client, "chunk")
+	createIndexIfNotExists(ctx, client, "block_changes")
+	createIndexIfNotExists(ctx, client, "chip")
+	createIndexIfNotExists(ctx, client, "network_info")
+	createIndexIfNotExists(ctx, client, "last_height")
+}
+
+func createIndexIfNotExists(ctx context.Context, client *elastic.Client, indexName string) {
+	exists, err := client.IndexExists(indexName).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	if !exists {
+		_, err := client.CreateIndex(indexName).Do(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func crudDemo(client *elastic.Client, ctx context.Context) {
 	// 索引mapping定义，这里仿微博消息结构定义
 	const mapping = `
-{
-  "mappings": {
-    "properties": {
-      "user": {
-        "type": "keyword"
-      },
-      "message": {
-        "type": "text"
-      },
-      "image": {
-        "type": "keyword"
-      },
-      "created": {
-        "type": "date"
-      },
-      "tags": {
-        "type": "keyword"
-      },
-      "location": {
-        "type": "geo_point"
-      },
-      "suggest_field": {
-        "type": "completion"
-      }
-    }
-  }
-}`
+	{
+	  "mappings": {
+		"properties": {
+		  "user": {
+			"type": "keyword"
+		  },
+		  "message": {
+			"type": "text"
+		  },
+		  "image": {
+			"type": "keyword"
+		  },
+		  "created": {
+			"type": "date"
+		  },
+		  "tags": {
+			"type": "keyword"
+		  },
+		  "location": {
+			"type": "geo_point"
+		  },
+		  "suggest_field": {
+			"type": "completion"
+		  }
+		}
+	  }
+	}`
 	// 首先检测下weibo索引是否存在
 	exists, err := client.IndexExists("weibo").Do(ctx)
 	if err != nil {
@@ -148,18 +173,5 @@ func crud(client *elastic.Client, ctx context.Context) {
 	if err != nil {
 		// Handle error
 		panic(err)
-	}
-}
-
-func createIndexIfNotExists(ctx context.Context, client *elastic.Client, indexName string) {
-	exists, err := client.IndexExists(indexName).Do(ctx)
-	if err != nil {
-		panic(err)
-	}
-	if !exists {
-		_, err := client.CreateIndex(indexName).Do(ctx)
-		if err != nil {
-			panic(err)
-		}
 	}
 }

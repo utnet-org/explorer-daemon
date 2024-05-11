@@ -53,6 +53,7 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 	_, err := client.Index().
 		Index("block").
 		BodyJson(sBody).
+		Id(body.Header.Hash).
 		Do(ctx)
 	if err != nil {
 		return err
@@ -65,6 +66,7 @@ func InsertBlockChanges(ctx context.Context, client *elastic.Client, res types.B
 	_, err := client.Index().
 		Index("block_changes").
 		BodyJson(res).
+		Id(res.BlockHash).
 		Do(ctx)
 	if err != nil {
 		return err
@@ -77,21 +79,17 @@ func InsertChunkDetails(body types.ChunkDetailsResult, chunkHash string) error {
 	ctx := ECTX
 	client := ECLIENT
 	createIndexIfNotExists(ctx, client, "chunk")
-	startTime := time.Now()
 	// chunkHash作为唯一doc id
 	_, err := client.Index().
 		Index("chunk").
 		BodyJson(body).
-		//Id(chunkHash).
+		Id(chunkHash).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("[InsertChunkDetails] ES error: %v", err)
 		return err
 	}
-
 	fmt.Println("chunk details insert success")
-	duration := time.Since(startTime)
-	fmt.Printf("elapsed time: %v\n", duration)
 	return nil
 }
 
@@ -242,8 +240,6 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 }
 
 func GetLastHeight(client *elastic.Client, ctx context.Context) (int64, error) {
-	// 确保索引存在
-	createIndexIfNotExists(ctx, client, "last_height")
 	// 查询最新 height
 	latestHeightResult, err := client.Get().
 		Index("last_height").
