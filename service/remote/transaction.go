@@ -22,7 +22,7 @@ func TransactionSendAsync() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("TransactionSendAsync Response:%s", body)
 }
@@ -43,7 +43,7 @@ func TransactionSendAwait() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("TransactionSendAwait Response:%s", body)
 }
@@ -67,7 +67,7 @@ func TransactionStatus() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("TransactionStatus Response:%s", body)
 }
@@ -91,7 +91,7 @@ func TransactionStatusReceipts() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("TransactionStatusReceipts Response:%s", body)
 }
@@ -112,7 +112,7 @@ func TransactionReceiptsById(receiptId string) {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("TransactionReceiptsById Response:%s", body)
 }

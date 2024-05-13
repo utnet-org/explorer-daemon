@@ -16,6 +16,11 @@ type ChunkId struct {
 	ChunkId string `json:"chunk_id"`
 }
 
+type LastHeightHash struct {
+	Height int64  `json:"height"`
+	Hash   string `json:"hash"`
+}
+
 type BlockDetailsReq struct {
 	//BlockId string `json:"block_id"`
 	//BlockHash string `json:"block_hash"`

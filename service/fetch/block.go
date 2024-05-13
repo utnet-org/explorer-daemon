@@ -18,7 +18,7 @@ func BlockDetailsByFinal() {
 		fmt.Println("rpc error")
 	}
 	err = es.InsertBlockDetails(ctx, client, res.Result)
-	err = es.InsertLastHeight(ctx, client, res.Result.Header.Height)
+	err = es.InsertLastHeight(ctx, client, res.Result.Header.Height, "")
 	HandleBlockChanges(1, res.Result.Header)
 	pkg.PrintStruct(res.Result)
 	// 获取chunk hash
@@ -88,32 +88,36 @@ func HandleBlock() error {
 		return err
 	}
 	rpcHeight := res.Result.Header.Height
-	lastHeight, err := es.GetLastHeight(client, ctx)
+	last, err := es.GetLastHeightHash(client, ctx)
 	if err != nil {
 		log.Errorln("[HandleBlock] GetLastHeight error:", err)
 		return err
 	}
-	if lastHeight == rpcHeight {
+	if last.Height == rpcHeight {
 		log.Infof("[HandleBlock] No new blocks to fetch, height: %v", rpcHeight)
 		return nil
 	}
 	// TODO 待完善初始height逻辑
 	// init last height
-	if lastHeight == 0 {
-		lastHeight = rpcHeight - 1
+	if last.Height == 0 {
+		last.Height = rpcHeight - 1
 	}
 	// 存储从 lastHeight+1 到最新高度的所有区块
-	for height := lastHeight + 1; height <= rpcHeight; height++ {
+	for height := last.Height + 1; height <= rpcHeight; height++ {
 		block, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
 			log.Error("[HandleBlock] BlockDetailsByBlockId error:", err)
+			return err
+		}
+		if block == nil {
+			log.Error("[HandleBlock] HandleBlock rpc res nil")
 			return err
 		}
 		if err = es.InsertBlockDetails(ctx, client, block.Result); err != nil {
 			log.Error("[HandleBlock] InsertBlockDetails error:", err)
 			return err
 		}
-		if _, err = es.UpdateLastHeight(client, ctx, height); err != nil {
+		if _, err = es.UpdateLastHeight(client, ctx, height, block.Result.Header.Hash); err != nil {
 			log.Error("[HandleBlock] UpdateLastHeight error:", err)
 			return err
 		}

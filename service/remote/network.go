@@ -18,7 +18,7 @@ func NetworkNodeStatus() {
 		Params:  params,
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("NetworkNodeStatus Response:%s", body)
 }
@@ -32,11 +32,11 @@ func NetworkInfo() (*types.NetworkInfoRes, error) {
 		Method:  "network_info",
 		Params:  params,
 	}
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 
 	log.Debugf("NetworkInfo Json Response:%s", jsonRes)
 	var res types.NetworkInfoRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		log.Errorln("Error unmarshalling JSON:", err)
 	}
@@ -56,7 +56,7 @@ func ValidationStatusByBlockNumber(blockNumber int) {
 		Params:  blockNumber,
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("NetworkValidationStatus Response:%s", body)
 }
@@ -70,7 +70,7 @@ func ValidationStatusByNull() {
 		Params:  params,
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("ValidationStatusByNull Response:%s", body)
 }

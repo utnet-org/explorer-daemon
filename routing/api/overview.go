@@ -40,6 +40,11 @@ func OverviewInfo(c *fiber.Ctx) error {
 		aveOut24 = float64(totalReward24 / sum)
 	}
 
+	miners, err := es.QueryMiner(ctx, client)
+	if err != nil {
+		return err
+	}
+
 	totalMsgs24 := es.QueryBlockChangeMsg24h()
 	ex := types.OverviewInfoRes{
 		//Height:           pkg.FakeInt(0, 100000),
@@ -52,9 +57,10 @@ func OverviewInfo(c *fiber.Ctx) error {
 		//DayMessage:       pkg.FakeIntStr(10000, 20000),
 		//TotalAccount:     pkg.FakeIntStr(5000, 10000),
 		//AveBlockInterval: pkg.FakeIntStr(10, 60),
-		Height:           lb.Height,
-		LatestBlock:      lb.TimestampNanosec,
-		TotalPower:       sum,
+		Height:      lb.Height,
+		LatestBlock: lb.TimestampNanosec,
+		//TotalPower:       sum,
+		TotalPower:       int64(pkg.DivisionPowerOfTen(miners.TotalPower, 12)),
 		ActiveMiner:      info.NumActivePeers,
 		BlockReward:      totalReward24,
 		DayAveReward:     aveOut24,

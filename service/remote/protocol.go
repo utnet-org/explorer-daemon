@@ -15,7 +15,7 @@ func GenesisConfig() {
 		Method:  "EXPERIMENTAL_genesis_config",
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("GenesisConfig Response:%s", body)
 }
@@ -31,7 +31,7 @@ func ProtocolConfigByFinal() {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("ProtocolConfigByFinal Response:%s", body)
 }
@@ -47,7 +47,7 @@ func ProtocolConfigByBlockId(blockId int) {
 		},
 	}
 
-	body := SendRemoteCall(requestBody, url)
+	body, _ := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("ProtocolConfigByBlockId Response:%s", body)
 }

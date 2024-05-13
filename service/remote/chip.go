@@ -19,10 +19,10 @@ func ChipsQuery() (types.ChipQueryRes, error) {
 			AccountId:   "guest-book.testnet",
 		},
 	}
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 	log.Debugf("[ChipsQuery] Json Response:%s", jsonRes)
 	var res types.ChipQueryRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		fmt.Println("[ChipsQuery] Error unmarshalling JSON:", err)
 	}

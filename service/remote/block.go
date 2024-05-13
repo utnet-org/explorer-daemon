@@ -14,7 +14,7 @@ The RPC API enables you to query the network and get details about specific bloc
 */
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
+func BlockDetailsByFinal() (*types.BlockDetailsRes, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -23,19 +23,23 @@ func BlockDetailsByFinal() (types.BlockDetailsRes, error) {
 			Finality: "final",
 		},
 	}
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	if err != nil {
+		log.Error("[BlockDetailsByFinal] Error unmarshalling JSON:", err)
+		return nil, err
+	}
 	log.Debug("[BlockDetailsByFinal] Rpc Response:%s", jsonRes)
 	var res types.BlockDetailsRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		log.Error("[BlockDetailsByFinal] Error unmarshalling JSON:", err)
 	}
 	log.Debug("[BlockDetailsByFinal] res:", res)
-	return res, err
+	return &res, err
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
-func BlockDetailsByBlockId(blockId interface{}) (types.BlockDetailsRes, error) {
+func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -44,15 +48,15 @@ func BlockDetailsByBlockId(blockId interface{}) (types.BlockDetailsRes, error) {
 			BlockId: blockId,
 		},
 	}
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 	log.Debug("[BlockDetailsByBlockId] Rpc Response:%s", jsonRes)
 	var res types.BlockDetailsRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		log.Error("[BlockDetailsByBlockId] Error unmarshalling JSON:", err)
 	}
 	log.Debug("[BlockDetailsByBlockId] res:", res)
-	return res, err
+	return &res, err
 }
 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
@@ -65,7 +69,7 @@ func BlockDetailsByBlockId(blockId interface{}) (types.BlockDetailsRes, error) {
 //			BlockHash: blockHash,
 //		},
 //	}
-//	body := SendRemoteCall(requestBody, url)
+//	body,_ := SendRemoteCall(requestBody, url)
 //	fmt.Printf("BlockDetailsByBlockHash Response:%s", body)
 //}
 
@@ -85,10 +89,10 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 		Params:  params,
 	}
 
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 	log.Debugf("[ChangesInBlock] Json Response:%s", jsonRes)
 	var res types.BlockChangesRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		log.Errorf("Error unmarshalling JSON: %v", err)
 	}
@@ -106,10 +110,10 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 			ChunkId: chunkId,
 		},
 	}
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 	log.Debugf("ChunkDetailsByChunkId Json Response:%s", jsonRes)
 	var res types.ChunkDetailsRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
@@ -127,11 +131,11 @@ func ChunkDetailsByBlockId(chunkId string) (types.ChunkDetailsRes, error) {
 		},
 	}
 
-	jsonRes := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 
 	fmt.Printf("ChunkDetailsByBlockId Json Response:%s", jsonRes)
 	var res types.ChunkDetailsRes
-	err := json.Unmarshal(jsonRes, &res)
+	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}

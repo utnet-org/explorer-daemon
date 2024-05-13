@@ -19,16 +19,16 @@ func InitFetchData() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		err := HandleBlock()
-		if err != nil {
-			log.Error("[InitFetchData] HandleBlock error: ", err)
+		if err := HandleBlock(); err != nil {
+			log.Fatalf("[InitFetchData] HandleBlock error: %v", err)
 		}
-		err = HandleNetworkInfo()
-		if err != nil {
+		if err := HandleMiner(); err != nil {
+			log.Fatalf("[InitFetchData] HandleMiner error: %v", err)
+		}
+		if err := HandleNetworkInfo(); err != nil {
 			log.Error("[InitFetchData] HandleNetworkInfo error: ", err)
 		}
-		err = HandleChipQuery()
-		if err != nil {
+		if err := HandleChipQuery(); err != nil {
 			log.Error("[InitFetchData] HandleChipQuery error: ", err)
 		}
 	}

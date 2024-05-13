@@ -34,6 +34,9 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 }
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
+	if &body == nil {
+		return errors.New("body is nil")
+	}
 	sBody := types.BlockDetailsStoreBody{
 		Author:           body.Author,
 		Chunks:           body.Chunks,
@@ -93,12 +96,12 @@ func InsertChunkDetails(body types.ChunkDetailsResult, chunkHash string) error {
 	return nil
 }
 
-func InsertLastHeight(ctx context.Context, client *elastic.Client, height int64) error {
+func InsertLastHeight(ctx context.Context, client *elastic.Client, height int64, hash string) error {
 	createIndexIfNotExists(ctx, client, "last_height")
 	_, err := client.Index().
 		Index("last_height").
 		Id("latest").
-		BodyJson(map[string]interface{}{"height": height}).
+		BodyJson(map[string]interface{}{"height": height, "hash": hash}).
 		Do(ctx)
 	if err != nil {
 		log.Errorln("[InsertLastHeight] Create error: ", err)
@@ -181,12 +184,12 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.Bl
 
 func GetLastBlock() (*types.BlockDetailsResult, error) {
 	ctx, client := GetESInstance()
-	lastHeight, err := GetLastHeight(client, ctx)
+	last, err := GetLastHeightHash(client, ctx)
 	if err != nil {
 		log.Errorf("[GetLastBlock] GetLastHeight error: %v\n", err)
 		return nil, err
 	}
-	query := elastic.NewTermQuery("height", lastHeight)
+	query := elastic.NewTermQuery("height", last.Height)
 	res, err := client.Search().
 		Index("block").
 		Query(query).
@@ -204,13 +207,13 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 
 func GetLastBlocks() (*[]types.LastBlockRes, error) {
 	ctx, client := GetESInstance()
-	lastHeight, err := GetLastHeight(client, ctx)
+	last, err := GetLastHeightHash(client, ctx)
 	if err != nil {
 		log.Errorf("[GetLastBlocks] Query error: %v\n", err)
 		return nil, err
 	}
 	// 创建一个范围查询，查询高度小于最新高度的前10个区块
-	rangeQuery := elastic.NewRangeQuery("height").Lte(lastHeight)
+	rangeQuery := elastic.NewRangeQuery("height").Lte(last.Height)
 	//rangeQuery := elastic.NewTermQuery("height", lastHeight)
 	res, err := client.Search().
 		Index("block").
@@ -239,7 +242,7 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 	return &blocks, nil
 }
 
-func GetLastHeight(client *elastic.Client, ctx context.Context) (int64, error) {
+func GetLastHeightHash(client *elastic.Client, ctx context.Context) (*types.LastHeightHash, error) {
 	// 查询最新 height
 	latestHeightResult, err := client.Get().
 		Index("last_height").
@@ -249,29 +252,26 @@ func GetLastHeight(client *elastic.Client, ctx context.Context) (int64, error) {
 		// 检查是否因为索引不存在而出错
 		if elastic.IsNotFound(err) {
 			log.Warningln("[GetLastHeight] Index not found, creating a new one...")
-			if err := InsertLastHeight(ctx, client, 0); err != nil {
+			if err := InsertLastHeight(ctx, client, 0, ""); err != nil {
 				log.Warningf("[GetLastHeight] Error creating index: %v", err)
 			}
 		} else {
 			log.Fatalf("[GetLastHeight] Error fetching or storing blocks: %v", err)
-			return -1, err
+			return nil, err
 		}
 	}
-	type LatestHeight struct {
-		Height int64 `json:"height"`
-	}
-	var latestHeight LatestHeight
+	var latestHeight types.LastHeightHash
 	err = json.Unmarshal(latestHeightResult.Source, &latestHeight)
 	if err != nil {
-		fmt.Println(err)
-		return -1, err
+		log.Errorf("[GetLastHeight] Error fetching or storing blocks: %v", err)
+		return nil, err
 	}
-	return latestHeight.Height, nil
+	return &latestHeight, nil
 }
 
-func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64) (int64, error) {
+func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64, hash string) (int64, error) {
 	// 定义在文档不存在时要插入的默认文档
-	upsert := map[string]interface{}{"height": height}
+	upsert := map[string]interface{}{"height": height, "hash": hash}
 	latestHeightResult, err := client.Update().
 		Index("last_height").
 		Id("latest").

@@ -58,6 +58,7 @@ func CreateCheckIndex(ctx context.Context, client *elastic.Client) {
 	createIndexIfNotExists(ctx, client, "chip")
 	createIndexIfNotExists(ctx, client, "network_info")
 	createIndexIfNotExists(ctx, client, "last_height")
+	createIndexIfNotExists(ctx, client, "miner")
 }
 
 func createIndexIfNotExists(ctx context.Context, client *elastic.Client, indexName string) {
