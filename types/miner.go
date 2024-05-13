@@ -8,6 +8,7 @@ type AllMinersRes struct {
 type AllMinersResult struct {
 	Miners     []Miner `json:"miners"`
 	TotalPower int64   `json:"total_power"`
+	Timestamp  int64   `json:"timestamp"`
 }
 
 type Miner struct {

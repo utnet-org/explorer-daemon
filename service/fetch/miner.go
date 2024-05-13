@@ -10,7 +10,7 @@ func HandleMiner() error {
 	ctx, client := es.GetESInstance()
 	last, err := es.GetLastHeightHash(client, ctx)
 	if err != nil {
-		log.Errorf("[GetLastBlock] GetLastHeight error: %v\n", err)
+		log.Errorf("[HandleMiner] GetLastHeight error: %v\n", err)
 		return err
 	}
 	res, err := remote.AllMiners(last.Hash)
@@ -18,7 +18,7 @@ func HandleMiner() error {
 		return err
 	}
 	if err = es.InsertMiner(ctx, client, res.Result); err != nil {
-		log.Error("[HandleBlock] InsertBlockDetails error:", err)
+		log.Error("[HandleMiner] InsertBlockDetails error:", err)
 		return err
 	}
 	return nil

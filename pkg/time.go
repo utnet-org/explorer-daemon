@@ -38,3 +38,15 @@ func TimeNanoSecAgo() int64 {
 	nanoSec24HoursAgo := now.Add(-24 * time.Hour).UnixNano()
 	return nanoSec24HoursAgo
 }
+
+func TimeNanoRange(n int64) (int64, int64) {
+	//current := time.Unix(0, currentTime)
+	//start := current.AddDate(0, 0, -n).Truncate(24 * time.Hour)
+	//end := current.Truncate(24 * time.Hour)
+	//return start.UnixNano(), end.UnixNano()
+	currentTime := time.Now().UnixNano()
+	oneDay := int64(24 * time.Hour)
+	sevenDays := oneDay * n
+	startTime := currentTime - sevenDays
+	return startTime, currentTime
+}

@@ -5,6 +5,7 @@ import (
 	"explorer-daemon/types"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestName(t *testing.T) {
@@ -25,4 +26,12 @@ func TestOverview(t *testing.T) {
 		AveBlockInterval: pkg.FakeIntStr(10, 60),
 	}
 	fmt.Println("Info:", oi)
+}
+
+func TestNano(t *testing.T) {
+	currentTime := time.Now().UnixNano()
+	oneDay := int64(24 * time.Hour)
+	sevenDays := oneDay * 7
+	startTime := currentTime - sevenDays
+	fmt.Printf("Start Time: %d, End Time: %d\n", startTime, currentTime)
 }
