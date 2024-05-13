@@ -22,12 +22,29 @@ func BlockDetails(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
-	resBody := &types.BlockDetailsResult{}
-
-	resBody, err = es.GetBlockDetails(pkg.BlockQueryType(req.QueryType), req.QueryWord)
-	fmt.Println("[BlockDetails] query res success")
-	pkg.PrintStruct(resBody)
-	return c.JSON(pkg.SuccessResponse(resBody))
+	res, err := es.GetBlockDetails(pkg.BlockQueryType(req.QueryType), req.QueryWord)
+	if err != nil {
+		log.Errorf("[BlockDetails] query res failed: %s", err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+	}
+	if res == nil {
+		log.Error("[BlockDetails] res nil")
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+	}
+	resWeb := types.BlockDetailsResWeb{
+		Height:           res.Header.Height,
+		Hash:             res.Header.Hash,
+		Timestamp:        res.Header.Timestamp,
+		TimestampNanoSec: res.Header.TimestampNanosec,
+		Author:           res.Author,
+		GasUsed:          res.Chunks[0].GasUsed,
+		GasPrice:         res.Header.GasPrice,
+		GasLimit:         res.Chunks[0].GasLimit,
+		GasFee:           0,
+		PrevHash:         res.Header.PrevHash,
+	}
+	log.Debugf("[BlockDetails] query res success,res: %v", resWeb)
+	return c.JSON(pkg.SuccessResponse(resWeb))
 }
 
 // @Tags Web
@@ -39,21 +56,8 @@ func BlockDetails(c *fiber.Ctx) error {
 // @Router /block/last [post]
 func LastBlock(c *fiber.Ctx) error {
 	res, _ := es.GetLastBlocks()
-	//var blocks []types.LastBlockRes
-	//for index, hit := range res {
-	//	var body types.LastBlockRes
-	//	fmt.Printf("第 %d 条数据\n", index+1)
-	//	_ = json.Unmarshal(hit.Source, &body)
-	//	pkg.PrintStruct(body)
-	//	body.Msgs = 1
-	//	blocks = append(blocks, body)
-	//}
-	resBody := types.LastBlockResList{
-		LastBlockList: *res,
-	}
-	log.Debugln("BlockDetails res success")
-	pkg.PrintStruct(resBody)
-	return c.JSON(pkg.SuccessResponse(resBody))
+	log.Debugf("BlockDetails res success, res: %v", res)
+	return c.JSON(pkg.SuccessResponse(res))
 }
 
 // @Tags Web

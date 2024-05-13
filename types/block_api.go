@@ -35,10 +35,6 @@ type LastBlockRes struct {
 	//} `json:"transactions_agg"`
 }
 
-type LastBlockResList struct {
-	LastBlockList []LastBlockRes `json:"last_block_list"`
-}
-
 type LastBlockRes2 struct {
 	Height    string `json:"height"`
 	Hash      string `json:"hash"`      //交易Hash
@@ -51,4 +47,17 @@ type LastBlockRes2 struct {
 	TransactionsAgg struct {
 		Count int `json:"count"` //交易
 	} `json:"transactions_agg"`
+}
+
+type BlockDetailsResWeb struct {
+	Height           int64  `json:"height"`
+	Hash             string `json:"hash"`              //交易Hash
+	Timestamp        int64  `json:"timestamp"`         //时间
+	TimestampNanoSec string `json:"timestamp_nanosec"` //时间
+	Author           string `json:"author"`            //矿工
+	GasUsed          int64  `json:"gas_used"`          //使用的Gas
+	GasPrice         string `json:"gas_price"`         //Gas价格
+	GasLimit         int64  `json:"gas_limit"`         //Gas限制
+	GasFee           int    `json:"gas_fee"`           //Gas费
+	PrevHash         string `json:"prev_hash"`         //上一个哈希
 }
