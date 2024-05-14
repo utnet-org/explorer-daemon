@@ -17,11 +17,6 @@ import (
 // @Router /overview/info [post]
 
 func OverviewInfo(c *fiber.Ctx) error {
-	//var msgReq types.OverviewInfoRes
-	//err := c.BodyParser(&msgReq)
-	//if err != nil {
-	//	return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
-	//}
 	ctx, client := es.GetESInstance()
 	lastBlock, err := es.GetLastBlock()
 	if err != nil {
@@ -47,7 +42,6 @@ func OverviewInfo(c *fiber.Ctx) error {
 	log.Debugf("miner power: %v", miners.TotalPower)
 
 	totalMsgs24 := es.QueryBlockChangeMsg24h()
-	totalPower := es.QueryMinerRange(ctx, client, 7)
 	ex := types.OverviewInfoRes{
 		//Height:           pkg.FakeInt(0, 100000),
 		//LatestBlock:      pkg.FakeIntStr(10, 120),
@@ -62,8 +56,8 @@ func OverviewInfo(c *fiber.Ctx) error {
 		Height:      lb.Height,
 		LatestBlock: lb.TimestampNanosec,
 		//TotalPower:       sum,
-		//TotalPower:       int64(pkg.DivisionPowerOfTen(miners.TotalPower, 12)),
-		TotalPower:       totalPower,
+		TotalPower: int64(pkg.DivisionPowerOfTen(float64(miners.TotalPower), 12)),
+		//TotalPower:       totalPower,
 		ActiveMiner:      info.NumActivePeers,
 		BlockReward:      totalReward24,
 		DayAveReward:     aveOut24,

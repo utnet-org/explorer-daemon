@@ -67,20 +67,21 @@ func QueryMiner(ctx context.Context, client *elastic.Client) (*types.AllMinersRe
 	return &result, nil
 }
 
-func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) (power int64) {
+func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []float64 {
 	//start, end := pkg.TimeNanoRange(n, time.Now().UnixNano())
 	start, end := pkg.TimeNanoRange(n)
 	dateQuery := elastic.NewRangeQuery("timestamp").Gte(start).Lte(end)
 
 	// 创建查询
 	query := elastic.NewBoolQuery().Filter(dateQuery)
-
+	powerList := make([]float64, 0)
 	// 执行查询
 	searchResult, err := client.Search().Index("miner").Query(query).Do(ctx)
 	if err != nil {
 		fmt.Println("Error executing search: ", err)
-		return
+		return powerList
 	}
+
 	// 处理查询结果
 	if searchResult.Hits.TotalHits.Value > 0 {
 		fmt.Printf("Found a total of %d documents\n", searchResult.Hits.TotalHits)
@@ -98,9 +99,10 @@ func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) (powe
 				continue
 			}
 			fmt.Printf("Power: %f\n", power)
+			powerList = append(powerList, power)
 		}
 	} else {
 		fmt.Println("No documents found")
 	}
-	return power
+	return powerList
 }

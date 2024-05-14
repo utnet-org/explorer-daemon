@@ -54,6 +54,7 @@ func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) 
 	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
 		log.Error("[BlockDetailsByBlockId] Error unmarshalling JSON:", err)
+		return nil, err
 	}
 	log.Debug("[BlockDetailsByBlockId] res:", res)
 	return &res, err

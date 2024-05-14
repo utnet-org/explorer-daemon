@@ -32,8 +32,8 @@ type BlockDetailsReq struct {
 // Block Details Response
 
 type BlockDetailsRes struct {
-	CommonRes CommonRes
-	Result    BlockDetailsResult `json:"result"`
+	CommonRes
+	Result BlockDetailsResult `json:"result"`
 }
 
 type BlockDetailsResult struct {

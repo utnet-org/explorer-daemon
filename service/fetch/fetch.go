@@ -20,10 +20,11 @@ func InitFetchData() {
 
 	for range ticker.C {
 		if err := HandleBlock(); err != nil {
-			log.Fatalf("[InitFetchData] HandleBlock error: %v", err)
+			// TODO 某些block没有数据
+			log.Errorf("[InitFetchData] HandleBlock error: %v", err)
 		}
 		if err := HandleMiner(); err != nil {
-			log.Fatalf("[InitFetchData] HandleMiner error: %v", err)
+			log.Errorf("[InitFetchData] HandleMiner error: %v", err)
 		}
 		if err := HandleNetworkInfo(); err != nil {
 			log.Error("[InitFetchData] HandleNetworkInfo error: ", err)

@@ -3,6 +3,7 @@ package remote
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	log "github.com/sirupsen/logrus"
@@ -29,6 +30,13 @@ func SendRemoteCall(requestBody types.RpcRequest, url string) ([]byte, error) {
 			log.Errorf("[SendRemoteCall] Error closing body error %v:", err)
 		}
 	}(resp.Body)
+	var rpcErrRes types.RpcErrRes
 	body, _ := io.ReadAll(resp.Body)
+	_ = json.Unmarshal(body, &rpcErrRes)
+	if rpcErrRes.Error.Code != 0 {
+		log.Errorf("[SendRemoteCall] Response remote error: %v, code: %v", rpcErrRes.Error.Name, rpcErrRes.Error.Code)
+		log.Errorf("[SendRemoteCall] Response remote data: %v", rpcErrRes.Error.Data)
+		return nil, errors.New(rpcErrRes.Error.Name)
+	}
 	return body, nil
 }

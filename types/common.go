@@ -10,5 +10,22 @@ type RpcRequest struct {
 type CommonRes struct {
 	ID      string `json:"id"`
 	Jsonrpc string `json:"jsonrpc"`
-	//Result  interface{} `json:"result"`
+}
+
+type RpcErrRes struct {
+	Error RpcErr `json:"error"`
+	CommonRes
+}
+
+type RpcErr struct {
+	Cause   RpcErrCause `json:"cause"`
+	Code    int64       `json:"code"`
+	Data    string      `json:"data"`
+	Message string      `json:"message"`
+	Name    string      `json:"name"`
+}
+
+type RpcErrCause struct {
+	Info map[string]interface{} `json:"info"`
+	Name string                 `json:"name"`
 }

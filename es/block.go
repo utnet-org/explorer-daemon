@@ -34,9 +34,6 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 }
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
-	if &body == nil {
-		return errors.New("body is nil")
-	}
 	sBody := types.BlockDetailsStoreBody{
 		Author:           body.Author,
 		Chunks:           body.Chunks,
