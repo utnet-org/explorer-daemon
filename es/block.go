@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
+	"sort"
+	"strconv"
 	"time"
 )
 
@@ -34,21 +36,23 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 }
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
+	gasPrice, _ := strconv.ParseInt(body.Header.GasPrice, 10, 64)
 	sBody := types.BlockDetailsStoreBody{
-		Author:           body.Author,
-		Chunks:           body.Chunks,
-		Header:           body.Header,
-		Hash:             body.Header.Hash,
-		ChunkHash:        body.Chunks[0].ChunkHash,
-		Height:           body.Header.Height,
-		Timestamp:        body.Header.Timestamp,
-		TimestampNanoSec: body.Header.TimestampNanosec,
-		PrevHash:         body.Header.PrevHash,
-		PrevHeight:       body.Header.PrevHeight,
-		ValidatorReward:  body.Header.ValidatorReward,
-		GasLimit:         body.Chunks[0].GasLimit,
-		GasPrice:         body.Header.GasPrice,
-		GasUsed:          body.Chunks[0].GasUsed,
+		Author:         body.Author,
+		Chunks:         body.Chunks,
+		Header:         body.Header,
+		Hash:           body.Header.Hash,
+		ChunkHash:      body.Chunks[0].ChunkHash,
+		Height:         body.Header.Height,
+		TimestampMilli: pkg.ConvertNanoToMilli(body.Header.Timestamp),
+		Timestamp:      body.Header.Timestamp,
+		//TimestampNanoSec: body.Header.TimestampNanosec,
+		PrevHash:        body.Header.PrevHash,
+		PrevHeight:      body.Header.PrevHeight,
+		ValidatorReward: body.Header.ValidatorReward,
+		GasLimit:        body.Chunks[0].GasLimit,
+		GasPrice:        gasPrice,
+		GasUsed:         body.Chunks[0].GasUsed,
 	}
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
@@ -370,50 +374,70 @@ func QueryBlockChangeMsg24h() (sum int64) {
 }
 
 func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
-	start, end := pkg.TimeNanoRange(n)
-	dateQuery := elastic.NewRangeQuery("timestamp").Gte(start).Lte(end)
-	// 创建查询
-	query := elastic.NewBoolQuery().Filter(dateQuery)
-	list := make([]types.DailyGas, 0)
-	// 执行查询
-	searchResult, err := client.Search().Index("block").Query(query).Do(ctx)
+	index := "block"
+	now := time.Now().UTC()
+	startTime := now.Add(-24 * time.Hour)
+
+	// Convert times to nanoseconds
+	startTimeNano := startTime.UnixMilli()
+	endTimeNano := now.UnixMilli()
+
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp_milli").Gte(startTimeNano).Lte(endTimeNano)).
+		Aggregation("by_4h", elastic.NewDateHistogramAggregation().
+			Field("timestamp_milli").
+			FixedInterval("4h").
+			MinDocCount(0).
+			Format("yyyy-MM-dd HH:mm:ss").
+			//SubAggregation("total_gas", elastic.NewSumAggregation().Field("gas_price")),
+			SubAggregation("total_gas", elastic.NewSumAggregation().Script(elastic.NewScript("doc['gas_used'].value * doc['gas_price'].value"))),
+		)
+
+	searchResult, err := searchService.Do(ctx)
 	if err != nil {
-		fmt.Println("Error executing search: ", err)
-		return list
+		log.Fatalf("Error executing the query: %s", err)
 	}
-	// 处理查询结果
-	if searchResult.Hits.TotalHits.Value > 0 {
-		for _, hit := range searchResult.Hits.Hits {
-			var data map[string]interface{}
-			err := json.Unmarshal(hit.Source, &data)
-			if err != nil {
-				fmt.Println("Error unmarshalling source: ", err)
-				continue
-			}
-			gp, ok := data["gas_price"].(float64)
-			if !ok {
-				fmt.Println("gas_price field is not a float64")
-				continue
-			}
-			gu, ok := data["gas_used"].(float64)
-			if !ok {
-				fmt.Println("gas_price field is not a float64")
-				continue
-			}
-			ts, ok := data["timestamp"].(float64)
-			if !ok {
-				fmt.Println("Timestamp field is not a int64")
-				continue
-			}
-			date := pkg.NanoTimestampToDate(int64(ts), "2006-01-02")
-			item := types.DailyGas{
+
+	// Parse the results
+	var results []types.DailyGas
+	if agg, found := searchResult.Aggregations.DateHistogram("by_4h"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), time.DateTime)
+			gas, _ := bucket.Sum("total_gas")
+			results = append(results, types.DailyGas{
 				Date: date,
-				Gas:  pkg.DivisionPowerOfTen(gp, 9) * gu,
-			}
-			list = append(list, item)
+				Gas:  pkg.DivisionPowerOfTen(*gas.Value, 9),
+			})
 		}
-	} else {
-		fmt.Println("No documents found")
 	}
-	return list
+
+	// Fill in missing intervals with gas 0
+	for i := 0; i < 6; i++ { // 24 hours / 4 hours per interval = 6 intervals
+		expectedTime := startTime.Add(time.Duration(i) * 4 * time.Hour).Format(time.DateTime)
+		if !containsTimestamp(results, expectedTime) {
+			results = append(results, types.DailyGas{
+				Date: expectedTime,
+				Gas:  0,
+			})
+		}
+	}
+
+	// Sort the results by timestamp
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+
+	fmt.Println(results)
+	return results
+}
+
+func containsTimestamp(results []types.DailyGas, timestamp string) bool {
+	for _, result := range results {
+		if result.Date == timestamp {
+			return true
+		}
+	}
+	return false
 }

@@ -141,18 +141,17 @@ func QueryMinerDailySum(ctx context.Context, client *elastic.Client, n int) []ty
 
 	if agg, found := searchResult.Aggregations.DateHistogram("by_day"); found {
 		for _, bucket := range agg.Buckets {
-			date := pkg.MilliTimestampToDate(int64(bucket.Key), "2006-01-02")
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), time.DateOnly)
 			power, _ := bucket.Sum("total_power")
 			results = append(results, types.DailyPower{
 				Date:  date,
-				Power: *power.Value,
+				Power: pkg.DivisionPowerOfTen(*power.Value, 12),
 			})
 		}
 	}
-
 	// Fill in missing days with power 0
 	for i := 0; i < n; i++ {
-		date := sevenDaysAgo.AddDate(0, 0, i).Format("2006-01-02")
+		date := sevenDaysAgo.AddDate(0, 0, i).Format(time.DateOnly)
 		if !containsDate(results, date) {
 			results = append(results, types.DailyPower{
 				Date:  date,
@@ -160,13 +159,10 @@ func QueryMinerDailySum(ctx context.Context, client *elastic.Client, n int) []ty
 			})
 		}
 	}
-
 	// Sort the results by date
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Date < results[j].Date
 	})
-
-	fmt.Println(results)
 	return results
 }
 
@@ -177,4 +173,71 @@ func containsDate(results []types.DailyPower, date string) bool {
 		}
 	}
 	return false
+}
+
+func QueryMinerMonthSum(ctx context.Context, client *elastic.Client, n int) []types.DailyPower {
+	index := "miner"
+	now := time.Now()
+	startTime := now.AddDate(0, -n+1, 0) // n months ago
+
+	// Convert times to milliseconds
+	startTimeMillis := startTime.UnixMilli()
+	endTimeMillis := now.UnixMilli()
+
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp").Gte(startTimeMillis).Lte(endTimeMillis)).
+		Aggregation("by_month", elastic.NewDateHistogramAggregation().
+			Field("timestamp").
+			CalendarInterval("month").
+			Format("yyyy-MM").
+			MinDocCount(0).
+			SubAggregation("total_power", elastic.NewSumAggregation().Field("total_power")),
+		)
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the query: %s", err)
+	}
+
+	// Parse the results
+	var results []types.DailyPower
+	if agg, found := searchResult.Aggregations.DateHistogram("by_month"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "2006-01")
+			power, _ := bucket.Sum("total_power")
+			results = append(results, types.DailyPower{
+				Date:  date,
+				Power: pkg.DivisionPowerOfTen(*power.Value, 12),
+			})
+		}
+	}
+
+	// Ensure we have 12 months
+	ensure12Months(n, &results, startTime)
+
+	fmt.Println(results)
+	return results
+}
+
+func ensure12Months(n int, results *[]types.DailyPower, startTime time.Time) {
+	months := make(map[string]bool)
+	for _, result := range *results {
+		months[result.Date] = true
+	}
+
+	for i := 0; i < n; i++ {
+		month := startTime.AddDate(0, i, 0).Format("2006-01")
+		if !months[month] {
+			*results = append(*results, types.DailyPower{
+				Date:  month,
+				Power: 0,
+			})
+		}
+	}
+	// Sort the results by month
+	sort.Slice(*results, func(i, j int) bool {
+		return (*results)[i].Date < (*results)[j].Date
+	})
 }
