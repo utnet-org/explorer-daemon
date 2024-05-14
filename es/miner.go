@@ -216,8 +216,6 @@ func QueryMinerMonthSum(ctx context.Context, client *elastic.Client, n int) []ty
 
 	// Ensure we have 12 months
 	ensure12Months(n, &results, startTime)
-
-	fmt.Println(results)
 	return results
 }
 

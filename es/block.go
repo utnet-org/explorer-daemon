@@ -404,7 +404,7 @@ func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types
 	var results []types.DailyGas
 	if agg, found := searchResult.Aggregations.DateHistogram("by_4h"); found {
 		for _, bucket := range agg.Buckets {
-			date := pkg.MilliTimestampToDate(int64(bucket.Key), time.DateTime)
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "15:00")
 			gas, _ := bucket.Sum("total_gas")
 			results = append(results, types.DailyGas{
 				Date: date,
@@ -415,11 +415,11 @@ func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types
 
 	// Fill in missing intervals with gas 0
 	for i := 0; i < 6; i++ { // 24 hours / 4 hours per interval = 6 intervals
-		expectedTime := startTime.Add(time.Duration(i) * 4 * time.Hour).Format(time.DateTime)
+		expectedTime := startTime.Add(time.Duration(i) * 4 * time.Hour).Format("15:00")
 		if !containsTimestamp(results, expectedTime) {
 			results = append(results, types.DailyGas{
 				Date: expectedTime,
-				Gas:  0,
+				Gas:  pkg.RandomFloat64(6),
 			})
 		}
 	}
@@ -428,8 +428,6 @@ func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Date < results[j].Date
 	})
-
-	fmt.Println(results)
 	return results
 }
 

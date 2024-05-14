@@ -61,7 +61,7 @@ func ValidationStatusByBlockNumber(blockNumber int) {
 	fmt.Printf("NetworkValidationStatus Response:%s", body)
 }
 
-func ValidationStatusByNull() {
+func ValidationStatusByNull() (*types.ValidationStatusRes, error) {
 	params := []interface{}{nil}
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
@@ -70,7 +70,14 @@ func ValidationStatusByNull() {
 		Params:  params,
 	}
 
-	body, _ := SendRemoteCall(requestBody, url)
+	jsonRes, err := SendRemoteCall(requestBody, url)
 
-	fmt.Printf("ValidationStatusByNull Response:%s", body)
+	log.Debugf("ValidationStatusByNull Json Response:%s", jsonRes)
+	var res types.ValidationStatusRes
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		log.Errorln("Error unmarshalling JSON:", err)
+	}
+	log.Debugf("ValidationStatusByNull Response:%s", jsonRes)
+	return &res, nil
 }

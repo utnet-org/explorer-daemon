@@ -24,3 +24,22 @@ func HandleNetworkInfo() error {
 	}
 	return nil
 }
+
+func HandleValidation() error {
+	res, err := remote.ValidationStatusByNull()
+	if err != nil {
+		fmt.Println("rpc error")
+		return err
+	}
+	if res == nil {
+		fmt.Println("rpc error res nil")
+		return err
+	}
+	//ctx, client := es.GetESInstance()
+	//err = es.InsertNetworkInfo(ctx, client, res.Result)
+	//if err != nil {
+	//	fmt.Println("[HandleNetworkInfo] insert error:", err)
+	//	return err
+	//}
+	return nil
+}

@@ -67,10 +67,10 @@ type KnownProducer struct {
 
 type ValidationStatusRes struct {
 	CommonRes CommonRes
-	Result    ValidationStatusBody `json:"result"`
+	Result    ValidationStatusResult `json:"result"`
 }
 
-type ValidationStatusBody struct {
+type ValidationStatusResult struct {
 	CurrentFishermen  []CurrentFisherman `json:"currentFishermen"`
 	CurrentProposals  []CurrentProposal  `json:"currentProposals"`
 	CurrentValidators []CurrentValidator `json:"currentValidators"`
