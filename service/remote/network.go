@@ -62,12 +62,11 @@ func ValidationStatusByBlockNumber(blockNumber int) {
 }
 
 func ValidationStatusByNull() (*types.ValidationStatusRes, error) {
-	params := []interface{}{nil}
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "validators",
-		Params:  params,
+		Params:  []interface{}{nil},
 	}
 
 	jsonRes, err := SendRemoteCall(requestBody, url)

@@ -52,3 +52,19 @@ func InsertValidator(ctx context.Context, client *elastic.Client, result types.V
 	log.Debugln("InsertValidator Success")
 	return nil
 }
+
+func QueryValidator(ctx context.Context, client *elastic.Client) (*types.ValidationStatusResult, error) {
+	query := elastic.NewMatchAllQuery()
+	res, err := client.Search().
+		Index("validator").
+		Query(query).
+		Size(1).
+		Do(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	var result types.ValidationStatusResult
+	_ = json.Unmarshal(res.Hits.Hits[0].Source, &result)
+	return &result, nil
+}
