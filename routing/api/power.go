@@ -11,10 +11,10 @@ func PowerChart(c *fiber.Ctx) error {
 	days := gjson.Get(string(c.Body()), "days").Int()
 	ctx, client := es.GetESInstance()
 	powers := es.QueryMinerRange(ctx, client, days)
-	finalPowers := make([]float64, 0)
-	for _, p := range powers {
-		finalP := pkg.DivisionPowerOfTen(p, 12)
-		finalPowers = append(finalPowers, finalP)
-	}
-	return c.JSON(pkg.SuccessResponse(finalPowers))
+	//finalPowers := make([]float64, 0)
+	//for _, p := range powers {
+	//	finalP := pkg.DivisionPowerOfTen(p.Power, 12)
+	//	finalPowers = append(finalPowers, finalP)
+	//}
+	return c.JSON(pkg.SuccessResponse(powers))
 }

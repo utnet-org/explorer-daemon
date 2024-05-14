@@ -50,3 +50,16 @@ func TimeNanoRange(n int64) (int64, int64) {
 	startTime := currentTime - sevenDays
 	return startTime, currentTime
 }
+
+// ConvertTimestampToDate 将纳秒时间戳转换为日期格式，可以指定精度
+func ConvertTimestampToDate(nanoTimestamp int64, layout string) string {
+	// 计算时间戳的秒部分和纳秒部分
+	sec := nanoTimestamp / 1e9
+	nsec := nanoTimestamp % 1e9
+
+	// 将秒和纳秒转换为 time.Time
+	date := time.Unix(sec, nsec).UTC()
+
+	// 格式化日期
+	return date.Format(layout)
+}

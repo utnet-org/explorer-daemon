@@ -67,21 +67,20 @@ func QueryMiner(ctx context.Context, client *elastic.Client) (*types.AllMinersRe
 	return &result, nil
 }
 
-func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []float64 {
-	//start, end := pkg.TimeNanoRange(n, time.Now().UnixNano())
+func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyPower {
 	start, end := pkg.TimeNanoRange(n)
 	dateQuery := elastic.NewRangeQuery("timestamp").Gte(start).Lte(end)
 
 	// 创建查询
 	query := elastic.NewBoolQuery().Filter(dateQuery)
-	powerList := make([]float64, 0)
+	//powerList := make([]float64, 0)
+	powerList := make([]types.DailyPower, 0)
 	// 执行查询
 	searchResult, err := client.Search().Index("miner").Query(query).Do(ctx)
 	if err != nil {
 		fmt.Println("Error executing search: ", err)
 		return powerList
 	}
-
 	// 处理查询结果
 	if searchResult.Hits.TotalHits.Value > 0 {
 		fmt.Printf("Found a total of %d documents\n", searchResult.Hits.TotalHits)
@@ -98,8 +97,17 @@ func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []flo
 				fmt.Println("Power field is not a float64")
 				continue
 			}
-			fmt.Printf("Power: %f\n", power)
-			powerList = append(powerList, power)
+			ts, ok := data["timestamp"].(float64)
+			if !ok {
+				fmt.Println("Timestamp field is not a int64")
+				continue
+			}
+			date := pkg.ConvertTimestampToDate(int64(ts), "2006-01-02")
+			item := types.DailyPower{
+				Date:  date,
+				Power: pkg.DivisionPowerOfTen(power, 12),
+			}
+			powerList = append(powerList, item)
 		}
 	} else {
 		fmt.Println("No documents found")
