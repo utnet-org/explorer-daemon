@@ -51,8 +51,16 @@ func TimeNanoRange(n int64) (int64, int64) {
 	return startTime, currentTime
 }
 
-// ConvertTimestampToDate 将纳秒时间戳转换为日期格式，可以指定精度
-func ConvertTimestampToDate(nanoTimestamp int64, layout string) string {
+func TimeMilliRange(n int64) (int64, int64) {
+	currentTime := time.Now().UnixMilli()
+	oneDay := int64(24 * time.Hour / time.Millisecond)
+	sevenDays := oneDay * n
+	startTime := currentTime - sevenDays
+	return startTime, currentTime
+}
+
+// NanoTimestampToDate 将纳秒时间戳转换为日期格式，可以指定精度
+func NanoTimestampToDate(nanoTimestamp int64, layout string) string {
 	// 计算时间戳的秒部分和纳秒部分
 	sec := nanoTimestamp / 1e9
 	nsec := nanoTimestamp % 1e9
@@ -62,4 +70,25 @@ func ConvertTimestampToDate(nanoTimestamp int64, layout string) string {
 
 	// 格式化日期
 	return date.Format(layout)
+}
+
+func MilliTimestampToDate(millis int64, layout string) string {
+	// 将毫秒转换为秒和纳秒
+	seconds := millis / 1000
+	nanoseconds := (millis % 1000) * int64(time.Millisecond)
+	// 创建时间对象
+	t := time.Unix(seconds, nanoseconds)
+
+	// 格式化日期
+	return t.Format(layout)
+}
+
+// ConvertNanoToMilli 将纳秒时间戳转换为毫秒时间戳
+func ConvertNanoToMilli(nano int64) int64 {
+	return nano / 1e6
+}
+
+// ConvertMillisToNano 将毫秒时间戳转换为纳秒时间戳
+func ConvertMillisToNano(millis int64) int64 {
+	return millis * 1e6
 }

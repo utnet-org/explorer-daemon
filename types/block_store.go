@@ -13,5 +13,6 @@ type BlockDetailsStoreBody struct {
 	PrevHeight       int64              `json:"prev_height"`      // 父高度
 	GasLimit         int64              `json:"gas_limit"`        // Gas 限制
 	GasPrice         string             `json:"gas_price"`        // Gas 价格
+	GasUsed          int64              `json:"gas_used"`         // Gas 消耗
 	ValidatorReward  string             `json:"validator_reward"` // 奖励
 }

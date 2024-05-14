@@ -7,10 +7,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func PowerChart(c *fiber.Ctx) error {
+func GasChart(c *fiber.Ctx) error {
 	days := gjson.Get(string(c.Body()), "days").Int()
 	ctx, client := es.GetESInstance()
-	//powers := es.QueryMinerRange(ctx, client, days)
-	powers := es.QueryMinerDailySum(ctx, client, int(days))
-	return c.JSON(pkg.SuccessResponse(powers))
+	gass := es.QueryGasRange(ctx, client, days)
+	return c.JSON(pkg.SuccessResponse(gass))
 }

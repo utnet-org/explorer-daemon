@@ -46,8 +46,9 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 		PrevHash:         body.Header.PrevHash,
 		PrevHeight:       body.Header.PrevHeight,
 		ValidatorReward:  body.Header.ValidatorReward,
-		//GasLimit:         body.Chunks[0].GasLimit,
-		//GasPrice:         body.Header.GasPrice,
+		GasLimit:         body.Chunks[0].GasLimit,
+		GasPrice:         body.Header.GasPrice,
+		GasUsed:          body.Chunks[0].GasUsed,
 	}
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
@@ -366,4 +367,53 @@ func QueryBlockChangeMsg24h() (sum int64) {
 		log.Debug("No aggregation found or sum is nil")
 	}
 	return sum
+}
+
+func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
+	start, end := pkg.TimeNanoRange(n)
+	dateQuery := elastic.NewRangeQuery("timestamp").Gte(start).Lte(end)
+	// 创建查询
+	query := elastic.NewBoolQuery().Filter(dateQuery)
+	list := make([]types.DailyGas, 0)
+	// 执行查询
+	searchResult, err := client.Search().Index("block").Query(query).Do(ctx)
+	if err != nil {
+		fmt.Println("Error executing search: ", err)
+		return list
+	}
+	// 处理查询结果
+	if searchResult.Hits.TotalHits.Value > 0 {
+		for _, hit := range searchResult.Hits.Hits {
+			var data map[string]interface{}
+			err := json.Unmarshal(hit.Source, &data)
+			if err != nil {
+				fmt.Println("Error unmarshalling source: ", err)
+				continue
+			}
+			gp, ok := data["gas_price"].(float64)
+			if !ok {
+				fmt.Println("gas_price field is not a float64")
+				continue
+			}
+			gu, ok := data["gas_used"].(float64)
+			if !ok {
+				fmt.Println("gas_price field is not a float64")
+				continue
+			}
+			ts, ok := data["timestamp"].(float64)
+			if !ok {
+				fmt.Println("Timestamp field is not a int64")
+				continue
+			}
+			date := pkg.NanoTimestampToDate(int64(ts), "2006-01-02")
+			item := types.DailyGas{
+				Date: date,
+				Gas:  pkg.DivisionPowerOfTen(gp, 9) * gu,
+			}
+			list = append(list, item)
+		}
+	} else {
+		fmt.Println("No documents found")
+	}
+	return list
 }

@@ -9,11 +9,12 @@ import (
 	"fmt"
 	"github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
+	"sort"
 	"time"
 )
 
 func InsertMiner(ctx context.Context, client *elastic.Client, result types.AllMinersResult) error {
-	result.Timestamp = time.Now().UnixNano()
+	result.Timestamp = time.Now().UnixMilli()
 	res, err := client.Index().
 		Index("miner").
 		BodyJson(result).
@@ -102,7 +103,7 @@ func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []typ
 				fmt.Println("Timestamp field is not a int64")
 				continue
 			}
-			date := pkg.ConvertTimestampToDate(int64(ts), "2006-01-02")
+			date := pkg.NanoTimestampToDate(int64(ts), "2006-01-02")
 			item := types.DailyPower{
 				Date:  date,
 				Power: pkg.DivisionPowerOfTen(power, 12),
@@ -113,4 +114,67 @@ func QueryMinerRange(ctx context.Context, client *elastic.Client, n int64) []typ
 		fmt.Println("No documents found")
 	}
 	return powerList
+}
+
+func QueryMinerDailySum(ctx context.Context, client *elastic.Client, n int) []types.DailyPower {
+	index := "miner"
+	now := time.Now()
+	sevenDaysAgo := now.AddDate(0, 0, -n+1)
+	var results []types.DailyPower
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp").Gte(sevenDaysAgo.UnixMilli()).Lte(now.UnixMilli())).
+		Aggregation("by_day", elastic.NewDateHistogramAggregation().
+			Field("timestamp").
+			FixedInterval("1d").
+			MinDocCount(0).
+			Format("yyyy-MM-dd").
+			SubAggregation("total_power", elastic.NewSumAggregation().Field("total_power")),
+		)
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		fmt.Printf("Error executing the query: %s", err)
+		return results
+	}
+
+	if agg, found := searchResult.Aggregations.DateHistogram("by_day"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "2006-01-02")
+			power, _ := bucket.Sum("total_power")
+			results = append(results, types.DailyPower{
+				Date:  date,
+				Power: *power.Value,
+			})
+		}
+	}
+
+	// Fill in missing days with power 0
+	for i := 0; i < n; i++ {
+		date := sevenDaysAgo.AddDate(0, 0, i).Format("2006-01-02")
+		if !containsDate(results, date) {
+			results = append(results, types.DailyPower{
+				Date:  date,
+				Power: 0,
+			})
+		}
+	}
+
+	// Sort the results by date
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+
+	fmt.Println(results)
+	return results
+}
+
+func containsDate(results []types.DailyPower, date string) bool {
+	for _, result := range results {
+		if result.Date == date {
+			return true
+		}
+	}
+	return false
 }

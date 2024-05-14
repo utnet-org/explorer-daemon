@@ -22,3 +22,8 @@ type GasPriceRes struct {
 type GasPriceBody struct {
 	GasPrice string `json:"gasPrice"`
 }
+
+type DailyGas struct {
+	Date string  `json:"date"`
+	Gas  float64 `json:"gas"`
+}
