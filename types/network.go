@@ -66,52 +66,41 @@ type KnownProducer struct {
 // Validation Status Response
 
 type ValidationStatusRes struct {
-	CommonRes CommonRes
-	Result    ValidationStatusResult `json:"result"`
+	CommonRes
+	Result ValidationStatusResult `json:"result"`
 }
 
 type ValidationStatusResult struct {
-	CurrentFishermen  []CurrentFisherman `json:"currentFishermen"`
-	CurrentProposals  []CurrentProposal  `json:"currentProposals"`
-	CurrentValidators []CurrentValidator `json:"currentValidators"`
-	EpochHeight       int64              `json:"epochHeight"`
-	EpochStartHeight  int64              `json:"epochStartHeight"`
-	NextFishermen     []NextFisherman    `json:"nextFishermen"`
-	NextValidators    []NextValidator    `json:"nextValidators"`
-	PrevEpochKickout  []string           `json:"prevEpochKickout"`
-}
-
-type CurrentFisherman struct {
-	AccountID string `json:"accountId"`
-	PublicKey string `json:"publicKey"`
-	Stake     string `json:"stake"`
-}
-
-type CurrentProposal struct {
-	AccountID string `json:"accountId"`
-	PublicKey string `json:"publicKey"`
-	Stake     string `json:"stake"`
+	CurrentFishermen       []string           `json:"current_fishermen"`
+	CurrentPledgeProposals []string           `json:"current_pledge_proposals"`
+	CurrentPowerProposals  []string           `json:"current_power_proposals"`
+	CurrentValidators      []CurrentValidator `json:"current_validators"`
+	EpochHeight            int64              `json:"epoch_height"`
+	EpochStartHeight       int64              `json:"epoch_start_height"`
+	NextFishermen          []string           `json:"next_fishermen"`
+	NextValidators         []NextValidator    `json:"next_validators"`
+	PrevEpochKickout       []string           `json:"prev_epoch_kickout"`
 }
 
 type CurrentValidator struct {
-	AccountID         string  `json:"accountId"`
-	IsSlashed         bool    `json:"isSlashed"`
-	NumExpectedBlocks int64   `json:"numExpectedBlocks"`
-	NumProducedBlocks int64   `json:"numProducedBlocks"`
-	PublicKey         string  `json:"publicKey"`
-	Shards            []int64 `json:"shards"`
-	Stake             string  `json:"stake"`
-}
-
-type NextFisherman struct {
-	AccountID string `json:"accountId"`
-	PublicKey string `json:"publicKey"`
-	Stake     string `json:"stake"`
+	AccountID                 string  `json:"account_id"`
+	IsSlashed                 bool    `json:"is_slashed"`
+	NumExpectedBlocks         int64   `json:"num_expected_blocks"`
+	NumExpectedChunks         int64   `json:"num_expected_chunks"`
+	NumExpectedChunksPerShard []int64 `json:"num_expected_chunks_per_shard"`
+	NumProducedBlocks         int64   `json:"num_produced_blocks"`
+	NumProducedChunks         int64   `json:"num_produced_chunks"`
+	NumProducedChunksPerShard []int64 `json:"num_produced_chunks_per_shard"`
+	Pledge                    string  `json:"pledge"`
+	Power                     string  `json:"power"`
+	PublicKey                 string  `json:"public_key"`
+	Shards                    []int64 `json:"shards"`
 }
 
 type NextValidator struct {
-	AccountID string  `json:"accountId"`
-	PublicKey string  `json:"publicKey"`
+	AccountID string  `json:"account_id"`
+	Pledge    string  `json:"pledge"`
+	Power     string  `json:"power"`
+	PublicKey string  `json:"public_key"`
 	Shards    []int64 `json:"shards"`
-	Stake     string  `json:"stake"`
 }

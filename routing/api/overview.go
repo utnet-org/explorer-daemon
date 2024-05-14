@@ -4,8 +4,9 @@ import (
 	"explorer-daemon/es"
 	"explorer-daemon/pkg"
 	"explorer-daemon/types"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
-	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 // @Tags Web
@@ -27,20 +28,29 @@ func OverviewInfo(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-
-	sum := es.QueryChipsPower(ctx, client)
-	totalReward24 := es.QueryBlockReward24h()
-	var aveOut24 float64
-	if sum != 0 {
-		aveOut24 = float64(totalReward24 / sum)
+	val, err := es.QueryValidator(ctx, client)
+	if err != nil {
+		return err
 	}
+	//sum := es.QueryChipsPower(ctx, client)
+	//totalReward24 := es.QueryBlockReward24h()
+
+	blockReward := es.QueryRewordDiff(ctx, client)
+	blockSupply24 := es.QuerySupplyDiff24h(ctx, client)
 
 	miners, err := es.QueryMiner(ctx, client)
 	if err != nil {
 		return err
 	}
-	log.Debugf("miner power: %v", miners.TotalPower)
-
+	totalPower := pkg.DivisionPowerOfTen(float64(miners.TotalPower), 12)
+	var aveOut24 float64
+	if totalPower != 0 {
+		formattedValue := fmt.Sprintf("%.6f", totalPower/blockSupply24)
+		aveOut24, err = strconv.ParseFloat(formattedValue, 64)
+		if err != nil {
+			fmt.Println("Error converting to float:", err)
+		}
+	}
 	totalMsgs24 := es.QueryBlockChangeMsg24h()
 	ex := types.OverviewInfoRes{
 		//Height:           pkg.FakeInt(0, 100000),
@@ -54,14 +64,15 @@ func OverviewInfo(c *fiber.Ctx) error {
 		//TotalAccount:     pkg.FakeIntStr(5000, 10000),
 		//AveBlockInterval: pkg.FakeIntStr(10, 60),
 		Height:      lb.Height,
-		LatestBlock: lb.TimestampNanosec,
+		LatestBlock: strconv.Itoa(int(lb.Timestamp)),
 		//TotalPower:       sum,
-		TotalPower: int64(pkg.DivisionPowerOfTen(float64(miners.TotalPower), 12)),
+		TotalPower: int64(totalPower),
 		//TotalPower:       totalPower,
-		ActiveMiner:      info.NumActivePeers,
-		BlockReward:      totalReward24,
-		DayAveReward:     aveOut24,
-		DayProduction:    pkg.FakeIntStr(10000, 100000),
+		ActiveMiner:  int64(len(val.CurrentValidators)),
+		BlockReward:  int64(blockReward),
+		DayAveReward: aveOut24,
+		//DayProduction:    pkg.FakeIntStr(10000, 100000),
+		DayProduction:    int64(blockSupply24),
 		DayMessages:      totalMsgs24,
 		TotalAccount:     info.PeerMaxCount,
 		AveBlockInterval: pkg.FakeIntStr(28, 33),

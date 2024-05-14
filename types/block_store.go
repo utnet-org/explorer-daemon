@@ -16,4 +16,5 @@ type BlockDetailsStoreBody struct {
 	GasPrice         int64              `json:"gas_price"`        // Gas 价格
 	GasUsed          int64              `json:"gas_used"`         // Gas 消耗
 	ValidatorReward  string             `json:"validator_reward"` // 奖励
+	TotalSupply      string             `json:"total_supply"`     // 总奖励
 }

@@ -7,7 +7,7 @@ type OverviewInfoRes struct {
 	ActiveMiner      int64   `json:"active_miner"`
 	BlockReward      int64   `json:"block_reward"`
 	DayAveReward     float64 `json:"day_ave_reward"`
-	DayProduction    string  `json:"dayProduction"`
+	DayProduction    int64   `json:"dayProduction"`
 	DayMessages      int64   `json:"day_messages"`
 	TotalAccount     int64   `json:"total_account"`
 	AveBlockInterval string  `json:"aveBlockInterval"`
