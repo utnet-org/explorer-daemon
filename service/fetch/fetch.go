@@ -29,6 +29,9 @@ func InitFetchData() {
 		if err := HandleNetworkInfo(); err != nil {
 			log.Error("[InitFetchData] HandleNetworkInfo error: ", err)
 		}
+		if err := HandleValidation(); err != nil {
+			log.Error("[InitFetchData] HandleValidation error: ", err)
+		}
 		if err := HandleChipQuery(); err != nil {
 			log.Error("[InitFetchData] HandleChipQuery error: ", err)
 		}

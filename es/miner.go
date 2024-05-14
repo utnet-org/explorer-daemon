@@ -166,6 +166,67 @@ func QueryMinerDailySum(ctx context.Context, client *elastic.Client, n int) []ty
 	return results
 }
 
+func QueryPowerDaily(ctx context.Context, client *elastic.Client, n int) []types.DailyPower {
+	index := "miner"
+	now := time.Now()
+	sevenDaysAgo := now.AddDate(0, 0, -n+1)
+	var results []types.DailyPower
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp").Gte(sevenDaysAgo.UnixMilli()).Lte(now.UnixMilli())).
+		Aggregation("by_day", elastic.NewDateHistogramAggregation().
+			Field("timestamp").
+			FixedInterval("1d").
+			MinDocCount(0).
+			Format("yyyy-MM-dd").
+			SubAggregation("last_entry", elastic.NewTopHitsAggregation().
+				Sort("timestamp", false). // Sort by timestamp descending
+				Size(1)),
+		)
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		fmt.Printf("Error executing the query: %s", err)
+		return results
+	}
+
+	if agg, found := searchResult.Aggregations.DateHistogram("by_day"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), time.DateOnly)
+			if hits, found := bucket.TopHits("last_entry"); found {
+				for _, hit := range hits.Hits.Hits {
+					var entry types.AllMinersResult
+					if err := json.Unmarshal(hit.Source, &entry); err != nil {
+						log.Printf("Error unmarshalling hit: %s", err)
+						continue
+					}
+					results = append(results, types.DailyPower{
+						Date:  date,
+						Power: pkg.DivisionPowerOfTen(float64(entry.TotalPower), 12),
+					})
+				}
+			}
+		}
+	}
+
+	// Fill in missing days with power 0
+	for i := 0; i < n; i++ {
+		date := sevenDaysAgo.AddDate(0, 0, i).Format(time.DateOnly)
+		if !containsDate(results, date) {
+			results = append(results, types.DailyPower{
+				Date:  date,
+				Power: 0,
+			})
+		}
+	}
+	// Sort the results by date
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+	return results
+}
+
 func containsDate(results []types.DailyPower, date string) bool {
 	for _, result := range results {
 		if result.Date == date {
@@ -238,4 +299,57 @@ func ensure12Months(n int, results *[]types.DailyPower, startTime time.Time) {
 	sort.Slice(*results, func(i, j int) bool {
 		return (*results)[i].Date < (*results)[j].Date
 	})
+}
+
+func QueryPowerMonth(ctx context.Context, client *elastic.Client, n int) []types.DailyPower {
+	index := "miner"
+	now := time.Now()
+	startTime := now.AddDate(0, -n+1, 0) // n months ago
+
+	// Convert times to milliseconds
+	startTimeMillis := startTime.UnixMilli()
+	endTimeMillis := now.UnixMilli()
+
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp").Gte(startTimeMillis).Lte(endTimeMillis)).
+		Aggregation("by_month", elastic.NewDateHistogramAggregation().
+			Field("timestamp").
+			CalendarInterval("month").
+			Format("yyyy-MM").
+			MinDocCount(0).
+			SubAggregation("last_entry", elastic.NewTopHitsAggregation().
+				Sort("timestamp", false). // Sort by timestamp descending
+				Size(1),
+			),
+		)
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the query: %s", err)
+	}
+
+	// Parse the results
+	var results []types.DailyPower
+	if agg, found := searchResult.Aggregations.DateHistogram("by_month"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "2006-01")
+			if hits, found := bucket.TopHits("last_entry"); found {
+				for _, hit := range hits.Hits.Hits {
+					var entry types.AllMinersResult
+					if err := json.Unmarshal(hit.Source, &entry); err != nil {
+						log.Printf("Error unmarshalling hit: %s", err)
+						continue
+					}
+					results = append(results, types.DailyPower{
+						Date:  date,
+						Power: pkg.DivisionPowerOfTen(float64(entry.TotalPower), 12),
+					})
+				}
+			}
+		}
+	}
+	// Ensure we have 12 months
+	ensure12Months(n, &results, startTime)
+	return results
 }

@@ -35,11 +35,11 @@ func HandleValidation() error {
 		fmt.Println("rpc error res nil")
 		return err
 	}
-	//ctx, client := es.GetESInstance()
-	//err = es.InsertNetworkInfo(ctx, client, res.Result)
-	//if err != nil {
-	//	fmt.Println("[HandleNetworkInfo] insert error:", err)
-	//	return err
-	//}
+	ctx, client := es.GetESInstance()
+	err = es.InsertValidator(ctx, client, res.Result)
+	if err != nil {
+		fmt.Println("[HandleValidation] insert error:", err)
+		return err
+	}
 	return nil
 }

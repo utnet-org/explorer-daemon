@@ -373,7 +373,7 @@ func QueryBlockChangeMsg24h() (sum int64) {
 	return sum
 }
 
-func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
+func QueryGasRangeSum(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
 	index := "block"
 	now := time.Now().UTC()
 	startTime := now.Add(-24 * time.Hour)
@@ -419,7 +419,80 @@ func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types
 		if !containsTimestamp(results, expectedTime) {
 			results = append(results, types.DailyGas{
 				Date: expectedTime,
-				Gas:  pkg.RandomFloat64(6),
+				//Gas:  pkg.RandomFloat64(6),
+				Gas: 0,
+			})
+		}
+	}
+
+	// Sort the results by timestamp
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+	return results
+}
+
+func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
+	index := "block"
+	now := time.Now().UTC()
+	startTime := now.Add(-24 * time.Hour)
+
+	// Convert times to nanoseconds
+	startTimeNano := startTime.UnixMilli()
+	endTimeNano := now.UnixMilli()
+
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp_milli").Gte(startTimeNano).Lte(endTimeNano)).
+		Aggregation("by_4h", elastic.NewDateHistogramAggregation().
+			Field("timestamp_milli").
+			FixedInterval("4h").
+			MinDocCount(0).
+			Format("yyyy-MM-dd HH:mm:ss").
+			SubAggregation("last_entry", elastic.NewTopHitsAggregation().
+				Sort("timestamp", false).
+				Size(1),
+			),
+		)
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the query: %s", err)
+	}
+
+	// Parse the results
+	var results []types.DailyGas
+	if agg, found := searchResult.Aggregations.DateHistogram("by_4h"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "15:00")
+			if hits, found := bucket.TopHits("last_entry"); found {
+				for _, hit := range hits.Hits.Hits {
+					var entry struct {
+						GasUsed  float64 `json:"gas_used"`
+						GasPrice float64 `json:"gas_price"`
+					}
+					if err := json.Unmarshal(hit.Source, &entry); err != nil {
+						log.Printf("Error unmarshalling hit: %s", err)
+						continue
+					}
+					results = append(results, types.DailyGas{
+						Date: date,
+						Gas:  pkg.DivisionPowerOfTen(entry.GasUsed*entry.GasPrice, 9),
+					})
+				}
+			}
+		}
+	}
+
+	// Fill in missing intervals with gas 0
+	for i := 0; i < 6; i++ { // 24 hours / 4 hours per interval = 6 intervals
+		expectedTime := startTime.Add(time.Duration(i) * 4 * time.Hour).Format("15:00")
+		if !containsTimestamp(results, expectedTime) {
+			results = append(results, types.DailyGas{
+				Date: expectedTime,
+				//Gas:  pkg.RandomFloat64(6),
+				Gas: 0,
 			})
 		}
 	}

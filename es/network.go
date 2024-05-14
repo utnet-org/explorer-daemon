@@ -39,3 +39,16 @@ func GetNetworkInfo(ctx context.Context, client *elastic.Client) (*types.Network
 	_ = json.Unmarshal(res.Hits.Hits[0].Source, &body)
 	return &body, nil
 }
+
+func InsertValidator(ctx context.Context, client *elastic.Client, result types.ValidationStatusResult) error {
+	_, err := client.Index().
+		Index("validator").
+		Id("validator").
+		BodyJson(result).
+		Do(ctx)
+	if err != nil {
+		return err
+	}
+	log.Debugln("InsertValidator Success")
+	return nil
+}
