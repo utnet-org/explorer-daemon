@@ -29,10 +29,11 @@ func Init() (context.Context, *elastic.Client) {
 	// 创建client
 	client, err := elastic.NewClient(
 		//es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
-		elastic.SetURL("http://127.0.0.1:9200"),
+		//elastic.SetURL("http://127.0.0.1:9200"),
+		elastic.SetURL("http://localhost:9200"),
 		// 禁用嗅探器用于兼容内网ip
-		elastic.SetSniff(false),
-		elastic.SetBasicAuth("user", "nvUt974rcNeg==*k0W3W"))
+		elastic.SetSniff(false))
+	//elastic.SetBasicAuth("user", "nvUt974rcNeg==*k0W3W"))
 	if err != nil {
 		log.Panicln("Elastic connect error:", err)
 	}
