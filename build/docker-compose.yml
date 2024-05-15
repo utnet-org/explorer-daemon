@@ -2,32 +2,48 @@
 version: '3.1'
 
 services:
-  explorer-db:
-    image: postgres
-    container_name: explorer-db
-    restart: always
-    ports:
-      - 8012:5432
-    environment:
-      POSTGRES_PASSWORD: explorer123
-      POSTGRES_DB: explorer
-      POSTGRES_USER: explorer
+#  explorer-db:
+#    image: postgres
+#    container_name: explorer-db
+#    restart: always
+#    ports:
+#      - 8012:5432
+#    environment:
+#      POSTGRES_PASSWORD: explorer123
+#      POSTGRES_DB: explorer
+#      POSTGRES_USER: explorer
   #  volumes:
   #    - /root/dbdata/wwcc:/var/lib/postgresql/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /root/es_data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
 
   elasticview:
     image: 1340691923/elastic_view:latest
     container_name: elasticview
     restart: unless-stopped
-#    environment:
+    environment:
 #      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
     ports:
-      - "8090:8090"
-#    networks:
-#      - ops_default
+      - "9100:9100"
 #    volumes:
 #      - ./data:/data
-#      - /root/esdata/explorer:/data
 
 #networks:
 #  ops_default:
