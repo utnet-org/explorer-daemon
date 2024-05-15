@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"explorer-daemon/es"
 	"explorer-daemon/pkg"
 	"explorer-daemon/types"
@@ -30,7 +31,7 @@ func GetValidatorExe(accId string) (*types.CurrentValidator, error) {
 			return &v, nil
 		}
 	}
-	return nil, err
+	return nil, errors.New("account not exist")
 }
 
 func GetValidators(c *fiber.Ctx) error {

@@ -29,22 +29,22 @@ type Chip struct {
 
 // for chip information
 type AddChipInfoReq struct {
-	ChipType     string `json:"chipType"`
+	ChipType     string `json:"chip_type"`
 	Power        int64  `json:"power"`
-	SerialNumber string `json:"serialNumber"`
-	BusId        string `json:"busId"`
-	P2Key        string `json:"p2Key"`
-	PublicKey    string `json:"publicKey"`
+	SerialNumber string `json:"serial_number"`
+	BusId        string `json:"bus_id"`
+	P2Key        string `json:"p2key"`
+	PublicKey    string `json:"public_key"`
 }
 
 type QueryChipInfoReq struct {
-	SearchKey string `json:"searchKey"`
+	SearchKey string `json:"search_key"`
 }
 type QueryChipInfoRep struct {
-	ChipType     string `json:"chipType"`
+	ChipType     string `json:"chip_type"`
 	Power        int64  `json:"power"`
-	SerialNumber string `json:"serialNumber"`
-	BusId        string `json:"busId"`
-	P2Key        string `json:"p2Key"`
-	PublicKey    string `json:"publicKey"`
+	SerialNumber string `json:"serial_number"`
+	BusId        string `json:"bus_id"`
+	P2Key        string `json:"p2key"`
+	PublicKey    string `json:"public_key"`
 }

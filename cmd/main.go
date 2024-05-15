@@ -9,10 +9,8 @@ import (
 	"explorer-daemon/service/fetch"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/sirupsen/logrus"
 	swag "github.com/swaggo/fiber-swagger"
-	"time"
 )
 
 func main() {
@@ -22,13 +20,13 @@ func main() {
 	go fetch.InitFetchData()
 	fiberApp := fiber.New()
 	// 创建一个速率限制器，每秒最多只允许10个请求
-	fiberApp.Use(limiter.New(limiter.Config{
-		Max:        10,
-		Expiration: 2 * time.Second,
-		KeyGenerator: func(c *fiber.Ctx) string {
-			return c.IP() // 使用客户端IP作为限流key
-		},
-	}))
+	//fiberApp.Use(limiter.New(limiter.Config{
+	//	Max:        10,
+	//	Expiration: 2 * time.Second,
+	//	KeyGenerator: func(c *fiber.Ctx) string {
+	//		return c.IP() // 使用客户端IP作为限流key
+	//	},
+	//}))
 	// 添加 CORS 中间件
 	fiberApp.Use(func(c *fiber.Ctx) error {
 		// 允许所有域名进行跨域请求

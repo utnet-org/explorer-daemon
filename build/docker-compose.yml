@@ -19,12 +19,15 @@ services:
     image: 1340691923/elastic_view:latest
     container_name: elasticview
     restart: unless-stopped
+#    environment:
+#      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
     ports:
       - "8090:8090"
 #    networks:
 #      - ops_default
-    volumes:
-      - ./data:/data
+#    volumes:
+#      - ./data:/data
+#      - /root/esdata/explorer:/data
 
 #networks:
 #  ops_default:

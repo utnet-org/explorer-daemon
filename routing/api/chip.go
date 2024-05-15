@@ -39,7 +39,7 @@ func AddChipInfo(c *fiber.Ctx) error {
 
 	newUser := model.Chip{
 		Model:        gorm.Model{},
-		SearchKey:    hashString,
+		SearchKey:    "UTC" + hashString,
 		ChipType:     reqParams.ChipType,
 		Power:        reqParams.Power,
 		SerialNumber: reqParams.SerialNumber,
@@ -70,10 +70,17 @@ func QueryChipInfo(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-
-	chips, err := model.GetChipBySearchKey(database.DB, reqParams.SearchKey)
+	result, err := QueryChipInfoExe(reqParams.SearchKey)
 	if err != nil {
-		return c.JSON(pkg.MessageResponse(-1, err.Error(), "查询芯片失败！"))
+		return c.JSON(pkg.MessageResponse(-1, err.Error(), "查询芯片失败"))
+	}
+	return c.JSON(pkg.SuccessResponse(result))
+}
+
+func QueryChipInfoExe(keyword string) ([]types.QueryChipInfoRep, error) {
+	chips, err := model.GetChipBySearchKey(database.DB, keyword)
+	if err != nil {
+		return nil, err
 	}
 	result := make([]types.QueryChipInfoRep, 0)
 	for _, item := range chips {
@@ -86,6 +93,5 @@ func QueryChipInfo(c *fiber.Ctx) error {
 			PublicKey:    item.PubKey,
 		})
 	}
-
-	return c.JSON(pkg.SuccessResponse(result))
+	return result, nil
 }

@@ -39,9 +39,8 @@ func Init() (context.Context, *elastic.Client) {
 	ctx := context.Background()
 	ECTX = ctx
 	ECLIENT = client
-	log.Infoln("Elastic connected")
 	CreateCheckIndex(ctx, client)
-	log.Infoln("Elastic completed")
+	log.Infoln("ES Connected")
 	return ECTX, ECLIENT
 	//mockData(ctx, client)
 	//crud(client, ctx)

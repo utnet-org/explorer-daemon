@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type QueryConditionReq struct {
@@ -73,7 +74,8 @@ func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 		}
 		log.Debugf("[ExecuteQuery] BlockDetailsExe:%v", res)
 		return pkg.QueryResponse(res, pkg.SearchBlockHeight), nil
-	} else if len(strKey) == 44 {
+	}
+	if len(strKey) == 44 {
 		req := types.BlockDetailsReq{
 			QueryType: pkg.BlockQueryHash,
 			QueryWord: keyword,
@@ -84,13 +86,22 @@ func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 		}
 		log.Debugf("[ExecuteQuery] BlockDetailsExe:%v", res)
 		return pkg.QueryResponse(res, pkg.SearchBlockHash), nil
-	} else if len(strKey) == 64 {
+	}
+	if len(strKey) == 64 {
 		res, err := GetValidatorExe(strKey)
 		if err != nil {
 			return nil, err
 		}
 		log.Debugf("[ExecuteQuery] GetValidatorExe:%v", res)
 		return pkg.QueryResponse(res, pkg.SearchAccount), nil
+	}
+	if strings.HasPrefix(strings.TrimSpace(strKey), "UTC") {
+		res, err := QueryChipInfoExe(strKey)
+		if err != nil {
+			return nil, err
+		}
+		log.Debugf("[ExecuteQuery] QueryChipInfoExe:%v", res)
+		return pkg.QueryResponse(res, pkg.SearchChip), nil
 	}
 	return nil, nil
 }
@@ -110,6 +121,10 @@ func QueryFilter(c *fiber.Ctx) error {
 	}
 	// 根据不同类型的查询条件执行相应的查询操作
 	//queryResult := req.ExecuteQuery()
-	queryResult, _ := ExecuteQuery2(req.Keyword)
+	queryResult, err := ExecuteQuery2(req.Keyword)
+	if err != nil {
+		log.Errorf("[QueryFilter] Error:%v", err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, err.Error(), "查询出错"))
+	}
 	return c.JSON(queryResult)
 }
