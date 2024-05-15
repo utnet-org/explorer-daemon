@@ -24,4 +24,7 @@ func Setup(f *fiber.App) {
 
 	prep.Post("/network/validators", api.GetValidators)
 	prep.Post("/network/validator", api.GetValidator)
+	// chip
+	prep.Post("add/chipinfo", api.AddChipInfo)
+	prep.Post("query/chipinfo", api.QueryChipInfo)
 }
