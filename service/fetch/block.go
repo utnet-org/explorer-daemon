@@ -104,8 +104,13 @@ func HandleBlock() error {
 	}
 	// 存储从 lastHeight+1 到最新高度的所有区块
 	for height := last.Height + 1; height <= rpcHeight; height++ {
+		log.Infof("[HandleBlock] Start Handle Height: %v", height)
 		block, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
+			if err.Error() == "UNKNOWN_BLOCK" {
+				log.Warningf("[HandleBlock] Continue UNKNOWN_BLOCK height: %v", height)
+				continue
+			}
 			log.Error("[HandleBlock] BlockDetailsByBlockId error:", err)
 			return err
 		}

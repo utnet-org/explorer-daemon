@@ -34,9 +34,9 @@ func SendRemoteCall(requestBody types.RpcRequest, url string) ([]byte, error) {
 	body, _ := io.ReadAll(resp.Body)
 	_ = json.Unmarshal(body, &rpcErrRes)
 	if rpcErrRes.Error.Code != 0 {
-		log.Errorf("[SendRemoteCall] Response remote error: %v, code: %v", rpcErrRes.Error.Name, rpcErrRes.Error.Code)
-		log.Errorf("[SendRemoteCall] Response remote data: %v", rpcErrRes.Error.Data)
-		return nil, errors.New(rpcErrRes.Error.Name)
+		log.Errorf("[SendRemoteCall] Rpc Error: %v, Code: %v", rpcErrRes.Error.Name, rpcErrRes.Error.Code)
+		log.Errorf("[SendRemoteCall] Rpc Error Data: %v", rpcErrRes.Error.Data)
+		return nil, errors.New(rpcErrRes.Error.Cause.Name)
 	}
 	return body, nil
 }

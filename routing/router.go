@@ -9,7 +9,7 @@ func Setup(f *fiber.App) {
 	prep := f.Group("/api")
 
 	//api.Post("/example", app.Example)
-	prep.Post("/overview/info", api.OverviewInfo)
+	prep.Post("/overview", api.OverviewInfo)
 
 	prep.Post("/query/filter", api.QueryFilter)
 

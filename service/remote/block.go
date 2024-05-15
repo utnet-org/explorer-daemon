@@ -49,7 +49,11 @@ func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) 
 		},
 	}
 	jsonRes, err := SendRemoteCall(requestBody, url)
-	log.Debug("[BlockDetailsByBlockId] Rpc Response:%s", jsonRes)
+	if err != nil {
+		log.Errorf("[BlockDetailsByBlockId] Rpc Error: %v", err)
+		return nil, err
+	}
+	log.Debugf("[BlockDetailsByBlockId] Rpc Response: %s", jsonRes)
 	var res types.BlockDetailsRes
 	err = json.Unmarshal(jsonRes, &res)
 	if err != nil {
