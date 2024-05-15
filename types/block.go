@@ -1,5 +1,7 @@
 package types
 
+import "explorer-daemon/pkg"
+
 type BlockIdReq struct {
 	BlockId interface{} `json:"block_id"`
 }
@@ -25,8 +27,8 @@ type BlockDetailsReq struct {
 	//BlockId string `json:"block_id"`
 	//BlockHash string `json:"block_hash"`
 	//Finality  string `json:"finality"`
-	QueryType int         `json:"query_type"`
-	QueryWord interface{} `json:"query_word"`
+	QueryType pkg.BlockQueryType `json:"query_type"`
+	QueryWord interface{}        `json:"query_word"`
 }
 
 // Block Details Response

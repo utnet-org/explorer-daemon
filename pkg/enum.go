@@ -5,17 +5,21 @@ type SearchType int
 
 const (
 	SearchAccount     SearchType = iota + 1 //账户
-	SearchBlock                             //区块
+	SearchBlockHeight                       //区块
+	SearchBlockHash                         //区块
 	SearchAddress                           //地址
 	SearchTransaction                       //交易Hash
 	SearchMessage                           //消息
+	SearchChip                              //芯片
 )
 
 func (s SearchType) ToString() string {
 	switch s {
 	case SearchAccount:
 		return "账户"
-	case SearchBlock:
+	case SearchBlockHeight:
+		return "区块"
+	case SearchBlockHash:
 		return "区块"
 	case SearchAddress:
 		return "地址"
@@ -23,15 +27,17 @@ func (s SearchType) ToString() string {
 		return "交易Hash"
 	case SearchMessage:
 		return "消息"
+	default:
+		panic("unhandled default case")
 	}
 	return ""
 }
 
 // BlockQueryType 查询类型
-type QueryType int
+type BlockQueryType int
 
 const (
-	BlockQueryHeight QueryType = iota + 1
+	BlockQueryHeight BlockQueryType = iota + 1
 	BlockQueryHash
 	BlockQueryFinal
 )

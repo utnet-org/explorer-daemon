@@ -22,20 +22,29 @@ func BlockDetails(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
-	ctx, client := es.GetESInstance()
-	res, err := es.GetBlockDetails(pkg.QueryType(req.QueryType), req.QueryWord)
+	resWeb, err := BlockDetailsExe(req)
 	if err != nil {
-		log.Errorf("[BlockDetails] query res failed: %s", err)
-		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+		return err
+	}
+	log.Debugf("[BlockDetails] query res success,res: %v", resWeb)
+	return c.JSON(pkg.SuccessResponse(resWeb))
+}
+
+func BlockDetailsExe(req types.BlockDetailsReq) (*types.BlockDetailsResWeb, error) {
+	ctx, client := es.GetESInstance()
+	res, err := es.GetBlockDetails(req.QueryType, req.QueryWord)
+	if err != nil {
+		log.Errorf("[BlockDetails] Es Block QueryWord: %v, error: %s", req.QueryWord, err)
+		return nil, err
 	}
 	if res == nil {
 		log.Error("[BlockDetails] res nil")
-		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+		return nil, err
 	}
 	cRes, err := es.QueryChunkDetails(ctx, client, pkg.ChunkQueryType(req.QueryType), req.QueryWord)
 	if err != nil {
 		log.Errorf("[BlockDetails] QueryChunkDetails KeyWord: %s, Error: %s", req.QueryWord, err)
-		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+		return nil, err
 	}
 	gu := pkg.DivisionPowerOfTen(float64(res.GasPrice), 9)
 	gl := pkg.DivisionPowerOfTen(float64(res.GasLimit), 15)
@@ -53,8 +62,7 @@ func BlockDetails(c *fiber.Ctx) error {
 		GasFee:           float64(res.GasUsed) * gu,
 		PrevHash:         res.PrevHash,
 	}
-	log.Debugf("[BlockDetails] query res success,res: %v", resWeb)
-	return c.JSON(pkg.SuccessResponse(resWeb))
+	return &resWeb, nil
 }
 
 // @Tags Web

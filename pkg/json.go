@@ -19,10 +19,26 @@ type JSONResponse struct {
 	Data interface{} `json:"data"`
 }
 
+type JSONQueryResponse struct {
+	// HTTP status code.
+	Code int `json:"code"`
+	// JSON represents the JSON that should be serialized and sent to the client
+	Data      interface{} `json:"data"`
+	QueryType interface{} `json:"query_type"`
+}
+
 func SuccessResponse(data interface{}) JSONResponse {
 	return JSONResponse{
 		Code: 0,
 		Data: data,
+	}
+}
+
+func QueryResponse(data interface{}, queryType interface{}) JSONQueryResponse {
+	return JSONQueryResponse{
+		Code:      0,
+		Data:      data,
+		QueryType: queryType,
 	}
 }
 

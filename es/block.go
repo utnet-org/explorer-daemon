@@ -133,7 +133,7 @@ func BlockQuery2() {
 }
 
 // 查询Block详情
-func GetBlockDetails(queryType pkg.QueryType, queryValue interface{}) (*types.BlockDetailsStoreBody, error) {
+func GetBlockDetails(queryType pkg.BlockQueryType, queryValue interface{}) (*types.BlockDetailsStoreBody, error) {
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
@@ -149,7 +149,6 @@ func GetBlockDetails(queryType pkg.QueryType, queryValue interface{}) (*types.Bl
 	searchResult, err := ECLIENT.Search().
 		Index("block").
 		Query(termQuery).
-		//Sort("created", true). // 根据创建时间排序
 		//From(0).Size(10).      // 分页参数
 		//Pretty(true).
 		Do(ECTX)
@@ -158,6 +157,7 @@ func GetBlockDetails(queryType pkg.QueryType, queryValue interface{}) (*types.Bl
 		return nil, err
 	}
 	if searchResult.TotalHits() == 0 {
+		log.Printf("[BlockDetailsQuery] Total Hits:%s", searchResult.TotalHits())
 		return nil, errors.New("nil data")
 	}
 	var body types.BlockDetailsStoreBody
