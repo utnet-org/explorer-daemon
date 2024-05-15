@@ -48,6 +48,9 @@ func Init() (context.Context, *elastic.Client) {
 }
 
 func GetESInstance() (context.Context, *elastic.Client) {
+	if ECTX == nil || ECLIENT == nil {
+		log.Fatalln("[GetESInstance] Failed")
+	}
 	return ECTX, ECLIENT
 }
 
@@ -133,7 +136,7 @@ func crudDemo(client *elastic.Client, ctx context.Context) {
 		// Handle error
 		panic(err)
 	}
-	fmt.Printf("文档Id %s, 索引名 %s\n", put1.Id, put1.Index)
+	log.Debugf("文档Id %s, 索引名 %s\n", put1.Id, put1.Index)
 
 	// 根据id查询文档
 	get1, err := client.Get().

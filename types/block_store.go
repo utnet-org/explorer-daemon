@@ -18,3 +18,13 @@ type BlockDetailsStoreBody struct {
 	ValidatorReward  string             `json:"validator_reward"` // 奖励
 	TotalSupply      string             `json:"total_supply"`     // 总奖励
 }
+
+type ChunkDetailsStoreResult struct {
+	Author       string             `json:"author"`
+	Header       ChunkDetailsHeader `json:"header"`
+	Receipts     []string           `json:"receipts"`
+	Transactions []string           `json:"transactions"`
+	ChunkHash    string             `json:"chunk_hash"`
+	BlockHash    string             `json:"block_hash"`
+	Height       int64              `json:"height"`
+}

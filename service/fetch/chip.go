@@ -19,7 +19,7 @@ func HandleChipQuery() error {
 		return err
 	}
 	if qRes.TotalHits() > 0 {
-		log.Infof("[HandleChipQuery] Chip data exist, height: %v", res.Result.BlockHeight)
+		log.Debugf("[HandleChipQuery] Chip data exist, height: %v", res.Result.BlockHeight)
 		return nil
 	}
 	err = es.InsertChip(ctx, client, res.Result)

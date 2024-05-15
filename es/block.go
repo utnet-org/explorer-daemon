@@ -59,7 +59,6 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 		GasUsed:          body.Chunks[0].GasUsed,
 		TotalSupply:      body.Header.TotalSupply,
 	}
-	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
 		Index("block").
 		BodyJson(sBody).
@@ -72,7 +71,6 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 }
 
 func InsertBlockChanges(ctx context.Context, client *elastic.Client, res types.BlockChangesResult) error {
-	//createIndexIfNotExists(ctx, client, "block_changes")
 	_, err := client.Index().
 		Index("block_changes").
 		BodyJson(res).
@@ -82,24 +80,6 @@ func InsertBlockChanges(ctx context.Context, client *elastic.Client, res types.B
 		return err
 	}
 	log.Debugln("[InsertBlockChanges] block_changes insert success")
-	return nil
-}
-
-func InsertChunkDetails(body types.ChunkDetailsResult, chunkHash string) error {
-	ctx := ECTX
-	client := ECLIENT
-	createIndexIfNotExists(ctx, client, "chunk")
-	// chunkHash作为唯一doc id
-	_, err := client.Index().
-		Index("chunk").
-		BodyJson(body).
-		Id(chunkHash).
-		Do(ctx)
-	if err != nil {
-		log.Errorf("[InsertChunkDetails] ES error: %v", err)
-		return err
-	}
-	fmt.Println("chunk details insert success")
 	return nil
 }
 
@@ -138,9 +118,6 @@ func BlockQuery2() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	// 打印搜索结果
-	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
 	var blk types.Weibo
 	for _, hit := range searchResult.Hits.Hits {
 		_ = json.Unmarshal(hit.Source, &blk)
@@ -156,13 +133,13 @@ func BlockQuery2() {
 }
 
 // 查询Block详情
-func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.BlockDetailsResult, error) {
+func GetBlockDetails(queryType pkg.QueryType, queryValue interface{}) (*types.BlockDetailsStoreBody, error) {
 	var queryName string
 	switch queryType {
 	case pkg.BlockQueryHeight:
 		queryName = "height"
 	case pkg.BlockQueryHash:
-		queryName = "hash"
+		queryName = "hash.keyword" // hash keyword in es
 	default:
 		queryName = ""
 	}
@@ -174,18 +151,19 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue string) (*types.Bl
 		Query(termQuery).
 		//Sort("created", true). // 根据创建时间排序
 		//From(0).Size(10).      // 分页参数
-		Pretty(true).
+		//Pretty(true).
 		Do(ECTX)
 	if err != nil {
 		fmt.Printf("[BlockDetailsQuery] error:%s", err)
 		return nil, err
 	}
-	fmt.Printf("查询到 %d 条数据\n", searchResult.TotalHits())
-	var body types.BlockDetailsResult
+	if searchResult.TotalHits() == 0 {
+		return nil, errors.New("nil data")
+	}
+	var body types.BlockDetailsStoreBody
 	for _, hit := range searchResult.Hits.Hits {
 		_ = json.Unmarshal(hit.Source, &body)
 	}
-	pkg.PrintStruct(body)
 	return &body, nil
 }
 
@@ -274,6 +252,61 @@ func GetLastHeightHash(client *elastic.Client, ctx context.Context) (*types.Last
 		return nil, err
 	}
 	return &latestHeight, nil
+}
+
+func InsertChunkDetails(ctx context.Context, client *elastic.Client, result types.ChunkDetailsResult, hash string) error {
+	cHash := result.Header.ChunkHash
+	body := types.ChunkDetailsStoreResult{
+		Author:       result.Author,
+		Header:       result.Header,
+		Receipts:     result.Receipts,
+		Transactions: result.Transactions,
+		ChunkHash:    cHash,
+		BlockHash:    hash,
+		Height:       result.Header.HeightCreated,
+	}
+	_, err := client.Index().
+		Index("chunk").
+		BodyJson(body).
+		Id(cHash).
+		Do(ctx)
+	if err != nil {
+		log.Errorf("[InsertChunkDetails] ES error: %v", err)
+		return err
+	}
+	log.Debugln("[InsertChunkDetails] chunk details insert success")
+	return nil
+}
+
+func QueryChunkDetails(ctx context.Context, client *elastic.Client, queryType pkg.ChunkQueryType, queryValue interface{}) (*types.ChunkDetailsStoreResult, error) {
+	var queryName string
+	switch queryType {
+	case pkg.ChunkQueryChunkHash:
+		queryName = "chunk_hash.keyword"
+	case pkg.ChunkQueryBlockHash:
+		queryName = "block_hash.keyword" // hash keyword in es
+	case pkg.ChunkQueryBlockHeight:
+		queryName = "height" // hash keyword in es
+	default:
+		queryName = ""
+	}
+	termQuery := elastic.NewTermQuery(queryName, queryValue)
+	searchResult, err := client.Search().
+		Index("chunk").
+		Query(termQuery).
+		Do(ctx)
+	if err != nil {
+		fmt.Printf("[QueryChunkDetails] error:%s", err)
+		return nil, err
+	}
+	if searchResult.TotalHits() == 0 {
+		return nil, errors.New("[QueryChunkDetails] nil data")
+	}
+	var body types.ChunkDetailsStoreResult
+	for _, hit := range searchResult.Hits.Hits {
+		_ = json.Unmarshal(hit.Source, &body)
+	}
+	return &body, nil
 }
 
 func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64, hash string) (int64, error) {

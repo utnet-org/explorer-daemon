@@ -74,7 +74,7 @@ func OverviewInfo(c *fiber.Ctx) error {
 		//DayProduction:    pkg.FakeIntStr(10000, 100000),
 		DayProduction:    int64(blockSupply24),
 		DayMessages:      totalMsgs24,
-		TotalAccount:     info.PeerMaxCount,
+		TotalAccount:     info.NumActivePeers,
 		AveBlockInterval: pkg.FakeIntStr(28, 33),
 	}
 	return c.JSON(pkg.SuccessResponse(ex))

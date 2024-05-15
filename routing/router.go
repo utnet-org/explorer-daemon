@@ -21,4 +21,7 @@ func Setup(f *fiber.App) {
 	prep.Post("/power/chart", api.PowerChart)
 
 	prep.Post("/gas/chart", api.GasChart)
+
+	prep.Post("/network/validators", api.GetValidators)
+	prep.Post("/network/validator", api.GetValidator)
 }

@@ -50,14 +50,16 @@ type LastBlockRes2 struct {
 }
 
 type BlockDetailsResWeb struct {
-	Height           int64  `json:"height"`
-	Hash             string `json:"hash"`              //交易Hash
-	Timestamp        int64  `json:"timestamp"`         //时间
-	TimestampNanoSec string `json:"timestamp_nanosec"` //时间
-	Author           string `json:"author"`            //矿工
-	GasUsed          int64  `json:"gas_used"`          //使用的Gas
-	GasPrice         string `json:"gas_price"`         //Gas价格
-	GasLimit         int64  `json:"gas_limit"`         //Gas限制
-	GasFee           int    `json:"gas_fee"`           //Gas费
-	PrevHash         string `json:"prev_hash"`         //上一个哈希
+	Height           int64   `json:"height"`
+	Hash             string  `json:"hash"`              //交易Hash
+	Timestamp        int64   `json:"timestamp"`         //时间
+	TimestampNanoSec string  `json:"timestamp_nanosec"` //时间
+	Transactions     int64   `json:"transactions"`      //交易
+	Receipts         int64   `json:"receipts"`          //回执
+	Author           string  `json:"author"`            //矿工
+	GasUsed          int64   `json:"gas_used"`          //使用的Gas
+	GasPrice         float64 `json:"gas_price"`         //Gas价格
+	GasLimit         float64 `json:"gas_limit"`         //Gas限制
+	GasFee           float64 `json:"gas_fee"`           //Gas费
+	PrevHash         string  `json:"prev_hash"`         //上一个哈希
 }

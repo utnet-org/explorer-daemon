@@ -28,12 +28,20 @@ func (s SearchType) ToString() string {
 }
 
 // BlockQueryType 查询类型
-type BlockQueryType int
+type QueryType int
 
 const (
-	BlockQueryHeight BlockQueryType = iota + 1
+	BlockQueryHeight QueryType = iota + 1
 	BlockQueryHash
 	BlockQueryFinal
+)
+
+type ChunkQueryType int
+
+const (
+	ChunkQueryBlockHeight ChunkQueryType = iota + 1
+	ChunkQueryBlockHash
+	ChunkQueryChunkHash
 )
 
 // BlockChangeRpcType

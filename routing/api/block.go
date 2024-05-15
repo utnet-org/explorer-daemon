@@ -22,7 +22,8 @@ func BlockDetails(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not transfer request to struct", "请求参数错误"))
 	}
-	res, err := es.GetBlockDetails(pkg.BlockQueryType(req.QueryType), req.QueryWord)
+	ctx, client := es.GetESInstance()
+	res, err := es.GetBlockDetails(pkg.QueryType(req.QueryType), req.QueryWord)
 	if err != nil {
 		log.Errorf("[BlockDetails] query res failed: %s", err)
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
@@ -31,17 +32,26 @@ func BlockDetails(c *fiber.Ctx) error {
 		log.Error("[BlockDetails] res nil")
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
 	}
+	cRes, err := es.QueryChunkDetails(ctx, client, pkg.ChunkQueryType(req.QueryType), req.QueryWord)
+	if err != nil {
+		log.Errorf("[BlockDetails] QueryChunkDetails KeyWord: %s, Error: %s", req.QueryWord, err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "can not get block details", "获取区块详情失败"))
+	}
+	gu := pkg.DivisionPowerOfTen(float64(res.GasPrice), 9)
+	gl := pkg.DivisionPowerOfTen(float64(res.GasLimit), 15)
 	resWeb := types.BlockDetailsResWeb{
-		Height:           res.Header.Height,
-		Hash:             res.Header.Hash,
-		Timestamp:        res.Header.Timestamp,
-		TimestampNanoSec: res.Header.TimestampNanosec,
+		Height:           res.Height,
+		Hash:             res.Hash,
+		Timestamp:        res.Timestamp,
+		TimestampNanoSec: res.TimestampNanoSec,
+		Transactions:     int64(len(cRes.Transactions)),
+		Receipts:         int64(len(cRes.Receipts)),
 		Author:           res.Author,
-		GasUsed:          res.Chunks[0].GasUsed,
-		GasPrice:         res.Header.GasPrice,
-		GasLimit:         res.Chunks[0].GasLimit,
-		GasFee:           0,
-		PrevHash:         res.Header.PrevHash,
+		GasUsed:          res.GasUsed,
+		GasPrice:         gu,
+		GasLimit:         gl,
+		GasFee:           float64(res.GasUsed) * gu,
+		PrevHash:         res.PrevHash,
 	}
 	log.Debugf("[BlockDetails] query res success,res: %v", resWeb)
 	return c.JSON(pkg.SuccessResponse(resWeb))

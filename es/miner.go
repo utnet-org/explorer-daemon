@@ -22,7 +22,7 @@ func InsertMiner(ctx context.Context, client *elastic.Client, result types.AllMi
 	if err != nil {
 		return err
 	}
-	fmt.Printf("文档Id %s, 索引名 %s\n", res.Id, res.Index)
+	log.Debugf("Doc Id %s\n", res.Id)
 	return nil
 }
 

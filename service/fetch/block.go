@@ -11,25 +11,6 @@ import (
 	"time"
 )
 
-func BlockDetailsByFinal() {
-	ctx, client := es.GetESInstance()
-	res, err := remote.BlockDetailsByFinal()
-	if err != nil {
-		fmt.Println("rpc error")
-	}
-	err = es.InsertBlockDetails(ctx, client, res.Result)
-	err = es.InsertLastHeight(ctx, client, res.Result.Header.Height, "")
-	HandleBlockChanges(1, res.Result.Header)
-	pkg.PrintStruct(res.Result)
-	// 获取chunk hash
-	cHash := res.Result.Chunks[0].ChunkHash
-	// 获取最新block中的chunk details
-	err = HandleChunkDetailsByChunkId(cHash)
-	if err != nil {
-		fmt.Println("InsertData error:", err)
-	}
-}
-
 func HandleBlockChanges(rpcType pkg.BlockChangeRpcType, header types.BlockDetailsHeader) error {
 	var queryValue interface{}
 	if rpcType == pkg.BlockChangeRpcFinal {
@@ -58,15 +39,14 @@ func HandleBlockChanges(rpcType pkg.BlockChangeRpcType, header types.BlockDetail
 	return nil
 }
 
-func HandleChunkDetailsByChunkId(chunkHash string) error {
-	log.Infof("[HandleChunkDetailsByChunkId] chunkHash %v", chunkHash)
-	// 获取最新block中的chunk details
+func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
 	res, err := remote.ChunkDetailsByChunkId(chunkHash)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] ChunkDetailsByChunkId error: %v", err)
 		return err
 	}
-	err = es.InsertChunkDetails(res.Result, chunkHash)
+	ctx, client := es.GetESInstance()
+	err = es.InsertChunkDetails(ctx, client, res.Result, hash)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
 		return err
@@ -85,6 +65,7 @@ func HandleBlock() error {
 	ctx, client := es.GetESInstance()
 	res, err := remote.BlockDetailsByFinal()
 	if err != nil {
+		log.Errorln("[HandleBlock] BlockDetailsByFinal Error:", err)
 		return err
 	}
 	rpcHeight := res.Result.Header.Height
@@ -94,7 +75,7 @@ func HandleBlock() error {
 		return err
 	}
 	if last.Height == rpcHeight {
-		log.Infof("[HandleBlock] No new blocks to fetch, height: %v", rpcHeight)
+		log.Infof("[HandleBlock] No New Blocks, Height: %v, RpcHeight: %v", last.Height, rpcHeight)
 		return nil
 	}
 	// TODO 待完善初始height逻辑
@@ -103,8 +84,9 @@ func HandleBlock() error {
 		last.Height = rpcHeight - 1
 	}
 	// 存储从 lastHeight+1 到最新高度的所有区块
+	// 16992 16991
 	for height := last.Height + 1; height <= rpcHeight; height++ {
-		log.Infof("[HandleBlock] Start Handle Height: %v", height)
+		log.Infof("[HandleBlock] Start Handle Height: %v, RpcHeight: %v", height, rpcHeight)
 		block, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
 			if err.Error() == "UNKNOWN_BLOCK" {
@@ -129,7 +111,11 @@ func HandleBlock() error {
 		// get chunk hash
 		chunkHash := res.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
-		err = HandleChunkDetailsByChunkId(chunkHash)
+		if block.Result.Header.Hash == "" {
+			log.Errorf("[HandleBlock] Hash null")
+			return err
+		}
+		err = HandleChunkDetailsByChunkId(chunkHash, block.Result.Header.Hash)
 		if err != nil {
 			log.Errorf("[HandleBlock] HandleChunkDetailsByChunkId error: %v", err)
 			return err
@@ -139,7 +125,7 @@ func HandleBlock() error {
 			log.Errorf("[HandleBlock] HandleBlockChanges error: %v", err)
 			return err
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 	return nil
 }
