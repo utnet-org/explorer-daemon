@@ -14,10 +14,10 @@ func PowerChart(c *fiber.Ctx) error {
 	ctx, client := es.GetESInstance()
 	var powers []types.DailyPower
 	if days != 0 {
-		powers = es.QueryMinerDailySum(ctx, client, int(days))
+		powers = es.QueryPowerDaily(ctx, client, int(days))
 		return c.JSON(pkg.SuccessResponse(powers))
 	} else if month != 0 {
-		powers = es.QueryMinerMonthSum(ctx, client, int(month))
+		powers = es.QueryPowerMonth(ctx, client, int(month))
 		return c.JSON(pkg.SuccessResponse(powers))
 	}
 	return c.JSON(pkg.SuccessResponse(powers))

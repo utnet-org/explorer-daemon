@@ -37,22 +37,27 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
 	gasPrice, _ := strconv.ParseInt(body.Header.GasPrice, 10, 64)
+	//tSupply, err := strconv.ParseInt(body.Header.TotalSupply, 16, 64)
+	//if err != nil {
+	//	return err
+	//}
 	sBody := types.BlockDetailsStoreBody{
-		Author:         body.Author,
-		Chunks:         body.Chunks,
-		Header:         body.Header,
-		Hash:           body.Header.Hash,
-		ChunkHash:      body.Chunks[0].ChunkHash,
-		Height:         body.Header.Height,
-		TimestampMilli: pkg.ConvertNanoToMilli(body.Header.Timestamp),
-		Timestamp:      body.Header.Timestamp,
-		//TimestampNanoSec: body.Header.TimestampNanosec,
-		PrevHash:        body.Header.PrevHash,
-		PrevHeight:      body.Header.PrevHeight,
-		ValidatorReward: body.Header.ValidatorReward,
-		GasLimit:        body.Chunks[0].GasLimit,
-		GasPrice:        gasPrice,
-		GasUsed:         body.Chunks[0].GasUsed,
+		Author:           body.Author,
+		Chunks:           body.Chunks,
+		Header:           body.Header,
+		Hash:             body.Header.Hash,
+		ChunkHash:        body.Chunks[0].ChunkHash,
+		Height:           body.Header.Height,
+		TimestampMilli:   pkg.ConvertNanoToMilli(body.Header.Timestamp),
+		Timestamp:        body.Header.Timestamp,
+		TimestampNanoSec: body.Header.TimestampNanosec,
+		PrevHash:         body.Header.PrevHash,
+		PrevHeight:       body.Header.PrevHeight,
+		ValidatorReward:  body.Header.ValidatorReward,
+		GasLimit:         body.Chunks[0].GasLimit,
+		GasPrice:         gasPrice,
+		GasUsed:          body.Chunks[0].GasUsed,
+		TotalSupply:      body.Header.TotalSupply,
 	}
 	createIndexIfNotExists(ctx, client, "block")
 	_, err := client.Index().
@@ -373,7 +378,7 @@ func QueryBlockChangeMsg24h() (sum int64) {
 	return sum
 }
 
-func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
+func QueryGasRangeSum(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
 	index := "block"
 	now := time.Now().UTC()
 	startTime := now.Add(-24 * time.Hour)
@@ -419,7 +424,80 @@ func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types
 		if !containsTimestamp(results, expectedTime) {
 			results = append(results, types.DailyGas{
 				Date: expectedTime,
-				Gas:  pkg.RandomFloat64(6),
+				//Gas:  pkg.RandomFloat64(6),
+				Gas: 0,
+			})
+		}
+	}
+
+	// Sort the results by timestamp
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+	return results
+}
+
+func QueryGasRange(ctx context.Context, client *elastic.Client, n int64) []types.DailyGas {
+	index := "block"
+	now := time.Now().UTC()
+	startTime := now.Add(-24 * time.Hour)
+
+	// Convert times to nanoseconds
+	startTimeNano := startTime.UnixMilli()
+	endTimeNano := now.UnixMilli()
+
+	// Aggregation query
+	searchService := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp_milli").Gte(startTimeNano).Lte(endTimeNano)).
+		Aggregation("by_4h", elastic.NewDateHistogramAggregation().
+			Field("timestamp_milli").
+			FixedInterval("4h").
+			MinDocCount(0).
+			Format("yyyy-MM-dd HH:mm:ss").
+			SubAggregation("last_entry", elastic.NewTopHitsAggregation().
+				Sort("timestamp", false).
+				Size(1),
+			),
+		)
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the query: %s", err)
+	}
+
+	// Parse the results
+	var results []types.DailyGas
+	if agg, found := searchResult.Aggregations.DateHistogram("by_4h"); found {
+		for _, bucket := range agg.Buckets {
+			date := pkg.MilliTimestampToDate(int64(bucket.Key), "15:00")
+			if hits, found := bucket.TopHits("last_entry"); found {
+				for _, hit := range hits.Hits.Hits {
+					var entry struct {
+						GasUsed  float64 `json:"gas_used"`
+						GasPrice float64 `json:"gas_price"`
+					}
+					if err := json.Unmarshal(hit.Source, &entry); err != nil {
+						log.Printf("Error unmarshalling hit: %s", err)
+						continue
+					}
+					results = append(results, types.DailyGas{
+						Date: date,
+						Gas:  pkg.DivisionPowerOfTen(entry.GasUsed*entry.GasPrice, 9),
+					})
+				}
+			}
+		}
+	}
+
+	// Fill in missing intervals with gas 0
+	for i := 0; i < 6; i++ { // 24 hours / 4 hours per interval = 6 intervals
+		expectedTime := startTime.Add(time.Duration(i) * 4 * time.Hour).Format("15:00")
+		if !containsTimestamp(results, expectedTime) {
+			results = append(results, types.DailyGas{
+				Date: expectedTime,
+				//Gas:  pkg.RandomFloat64(6),
+				Gas: 0,
 			})
 		}
 	}
@@ -438,4 +516,101 @@ func containsTimestamp(results []types.DailyGas, timestamp string) bool {
 		}
 	}
 	return false
+}
+
+func QueryRewordDiff(ctx context.Context, client *elastic.Client) float64 {
+	index := "block"
+	// 查询最新的两条数据，根据 height 字段降序排序
+	searchService := client.Search().
+		Index(index).
+		Sort("height", false).
+		Size(2) // 获取最新的两条数据
+
+	searchResult, err := searchService.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the query: %s", err)
+	}
+
+	// 解析结果
+	var latestData, previousData types.BlockDetailsStoreBody
+	var difference float64
+	if len(searchResult.Hits.Hits) >= 2 {
+		// 获取最新一条数据
+		if err := json.Unmarshal(searchResult.Hits.Hits[0].Source, &latestData); err != nil {
+			log.Fatalf("Error unmarshalling latest data: %s", err)
+		}
+
+		// 获取上一条数据
+		if err := json.Unmarshal(searchResult.Hits.Hits[1].Source, &previousData); err != nil {
+			log.Fatalf("Error unmarshalling previous data: %s", err)
+		}
+
+		x, _ := pkg.DivisionBigPowerOfTen(previousData.TotalSupply, 24)
+		y, _ := pkg.DivisionBigPowerOfTen(latestData.TotalSupply, 24)
+
+		// 计算 total_supply 差值
+		difference = y - x
+		log.Debugf("Total supply difference between latest and previous block: %f\n", difference)
+		return difference
+	}
+	log.Debugln("Not enough data to calculate the difference")
+	return difference
+}
+
+func QuerySupplyDiff24h(ctx context.Context, client *elastic.Client) float64 {
+	index := "block"
+	now := time.Now()
+	startTime := now.Add(-24 * time.Hour)
+	var difference float64
+	// Convert times to milliseconds
+	start := startTime.UnixMilli()
+	end := now.UnixMilli()
+
+	// Query to get the first record in the last 24 hours
+	firstRecordSearch := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp_milli").Gte(start).Lte(end)).
+		Sort("timestamp_milli", true).
+		Size(1)
+
+	firstResult, err := firstRecordSearch.Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the first record query: %s", err)
+	}
+
+	// Query to get the last record in the last 24 hours
+	lastRecordSearch := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("timestamp_milli").Gte(start).Lte(end)).
+		Sort("timestamp_milli", false).
+		Size(1)
+
+	lastResult, err := lastRecordSearch.Do(context.Background())
+	if err != nil {
+		log.Fatalf("Error executing the last record query: %s", err)
+	}
+
+	if len(firstResult.Hits.Hits) == 0 || len(lastResult.Hits.Hits) == 0 {
+		log.Debugln("Not enough data to calculate the supply difference")
+		return difference
+	}
+
+	// Parse the first record
+	var firstRecord types.BlockDetailsStoreBody
+	if err := json.Unmarshal(firstResult.Hits.Hits[0].Source, &firstRecord); err != nil {
+		log.Fatalf("Error unmarshalling first record: %s", err)
+	}
+
+	// Parse the last record
+	var lastRecord types.BlockDetailsStoreBody
+	if err := json.Unmarshal(lastResult.Hits.Hits[0].Source, &lastRecord); err != nil {
+		log.Fatalf("Error unmarshalling last record: %s", err)
+	}
+
+	// Calculate the supply difference
+	x, _ := pkg.DivisionBigPowerOfTen(firstRecord.TotalSupply, 24)
+	y, _ := pkg.DivisionBigPowerOfTen(lastRecord.TotalSupply, 24)
+	difference = y - x
+	log.Debugf("Total supply difference in the last 24 hours: %f\n", difference)
+	return difference
 }
