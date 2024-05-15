@@ -21,4 +21,8 @@ func Setup(f *fiber.App) {
 	prep.Post("/power/chart", api.PowerChart)
 
 	prep.Post("/gas/chart", api.GasChart)
+
+	// chip
+	prep.Post("add/chipinfo", api.AddChipInfo)
+	prep.Post("query/chipinfo", api.QueryChipInfo)
 }

@@ -17,6 +17,7 @@ import (
 func ConnectDB() {
 	allModels := []interface{}{
 		&model.Example{},
+		&model.Chip{},
 	}
 	var err error
 	p := config.EnvLoad("DB_PORT")
