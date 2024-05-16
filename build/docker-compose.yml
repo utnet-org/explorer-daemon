@@ -14,6 +14,16 @@ services:
 #      POSTGRES_USER: explorer
   #  volumes:
   #    - /root/dbdata/wwcc:/var/lib/postgresql/data
+  chip-db:
+    image: postgres
+    container_name: chip-db
+    restart: always
+    ports:
+      - 8013:5432
+    environment:
+      POSTGRES_PASSWORD: utility12345
+      POSTGRES_DB: chipdb
+      POSTGRES_USER: utility
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
     container_name: elasticsearch
@@ -27,8 +37,8 @@ services:
       memlock:
         soft: -1
         hard: -1
-    volumes:
-      - /root/es_data:/usr/share/elasticsearch/data
+#    volumes:
+#      - /root/es_data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
@@ -39,9 +49,9 @@ services:
     restart: unless-stopped
     environment:
 #      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTICSEARCH_HOST=http://localhost:9200
     ports:
-      - "9100:9100"
+      - 9100:9100
 #    volumes:
 #      - ./data:/data
 
