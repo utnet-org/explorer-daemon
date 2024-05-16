@@ -1,20 +1,12 @@
 package fetch
 
 import (
+	"explorer-daemon/service/remote"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-func InitFetchData() {
-	// 定时执行RPC请求
-	//ticker := time.NewTicker(time.Hour) // 例如，每小时执行一次
-	//for range ticker.C {
-	//BlockDetailsByFinal()
-	//BlockChangesRpc()
-	//HandleNetworkInfo()
-	//HandleChipQuery()
-	//}
-
+func InitChainData() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
@@ -35,5 +27,14 @@ func InitFetchData() {
 		if err := HandleChipQuery(); err != nil {
 			log.Error("[InitFetchData] HandleChipQuery error: ", err)
 		}
+	}
+}
+
+func InitCoinData() {
+	remote.UpdatePrice()
+	ticker := time.NewTicker(3 * time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
+		remote.UpdatePrice()
 	}
 }

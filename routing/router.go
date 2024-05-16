@@ -27,4 +27,7 @@ func Setup(f *fiber.App) {
 	// chip
 	prep.Post("add/chipinfo", api.AddChipInfo)
 	prep.Post("query/chipinfo", api.QueryChipInfo)
+
+	// coin
+	prep.Get("/coin/price", api.CoinPrice)
 }

@@ -17,7 +17,8 @@ func main() {
 	database.ConnectDB()
 	es.Init()
 	log.Init()
-	go fetch.InitFetchData()
+	go fetch.InitCoinData()
+	go fetch.InitChainData()
 	fiberApp := fiber.New()
 	// 创建一个速率限制器，每秒最多只允许10个请求
 	//fiberApp.Use(limiter.New(limiter.Config{
