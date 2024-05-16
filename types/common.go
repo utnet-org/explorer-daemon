@@ -29,3 +29,8 @@ type RpcErrCause struct {
 	Info map[string]interface{} `json:"info"`
 	Name string                 `json:"name"`
 }
+
+type Page struct {
+	PageNum  int `json:"page_num"`
+	PageSize int `json:"page_size"`
+}

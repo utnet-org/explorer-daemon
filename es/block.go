@@ -190,7 +190,7 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 	return &body, nil
 }
 
-func GetLastBlocks() (*[]types.LastBlockRes, error) {
+func GetLastBlocks() (*[]types.LastBlockResWeb, error) {
 	ctx, client := GetESInstance()
 	last, err := GetLastHeightHash(client, ctx)
 	if err != nil {
@@ -210,9 +210,9 @@ func GetLastBlocks() (*[]types.LastBlockRes, error) {
 		log.Errorln(err)
 		return nil, err
 	}
-	var blocks []types.LastBlockRes
+	var blocks []types.LastBlockResWeb
 	for _, hit := range res.Hits.Hits {
-		var body types.LastBlockRes
+		var body types.LastBlockResWeb
 		//fmt.Printf("第 %d 条数据\n", index+1)
 		_ = json.Unmarshal(hit.Source, &body)
 		pkg.PrintStruct(body)
@@ -646,4 +646,63 @@ func QuerySupplyDiff24h(ctx context.Context, client *elastic.Client) float64 {
 	difference = y - x
 	log.Debugf("Total supply difference in the last 24 hours: %f\n", difference)
 	return difference
+}
+
+func QueryBlockList(ctx context.Context, client *elastic.Client, pageNum, pageSize int) ([]types.BlockDetailsResWeb, int64, error) {
+	from := (pageNum - 1) * pageSize
+	searchResult, err := client.Search().
+		Index("block").
+		From(from).
+		Size(pageSize).
+		Do(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var blocks []types.BlockDetailsResWeb
+	for _, hit := range searchResult.Hits.Hits {
+		var res types.BlockDetailsStoreBody
+		if err := json.Unmarshal(hit.Source, &res); err == nil {
+			resWeb, err := BlockDetailsProcessed(ctx, client, 1, res.Height)
+			if err != nil {
+				return blocks, 0, err
+			}
+			blocks = append(blocks, *resWeb)
+		}
+	}
+	return blocks, searchResult.TotalHits(), nil
+}
+
+func BlockDetailsProcessed(ctx context.Context, client *elastic.Client, qType int, qWord interface{}) (*types.BlockDetailsResWeb, error) {
+	res, err := GetBlockDetails(pkg.BlockQueryType(qType), qWord)
+	if err != nil {
+		log.Errorf("[BlockDetails] Es Block QueryWord: %v, error: %s", qWord, err)
+		return nil, err
+	}
+	if res == nil {
+		log.Error("[BlockDetails] res nil")
+		return nil, err
+	}
+	cRes, err := QueryChunkDetails(ctx, client, pkg.ChunkQueryType(qType), qWord)
+	if err != nil {
+		log.Errorf("[BlockDetails] QueryChunkDetails KeyWord: %s, Error: %s", qWord, err)
+		return nil, err
+	}
+	gu := pkg.DivisionPowerOfTen(float64(res.GasPrice), 9)
+	gl := pkg.DivisionPowerOfTen(float64(res.GasLimit), 15)
+	resWeb := types.BlockDetailsResWeb{
+		Height:           res.Height,
+		Hash:             res.Hash,
+		Timestamp:        res.Timestamp,
+		TimestampNanoSec: res.TimestampNanoSec,
+		Transactions:     int64(len(cRes.Transactions)),
+		Receipts:         int64(len(cRes.Receipts)),
+		Author:           res.Author,
+		GasUsed:          res.GasUsed,
+		GasPrice:         gu,
+		GasLimit:         gl,
+		GasFee:           float64(res.GasUsed) * gu,
+		PrevHash:         res.PrevHash,
+	}
+	return &resWeb, nil
 }

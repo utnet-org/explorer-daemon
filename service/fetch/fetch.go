@@ -32,7 +32,7 @@ func InitChainData() {
 
 func InitCoinData() {
 	remote.UpdatePrice()
-	ticker := time.NewTicker(3 * time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 	for range ticker.C {
 		remote.UpdatePrice()
