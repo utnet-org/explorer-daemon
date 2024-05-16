@@ -1,5 +1,5 @@
 # Use postgres/example user/password credentials
-version: '3.1'
+version: '3.7'
 
 services:
 #  explorer-db:
@@ -19,7 +19,7 @@ services:
     container_name: chip-db
     restart: always
     ports:
-      - 8013:5432
+      - "8013:5432"
     environment:
       POSTGRES_PASSWORD: utility12345
       POSTGRES_DB: chipdb
@@ -37,11 +37,11 @@ services:
       memlock:
         soft: -1
         hard: -1
-#    volumes:
-#      - /root/es_data:/usr/share/elasticsearch/data
+    volumes:
+      - /root/es_data:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
-      - 9300:9300
+      - "9200:9200"
+      - "9300:9300"
 
   elasticview:
     image: 1340691923/elastic_view:latest
@@ -51,10 +51,5 @@ services:
 #      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
       - ELASTICSEARCH_HOST=http://localhost:9200
     ports:
-      - 9100:9100
+      - "8090:8090"
 #    volumes:
-#      - ./data:/data
-
-#networks:
-#  ops_default:
-#    external: true
