@@ -13,20 +13,6 @@ var ECLIENT *elastic.Client
 var ECTX context.Context
 
 func Init() (context.Context, *elastic.Client) {
-	// 创建ES client用于后续操作ES
-	//client, err := es.NewClient(
-	//	// 设置ES服务地址，支持多个地址
-	//	es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
-	//	// 设置基于http base auth验证的账号和密码
-	//	es.SetBasicAuth("user", "secret"))
-	//if err != nil {
-	//	// Handle error
-	//	fmt.Printf("连接失败: %v\n", err)
-	//} else {
-	//	fmt.Println("连接成功")
-	//}
-
-	// 创建client
 	client, err := elastic.NewClient(
 		//es.SetURL("http://127.0.0.1:9200", "http://127.0.0.1:9201"),
 		//elastic.SetURL("http://127.0.0.1:9200"),
@@ -35,9 +21,14 @@ func Init() (context.Context, *elastic.Client) {
 		elastic.SetSniff(false))
 	//elastic.SetBasicAuth("user", "nvUt974rcNeg==*k0W3W"))
 	if err != nil {
-		log.Panicln("Elastic connect error:", err)
+		log.Panicln("[ESInit] Elastic connect error:", err)
 	}
 	ctx := context.Background()
+	info, code, err := client.Ping("http://localhost:9200").Do(ctx)
+	if err != nil {
+		log.Fatalf("[ESInit] Error pinging the Elasticsearch server: %s", err)
+	}
+	log.Printf("[ESInit] Elasticsearch returned with code %d and version %s\n", code, info.Version.Number)
 	ECTX = ctx
 	ECLIENT = client
 	CreateCheckIndex(ctx, client)
