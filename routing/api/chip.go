@@ -95,3 +95,34 @@ func QueryChipInfoExe(keyword string) ([]types.QueryChipInfoRep, error) {
 	}
 	return result, nil
 }
+
+func GetChipList(c *fiber.Ctx) error {
+	num := c.QueryInt("page_num", 1)
+	size := c.QueryInt("page_size", 20)
+	if num <= 1 {
+		num = 1
+	}
+	if size <= 0 {
+		size = 20
+	}
+	chips, total, err := model.QueryChipList(database.DB, num, size)
+	if err != nil {
+		return c.JSON(pkg.MessageResponse(-1, err.Error(), "查询芯片失败"))
+	}
+	var result []types.QueryChipInfoRep
+	for _, chip := range chips {
+		result = append(result, types.QueryChipInfoRep{
+			ChipType:     chip.ChipType,
+			Power:        chip.Power,
+			SerialNumber: chip.SerialNumber,
+			BusId:        chip.BusId,
+			P2Key:        chip.P2Key,
+			PublicKey:    chip.PubKey,
+		})
+	}
+	webRes := types.ChipListResWeb{
+		Total:    total,
+		ChipList: result,
+	}
+	return c.JSON(pkg.SuccessResponse(webRes))
+}

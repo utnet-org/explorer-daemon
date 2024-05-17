@@ -48,3 +48,8 @@ type QueryChipInfoRep struct {
 	P2Key        string `json:"p2key"`
 	PublicKey    string `json:"public_key"`
 }
+
+type ChipListResWeb struct {
+	Total    int64              `json:"total"`
+	ChipList []QueryChipInfoRep `json:"chip_list"`
+}

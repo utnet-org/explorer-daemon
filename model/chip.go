@@ -13,7 +13,6 @@ type Chip struct {
 	P2Key        string //
 	PubKey       string //
 	Flag         string // 启用标志(1-启用 0-失效)
-
 }
 
 // GetChipBySerialBus 通过 serial bus 寻找芯片
@@ -40,4 +39,17 @@ func (u *Chip) InsertNewChip(db *gorm.DB) (uint, error) {
 		return 0, err
 	}
 	return u.ID, nil
+}
+
+// 翻页查询芯片列表
+func QueryChipList(db *gorm.DB, page int, pageSize int) (chips []Chip, total int64, err error) {
+	err = db.Model(&Chip{}).Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = db.Offset((page - 1) * pageSize).Limit(pageSize).Find(&chips).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return chips, total, nil
 }
