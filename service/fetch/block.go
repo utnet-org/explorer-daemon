@@ -109,7 +109,8 @@ func HandleBlock() error {
 			return err
 		}
 		// get chunk hash
-		chunkHash := res.Result.Chunks[0].ChunkHash
+		//chunkHash := res.Result.Chunks[0].ChunkHash
+		chunkHash := block.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
 		if block.Result.Header.Hash == "" {
 			log.Errorf("[HandleBlock] Hash null")

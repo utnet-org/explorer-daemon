@@ -683,10 +683,13 @@ func BlockDetailsProcessed(ctx context.Context, client *elastic.Client, qType in
 		log.Error("[BlockDetails] res nil")
 		return nil, err
 	}
+	var cc types.ChunkDetailsStoreResult
 	cRes, err := QueryChunkDetails(ctx, client, pkg.ChunkQueryType(qType), qWord)
 	if err != nil {
-		log.Errorf("[BlockDetails] QueryChunkDetails KeyWord: %s, Error: %s", qWord, err)
-		return nil, err
+		log.Errorf("[BlockDetails] QueryChunkDetails KeyWord: %v, Error: %v", qWord, err)
+		//return nil, err
+	} else {
+		cc = *cRes
 	}
 	gu := pkg.DivisionPowerOfTen(float64(res.GasPrice), 9)
 	gl := pkg.DivisionPowerOfTen(float64(res.GasLimit), 15)
@@ -695,8 +698,8 @@ func BlockDetailsProcessed(ctx context.Context, client *elastic.Client, qType in
 		Hash:             res.Hash,
 		Timestamp:        res.Timestamp,
 		TimestampNanoSec: res.TimestampNanoSec,
-		Transactions:     int64(len(cRes.Transactions)),
-		Receipts:         int64(len(cRes.Receipts)),
+		Transactions:     int64(len(cc.Transactions)),
+		Receipts:         int64(len(cc.Receipts)),
 		Author:           res.Author,
 		GasUsed:          res.GasUsed,
 		GasPrice:         gu,

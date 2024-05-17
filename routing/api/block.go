@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
 // @Tags Web
@@ -103,16 +102,8 @@ func FinalBlockChanges(c *fiber.Ctx) error {
 }
 
 func BlockList(c *fiber.Ctx) error {
-	numStr := c.Query("page_num", "1")
-	sizeStr := c.Query("page_size", "20")
-	num, err := strconv.Atoi(numStr)
-	if err != nil {
-		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, err.Error(), "页码错误"))
-	}
-	size, err := strconv.Atoi(sizeStr)
-	if err != nil {
-		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, err.Error(), "页码错误"))
-	}
+	num := c.QueryInt("page_num", 1)
+	size := c.QueryInt("page_size", 20)
 	if num <= 1 {
 		num = 1
 	}
