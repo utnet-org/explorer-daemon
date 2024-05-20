@@ -64,13 +64,15 @@ type ResultStatus struct {
 }
 
 type Transaction struct {
-	Actions    []Action `json:"actions"`
-	Hash       string   `json:"hash"`
-	Nonce      int64    `json:"nonce"`
-	PublicKey  string   `json:"publicKey"`
-	ReceiverID string   `json:"receiverId"`
-	Signature  string   `json:"signature"`
-	SignerID   string   `json:"signerId"`
+	// TODO many type actions
+	//Actions    []Action `json:"actions"`
+	Actions    []interface{} `json:"actions"`
+	Hash       string        `json:"hash"`
+	Nonce      int64         `json:"nonce"`
+	PublicKey  string        `json:"public_key"`
+	ReceiverID string        `json:"receiver_id"`
+	Signature  string        `json:"signature"`
+	SignerID   string        `json:"signer_id"`
 }
 
 type Action struct {
@@ -123,23 +125,25 @@ type TransStatusReceiptsBody struct {
 }
 
 type ReceiptElement struct {
-	PredecessorID string         `json:"predecessorId"`
+	PredecessorID string         `json:"predecessor_id"`
 	Receipt       ReceiptReceipt `json:"receipt"`
-	ReceiptID     string         `json:"receiptId"`
-	ReceiverID    string         `json:"receiverId"`
+	ReceiptID     string         `json:"receipt_id"`
+	ReceiverID    string         `json:"receiver_id"`
 }
 
 type ReceiptReceipt struct {
-	Action ReceiptAction `json:"action"`
+	Action ReceiptAction `json:"Action"`
 }
 
 type ReceiptAction struct {
-	Actions             []ActionAction `json:"actions"`
-	GasPrice            string         `json:"gasPrice"`
-	InputDataIDS        []string       `json:"inputDataIds"`
-	OutputDataReceivers []string       `json:"outputDataReceivers"`
-	SignerID            string         `json:"signerId"`
-	SignerPublicKey     string         `json:"signerPublicKey"`
+	// TODO many type actions
+	//Actions             []ActionAction `json:"actions"`
+	Actions             []interface{} `json:"actions"`
+	GasPrice            string        `json:"gas_price"`
+	InputDataIDS        []string      `json:"input_data_ids"`
+	OutputDataReceivers []string      `json:"output_data_receivers"`
+	SignerID            string        `json:"signer_id"`
+	SignerPublicKey     string        `json:"signer_public_key"`
 }
 
 type ActionAction struct {

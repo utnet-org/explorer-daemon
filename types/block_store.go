@@ -22,8 +22,8 @@ type BlockDetailsStoreBody struct {
 type ChunkDetailsStoreResult struct {
 	Author       string             `json:"author"`
 	Header       ChunkDetailsHeader `json:"header"`
-	Receipts     []string           `json:"receipts"`
-	Transactions []string           `json:"transactions"`
+	Receipts     []ReceiptElement   `json:"receipts"`
+	Transactions []Transaction      `json:"transactions"`
 	ChunkHash    string             `json:"chunk_hash"`
 	BlockHash    string             `json:"block_hash"`
 	Height       int64              `json:"height"`

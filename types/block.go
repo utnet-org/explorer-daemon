@@ -111,8 +111,8 @@ type BlockChangesReq struct {
 // Block Changes Response
 
 type BlockChangesRes struct {
-	CommonRes CommonRes
-	Result    BlockChangesResult `json:"result"`
+	CommonRes
+	Result BlockChangesResult `json:"result"`
 }
 
 type BlockChangesResult struct {
@@ -131,15 +131,15 @@ type Change struct {
 // Chunk Details Response
 
 type ChunkDetailsRes struct {
-	CommonRes CommonRes
-	Result    ChunkDetailsResult `json:"result"`
+	CommonRes
+	Result ChunkDetailsResult `json:"result"`
 }
 
 type ChunkDetailsResult struct {
 	Author       string             `json:"author"`
 	Header       ChunkDetailsHeader `json:"header"`
-	Receipts     []string           `json:"receipts"`
-	Transactions []string           `json:"transactions"`
+	Receipts     []ReceiptElement   `json:"receipts"`
+	Transactions []Transaction      `json:"transactions"`
 }
 
 type ChunkDetailsHeader struct {
