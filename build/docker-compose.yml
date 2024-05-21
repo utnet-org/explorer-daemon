@@ -2,16 +2,16 @@
 version: '3.7'
 
 services:
-#  explorer-db:
-#    image: postgres
-#    container_name: explorer-db
-#    restart: always
-#    ports:
-#      - 8012:5432
-#    environment:
-#      POSTGRES_PASSWORD: explorer123
-#      POSTGRES_DB: explorer
-#      POSTGRES_USER: explorer
+  #  explorer-db:
+  #    image: postgres
+  #    container_name: explorer-db
+  #    restart: always
+  #    ports:
+  #      - 8012:5432
+  #    environment:
+  #      POSTGRES_PASSWORD: explorer123
+  #      POSTGRES_DB: explorer
+  #      POSTGRES_USER: explorer
   #  volumes:
   #    - /root/dbdata/wwcc:/var/lib/postgresql/data
   chip-db:
@@ -25,20 +25,22 @@ services:
       POSTGRES_DB: chipdb
       POSTGRES_USER: utility
   elasticsearch:
+    #    elasticsearch 7.17版本后，jdbc连接通行证不再免费，为了兼容使用7.10.2版本，实测DataGrip driver不支持license
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
+    #    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - /root/es_data:/usr/share/elasticsearch/data
+    #      - bootstrap.memory_lock=true
+    #      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    #    ulimits:
+    #      memlock:
+    #        soft: -1
+    #        hard: -1
+    #    volumes:
+    #      - /root/es_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -48,11 +50,11 @@ services:
     container_name: elasticview
     restart: unless-stopped
     environment:
-#      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
+      #      - ELASTICSEARCH_HOST=http://host.docker.internal:9200
       - ELASTICSEARCH_HOST=http://localhost:9200
     ports:
       - "8090:8090"
-#    volumes:
+  #    volumes:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.4
     container_name: kibana
