@@ -57,8 +57,12 @@ func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
 				log.Errorf("[HandleChunkDetailsByChunkId] Remote TransactionStatus error: %v", err)
 				return err
 			}
+			result := types.TxnStoreResult{
+				Height:          res.Result.Header.HeightCreated,
+				TxnStatusResult: *tRes,
+			}
 			// Store Es data
-			err = es.InsertTxnStatus(ctx, client, tRes.Result)
+			err = es.InsertTxnStatus(ctx, client, result)
 			if err != nil {
 				log.Errorf("[HandleChunkDetailsByChunkId] InsertTxnStatus error: %v", err)
 				return err
@@ -103,7 +107,6 @@ func HandleBlock() error {
 		last.Height = rpcHeight - 1
 	}
 	// 存储从 lastHeight+1 到最新高度的所有区块
-	// 16992 16991
 	for height := last.Height + 1; height <= rpcHeight; height++ {
 		log.Infof("[HandleBlock] Start Handle Height: %v, RpcHeight: %v", height, rpcHeight)
 		block, err := remote.BlockDetailsByBlockId(height)
@@ -121,10 +124,6 @@ func HandleBlock() error {
 		}
 		if err = es.InsertBlockDetails(ctx, client, block.Result); err != nil {
 			log.Error("[HandleBlock] InsertBlockDetails error:", err)
-			return err
-		}
-		if _, err = es.UpdateLastHeight(client, ctx, height, block.Result.Header.Hash); err != nil {
-			log.Error("[HandleBlock] UpdateLastHeight error:", err)
 			return err
 		}
 		err = HandleGasEveryHeight(height, err, block)
@@ -146,6 +145,11 @@ func HandleBlock() error {
 		err = HandleBlockChanges(2, res.Result.Header)
 		if err != nil {
 			log.Errorf("[HandleBlock] HandleBlockChanges error: %v", err)
+			return err
+		}
+		// Update the height after all operations have been processed
+		if _, err = es.UpdateLastHeight(client, ctx, height, block.Result.Header.Hash); err != nil {
+			log.Error("[HandleBlock] UpdateLastHeight error:", err)
 			return err
 		}
 		time.Sleep(200 * time.Millisecond)

@@ -37,10 +37,6 @@ func InsertBlockDetailsBulk(ctx context.Context, client *elastic.Client, bb type
 
 func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.BlockDetailsResult) error {
 	gasPrice, _ := strconv.ParseInt(body.Header.GasPrice, 10, 64)
-	//tSupply, err := strconv.ParseInt(body.Header.TotalSupply, 16, 64)
-	//if err != nil {
-	//	return err
-	//}
 	sBody := types.BlockDetailsStoreBody{
 		Author:           body.Author,
 		Chunks:           body.Chunks,
@@ -59,7 +55,20 @@ func InsertBlockDetails(ctx context.Context, client *elastic.Client, body types.
 		GasUsed:          body.Chunks[0].GasUsed,
 		TotalSupply:      body.Header.TotalSupply,
 	}
-	_, err := client.Index().
+	// Check data exist
+	exists, err := client.Exists().
+		Index("block").
+		Id(body.Header.Hash).
+		Do(ctx)
+	if err != nil {
+		log.Errorf("[InsertBlockDetails] Check exist error: %v", err)
+		return err
+	}
+	if exists {
+		log.Warningf("[InsertBlockDetails] Data exist height: %v", sBody.Height)
+		return nil
+	}
+	_, err = client.Index().
 		Index("block").
 		BodyJson(sBody).
 		Id(body.Header.Hash).

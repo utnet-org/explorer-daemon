@@ -28,15 +28,17 @@ func GetTxnList(c *fiber.Ctx) error {
 		if err != nil {
 			return c.JSON(pkg.MessageResponse(-1, err.Error(), "数据不存在"))
 		}
+		tb, _ := pkg.DivisionBigPowerOfTen(v.TransactionOutcome.Outcome.TokensBurnt, 24)
 		result = append(result, types.TxnResWeb{
-			Height:     b.Height,
+			Height:     v.Height,
 			Timestamp:  b.Timestamp,
 			Hash:       v.Transaction.Hash,
 			TxnType:    "", // unknown
 			ReceiverID: v.Transaction.ReceiverID,
 			SignerID:   v.Transaction.SignerID,
 			Deposit:    "", // only function call has deposit
-			TxnFee:     v.TransactionOutcome.Outcome.TokensBurnt,
+			//TxnFee:     strconv.FormatFloat(tb, 'f', -1, 64),
+			TxnFee: tb,
 		})
 	}
 	webRes := types.TxnListResWeb{

@@ -30,12 +30,13 @@ type ChunkDetailsStoreResult struct {
 }
 
 type TxnStoreResult struct {
-	Height             string             `json:"height"`
-	FinalExeStatus     string             `json:"final_execution_status"`
-	ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
-	Status             interface{}        `json:"status"`
-	Transaction        Transaction        `json:"transaction"`
-	TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
+	Height int64 `json:"height"`
+	TxnStatusResult
+	//FinalExeStatus     string             `json:"final_execution_status"`
+	//ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
+	//Status             interface{}        `json:"status"`
+	//Transaction        Transaction        `json:"transaction"`
+	//TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
 }
 
 type GasStoreResult struct {

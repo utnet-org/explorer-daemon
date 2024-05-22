@@ -56,7 +56,7 @@ func TransactionSendAwait() {
 // params:
 // transaction hash (see UtilityBlocks Explorer for a valid transaction hash)
 // sender account id
-func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusRes, error) {
+func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusResult, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -75,7 +75,7 @@ func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusRes, error) {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
 	log.Debugln("[TransactionStatus] res:", res)
-	return &res, nil
+	return &res.Result, nil
 }
 
 // Queries status of a transaction by hash, returning the final transaction result and details of all receipts.

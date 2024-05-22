@@ -8,9 +8,9 @@ type TxnResWeb struct {
 	//PublicKey  string `json:"public_key"`
 	ReceiverID string `json:"receiver_id"`
 	//Signature  string `json:"signature"`
-	SignerID string `json:"signer_id"`
-	Deposit  string `json:"deposit"`
-	TxnFee   string `json:"txn_fee"`
+	SignerID string  `json:"signer_id"`
+	Deposit  string  `json:"deposit"`
+	TxnFee   float64 `json:"txn_fee"`
 }
 
 type TxnListResWeb struct {

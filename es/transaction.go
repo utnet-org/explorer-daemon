@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func InsertTxnStatus(ctx context.Context, client *elastic.Client, result types.TxnStatusResult) error {
+func InsertTxnStatus(ctx context.Context, client *elastic.Client, result types.TxnStoreResult) error {
 	_, err := client.Index().
 		Index("transaction").
 		Id(result.Transaction.Hash).
@@ -23,7 +23,7 @@ func InsertTxnStatus(ctx context.Context, client *elastic.Client, result types.T
 	return nil
 }
 
-func QueryTxnStatusList(ctx context.Context, client *elastic.Client, pageNum, pageSize int) ([]types.TxnStatusResult, int64, error) {
+func QueryTxnStatusList(ctx context.Context, client *elastic.Client, pageNum, pageSize int) ([]types.TxnStoreResult, int64, error) {
 	from := (pageNum - 1) * pageSize
 	searchResult, err := client.Search().
 		Index("transaction").
@@ -34,9 +34,9 @@ func QueryTxnStatusList(ctx context.Context, client *elastic.Client, pageNum, pa
 		return nil, 0, err
 	}
 
-	var txns []types.TxnStatusResult
+	var txns []types.TxnStoreResult
 	for _, hit := range searchResult.Hits.Hits {
-		var res types.TxnStatusResult
+		var res types.TxnStoreResult
 		if err := json.Unmarshal(hit.Source, &res); err == nil {
 			txns = append(txns, res)
 		}
