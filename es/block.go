@@ -263,10 +263,11 @@ func GetLastHeightHash(client *elastic.Client, ctx context.Context) (*types.Last
 	return &latestHeight, nil
 }
 
-func InsertChunkDetails(ctx context.Context, client *elastic.Client, result types.ChunkDetailsResult, hash string) error {
+func InsertChunkDetails(ctx context.Context, client *elastic.Client, result types.ChunkDetailsResult, hash string, ts int64) error {
 	cHash := result.Header.ChunkHash
 	body := types.ChunkDetailsStoreResult{
 		Author:       result.Author,
+		Timestamp:    ts,
 		Header:       result.Header,
 		Receipts:     result.Receipts,
 		Transactions: result.Transactions,

@@ -21,6 +21,7 @@ type BlockDetailsStoreBody struct {
 
 type ChunkDetailsStoreResult struct {
 	Author       string             `json:"author"`
+	Timestamp    int64              `json:"timestamp"`
 	Header       ChunkDetailsHeader `json:"header"`
 	Receipts     []ReceiptElement   `json:"receipts"`
 	Transactions []Transaction      `json:"transactions"`
@@ -30,13 +31,14 @@ type ChunkDetailsStoreResult struct {
 }
 
 type TxnStoreResult struct {
-	Height int64 `json:"height"`
+	Height    int64 `json:"height"`
+	Timestamp int64 `json:"timestamp"`
 	TxnStatusResult
 	//FinalExeStatus     string             `json:"final_execution_status"`
 	//ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
 	//Status             interface{}        `json:"status"`
-	//Transaction        Transaction        `json:"transaction"`
-	//TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
+	//Transaction        `json:"transaction"`
+	//TransactionOutcome `json:"transaction_outcome"`
 }
 
 type GasStoreResult struct {

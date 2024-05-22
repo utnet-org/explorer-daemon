@@ -92,3 +92,12 @@ func ConvertNanoToMilli(nano int64) int64 {
 func ConvertMillisToNano(millis int64) int64 {
 	return millis * 1e6
 }
+
+func NanoToUTC(nano int64) time.Time {
+	return time.Unix(0, nano).UTC()
+}
+
+func NanoToUTCStr(nano int64) string {
+	utcTime := time.Unix(0, nano).UTC()
+	return utcTime.Format(time.RFC3339)
+}

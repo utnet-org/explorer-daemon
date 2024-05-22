@@ -17,3 +17,17 @@ type TxnListResWeb struct {
 	Total   int64       `json:"total"`
 	TxnList []TxnResWeb `json:"txn_list"`
 }
+
+type TxnDetailResWeb struct {
+	Hash      string `json:"hash"`
+	Status    string `json:"status"`
+	Height    int64  `json:"height"`
+	Timestamp int64  `json:"timestamp"`
+	TimeUTC   string `json:"time_utc"`
+	//TxnType   string `json:"txn_type"`
+	SignerID         string        `json:"signer_id"`
+	ReceiverID       string        `json:"receiver_id"`
+	TokenTransferred []interface{} `json:"token_transferred"`
+	Deposit          string        `json:"deposit"`
+	TxnFee           float64       `json:"txn_fee"`
+}

@@ -39,7 +39,9 @@ func HandleBlockChanges(rpcType pkg.BlockChangeRpcType, header types.BlockDetail
 	return nil
 }
 
-func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
+func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHeader) error {
+	blkHash := header.Hash
+	ts := header.Timestamp
 	res, err := remote.ChunkDetailsByChunkId(chunkHash)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] ChunkDetailsByChunkId error: %v", err)
@@ -59,6 +61,7 @@ func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
 			}
 			result := types.TxnStoreResult{
 				Height:          res.Result.Header.HeightCreated,
+				Timestamp:       ts,
 				TxnStatusResult: *tRes,
 			}
 			// Store Es data
@@ -69,7 +72,7 @@ func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
 			}
 		}
 	}
-	err = es.InsertChunkDetails(ctx, client, res.Result, hash)
+	err = es.InsertChunkDetails(ctx, client, res.Result, blkHash, ts)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
 		return err
@@ -130,6 +133,8 @@ func HandleBlock() error {
 		if err != nil {
 			return err
 		}
+		blkHeader := block.Result.Header
+		blkHash := block.Result.Header.Hash
 		// get chunk hash
 		chunkHash := block.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
@@ -137,7 +142,7 @@ func HandleBlock() error {
 			log.Errorf("[HandleBlock] Hash null")
 			return err
 		}
-		err = HandleChunkDetailsByChunkId(chunkHash, block.Result.Header.Hash)
+		err = HandleChunkDetailsByChunkId(chunkHash, blkHeader)
 		if err != nil {
 			log.Errorf("[HandleBlock] HandleChunkDetailsByChunkId error: %v", err)
 			return err
@@ -148,7 +153,7 @@ func HandleBlock() error {
 			return err
 		}
 		// Update the height after all operations have been processed
-		if _, err = es.UpdateLastHeight(client, ctx, height, block.Result.Header.Hash); err != nil {
+		if _, err = es.UpdateLastHeight(client, ctx, height, blkHash); err != nil {
 			log.Error("[HandleBlock] UpdateLastHeight error:", err)
 			return err
 		}

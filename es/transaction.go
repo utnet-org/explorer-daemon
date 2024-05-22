@@ -43,3 +43,19 @@ func QueryTxnStatusList(ctx context.Context, client *elastic.Client, pageNum, pa
 	}
 	return txns, searchResult.TotalHits(), nil
 }
+
+// Query transaction status by hash
+func QueryTxnStatusByHash(ctx context.Context, client *elastic.Client, hash string) (*types.TxnStoreResult, error) {
+	result, err := client.Get().
+		Index("transaction").
+		Id(hash).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var txn types.TxnStoreResult
+	if err := json.Unmarshal(result.Source, &txn); err != nil {
+		return nil, err
+	}
+	return &txn, nil
+}
