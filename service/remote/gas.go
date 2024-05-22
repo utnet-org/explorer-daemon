@@ -1,13 +1,15 @@
 package remote
 
 import (
+	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 // Returns gas price for a specific block_height or block_hash.
-func GasPriceByBlockHeight(blockHeights []int) {
+func GasPriceByBlockHeight(blockHeights []int64) (*types.GasPriceResult, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
@@ -15,37 +17,55 @@ func GasPriceByBlockHeight(blockHeights []int) {
 		Params:  blockHeights,
 	}
 
-	body, _ := SendRemoteCall(requestBody, url)
-	fmt.Printf("GasPriceByBlockHeight Response:%s", body)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	log.Debugf("[GasPriceByBlockHeight] Json Response:%s", jsonRes)
+	var res types.GasPriceRes
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, err
+	}
+	log.Debugln("[GasPriceByBlockHeight] res:", res)
+	return &res.Result, nil
 }
 
 // Returns gas price for a specific block_height or block_hash.
-func GasPriceByBlockHash(blockHash []string) {
-
+func GasPriceByBlockHash(blockHash []string) (*types.GasPriceResult, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "gas_price",
 		Params:  blockHash,
 	}
-
-	body, _ := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("GasPriceByBlockHeight Response:%s", body)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	log.Debugf("[GasPriceByBlockHash] Json Response:%s", jsonRes)
+	var res types.GasPriceResult
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, err
+	}
+	log.Debugln("[GasPriceByBlockHash] res:", res)
+	return &res, nil
 }
 
 // Returns gas price for a specific block_height or block_hash.
-func GasPriceByNull() {
+func GasPriceByNull() (*types.GasPriceResult, error) {
 	params := []interface{}{nil}
-
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "gas_price",
 		Params:  params,
 	}
-
-	body, _ := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("GasPriceByBlockHeight Response:%s", body)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	log.Debugf("[GasPriceByBlockHash] Json Response:%s", jsonRes)
+	var res types.GasPriceResult
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, err
+	}
+	log.Debugln("[GasPriceByBlockHash] res:", res)
+	return &res, nil
 }

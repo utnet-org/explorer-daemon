@@ -9,6 +9,12 @@ type TransReceiptByIdReq struct {
 	ReceiptId string `json:"receiptId"`
 }
 
+type TxnStatusReq struct {
+	TxHash          string `json:"tx_hash"`
+	SenderAccountId string `json:"sender_account_id"`
+	WaitUntil       string `json:"wait_until,omitempty"`
+}
+
 // Transaction Send Response
 
 type TransSendRes struct {
@@ -22,45 +28,48 @@ type TransSendBody struct {
 
 // Transaction Status Response
 
-type TransStatusRes struct {
-	CommonRes CommonRes
-	Result    TransStatusBody `json:"result"`
+type TxnStatusRes struct {
+	CommonRes
+	Result TxnStatusResult `json:"result"`
 }
 
-type TransStatusBody struct {
-	ReceiptsOutcome    []ReceiptsOutcome  `json:"receiptsOutcome"`
-	Status             ResultStatus       `json:"status"`
+type TxnStatusResult struct {
+	FinalExeStatus  string            `json:"final_execution_status"`
+	ReceiptsOutcome []ReceiptsOutcome `json:"receipts_outcome"`
+	//Status             ResultStatus       `json:"status"`
+	Status             interface{}        `json:"status"`
 	Transaction        Transaction        `json:"transaction"`
-	TransactionOutcome TransactionOutcome `json:"transactionOutcome"`
+	TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
 }
 
 type ReceiptsOutcome struct {
-	BlockHash string                 `json:"blockHash"`
+	BlockHash string                 `json:"block_hash"`
 	ID        string                 `json:"id"`
 	Outcome   ReceiptsOutcomeOutcome `json:"outcome"`
-	Proof     []ReceiptsOutcomeProof `json:"proof"`
+	Proof     []OutcomeProof         `json:"proof"`
 }
 
 type ReceiptsOutcomeOutcome struct {
-	ExecutorID  string       `json:"executorId"`
-	GasBurnt    int64        `json:"gasBurnt"`
-	Logs        []string     `json:"logs"`
-	ReceiptIDS  []string     `json:"receiptIds"`
-	Status      PurpleStatus `json:"status"`
-	TokensBurnt string       `json:"tokensBurnt"`
+	OutcomeOutcome
+	Status interface{} `json:"status"`
+}
+
+type ReceiptsMetadata struct {
+	GasProfile []string `json:"gas_profile"`
+	Version    int64    `json:"version"`
 }
 
 type PurpleStatus struct {
 	SuccessValue string `json:"successValue"`
 }
 
-type ReceiptsOutcomeProof struct {
+type OutcomeProof struct {
 	Direction string `json:"direction"`
 	Hash      string `json:"hash"`
 }
 
 type ResultStatus struct {
-	SuccessValue string `json:"successValue"`
+	SuccessValue string `json:"SuccessValue"`
 }
 
 type Transaction struct {
@@ -84,28 +93,27 @@ type Transfer struct {
 }
 
 type TransactionOutcome struct {
-	BlockHash string                    `json:"blockHash"`
+	BlockHash string                    `json:"block_hash"`
 	ID        string                    `json:"id"`
 	Outcome   TransactionOutcomeOutcome `json:"outcome"`
-	Proof     []TransactionOutcomeProof `json:"proof"`
+	Proof     []OutcomeProof            `json:"proof"`
 }
 
+type OutcomeOutcome struct {
+	ExecutorID  string   `json:"executor_id"`
+	GasBurnt    int64    `json:"gas_burnt"`
+	Metadata    string   `json:"metadata"`
+	Logs        []string `json:"logs"`
+	ReceiptIDS  []string `json:"receipt_ids"`
+	TokensBurnt string   `json:"tokens_burnt"`
+}
 type TransactionOutcomeOutcome struct {
-	ExecutorID  string       `json:"executorId"`
-	GasBurnt    int64        `json:"gasBurnt"`
-	Logs        []string     `json:"logs"`
-	ReceiptIDS  []string     `json:"receiptIds"`
-	Status      FluffyStatus `json:"status"`
-	TokensBurnt string       `json:"tokensBurnt"`
+	OutcomeOutcome
+	Status interface{} `json:"status"`
 }
 
 type FluffyStatus struct {
 	SuccessReceiptID string `json:"successReceiptId"`
-}
-
-type TransactionOutcomeProof struct {
-	Direction *string `json:"direction,omitempty"`
-	Hash      *string `json:"hash,omitempty"`
 }
 
 // Transaction Status Response With Receipts

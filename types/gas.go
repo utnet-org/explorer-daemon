@@ -15,12 +15,12 @@ type GasBlockNullReq struct {
 // Gas Price Response
 
 type GasPriceRes struct {
-	CommonRes CommonRes
-	Body      GasPriceBody `json:"result"`
+	CommonRes
+	Result GasPriceResult `json:"result"`
 }
 
-type GasPriceBody struct {
-	GasPrice string `json:"gasPrice"`
+type GasPriceResult struct {
+	GasPrice string `json:"gas_price"`
 }
 
 type DailyGas struct {

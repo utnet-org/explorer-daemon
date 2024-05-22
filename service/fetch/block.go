@@ -46,6 +46,25 @@ func HandleChunkDetailsByChunkId(chunkHash, hash string) error {
 		return err
 	}
 	ctx, client := es.GetESInstance()
+	// Handle transactions not nil
+	if len(res.Result.Transactions) != 0 {
+		for _, txn := range res.Result.Transactions {
+			txnHash := txn.Hash
+			senderId := txn.SignerID
+			// Remote txns data
+			tRes, err := remote.TxnStatus(txnHash, senderId, "")
+			if err != nil {
+				log.Errorf("[HandleChunkDetailsByChunkId] Remote TransactionStatus error: %v", err)
+				return err
+			}
+			// Store Es data
+			err = es.InsertTxnStatus(ctx, client, tRes.Result)
+			if err != nil {
+				log.Errorf("[HandleChunkDetailsByChunkId] InsertTxnStatus error: %v", err)
+				return err
+			}
+		}
+	}
 	err = es.InsertChunkDetails(ctx, client, res.Result, hash)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
@@ -108,8 +127,11 @@ func HandleBlock() error {
 			log.Error("[HandleBlock] UpdateLastHeight error:", err)
 			return err
 		}
+		err = HandleGasEveryHeight(height, err, block)
+		if err != nil {
+			return err
+		}
 		// get chunk hash
-		//chunkHash := res.Result.Chunks[0].ChunkHash
 		chunkHash := block.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
 		if block.Result.Header.Hash == "" {

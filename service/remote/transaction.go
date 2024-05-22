@@ -1,9 +1,11 @@
 package remote
 
 import (
+	"encoding/json"
 	"explorer-daemon/config"
 	"explorer-daemon/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 // Sends a transaction and immediately returns transaction hash.
@@ -54,22 +56,26 @@ func TransactionSendAwait() {
 // params:
 // transaction hash (see UtilityBlocks Explorer for a valid transaction hash)
 // sender account id
-func TransactionStatus() {
-	params := make([]string, 0)
-	params = append(params, "DgAAAHNlbmRlci50ZXN0bmV0AOrmAai64SZOv9e/naX4W15pJx0GAap35wTT1T/DwcbbDwAAAAAAAAAQAAAAcmVjZWl2ZXIudGVzdG5ldNMnL7URB1cxPOu3G8jTqlEwlcasagIbKlAJlF5ywVFLAQAAAAMAAACh7czOG8LTAAAAAAAAAGQcOG03xVSFQFjoagOb4NBBqWhERnnz45LY4+52JgZhm1iQKz7qAdPByrGFDQhQ2Mfga8RlbysuQ8D8LlA6bQE=")
-	params = append(params, "sender.testnet")
+func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusRes, error) {
 	requestBody := types.RpcRequest{
 		JsonRpc: config.JsonRpc,
 		ID:      config.RpcId,
 		Method:  "tx",
-		Params: types.SignedTransactionReq{
-			SignedTransaction: params,
+		Params: types.TxnStatusReq{
+			TxHash:          hash,
+			SenderAccountId: accountId,
+			WaitUntil:       waitUntil,
 		},
 	}
-
-	body, _ := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("TransactionStatus Response:%s", body)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	log.Debugf("[TransactionStatus] Json Response:%s", jsonRes)
+	var res types.TxnStatusRes
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	log.Debugln("[TransactionStatus] res:", res)
+	return &res, nil
 }
 
 // Queries status of a transaction by hash, returning the final transaction result and details of all receipts.

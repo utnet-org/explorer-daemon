@@ -28,3 +28,18 @@ type ChunkDetailsStoreResult struct {
 	BlockHash    string             `json:"block_hash"`
 	Height       int64              `json:"height"`
 }
+
+type TxnStoreResult struct {
+	Height             string             `json:"height"`
+	FinalExeStatus     string             `json:"final_execution_status"`
+	ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
+	Status             interface{}        `json:"status"`
+	Transaction        Transaction        `json:"transaction"`
+	TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
+}
+
+type GasStoreResult struct {
+	Height   int64  `json:"height"`
+	Hash     string `json:"hash"`
+	GasPrice string `json:"gas_price"`
+}

@@ -2,18 +2,18 @@
 version: '3.7'
 
 services:
-  #  explorer-db:
-  #    image: postgres
-  #    container_name: explorer-db
-  #    restart: always
-  #    ports:
-  #      - 8012:5432
-  #    environment:
-  #      POSTGRES_PASSWORD: explorer123
-  #      POSTGRES_DB: explorer
-  #      POSTGRES_USER: explorer
-  #  volumes:
-  #    - /root/dbdata/wwcc:/var/lib/postgresql/data
+#  explorer-db:
+#    image: postgres
+#    container_name: explorer-db
+#    restart: always
+#    ports:
+#      - "8012:5432"
+#    environment:
+#      POSTGRES_PASSWORD: explorer123
+#      POSTGRES_DB: explorer
+#      POSTGRES_USER: explorer
+#  volumes:
+#    - /root/dbdata/wwcc:/var/lib/postgresql/data
   chip-db:
     image: postgres
     container_name: chip-db
