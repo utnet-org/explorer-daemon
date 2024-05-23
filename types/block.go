@@ -45,25 +45,25 @@ type BlockDetailsResult struct {
 }
 
 type Chunk struct {
-	BalanceBurnt             string   `json:"balance_burnt,omitempty"`              // 燃烧的余额
-	ChunkHash                string   `json:"chunk_hash,omitempty"`                 // 区块哈希
-	EncodedLength            int64    `json:"encoded_length,omitempty"`             // 编码长度
-	EncodedMerkleRoot        string   `json:"encoded_merkle_root,omitempty"`        // 编码默克尔根
-	GasLimit                 int64    `json:"gas_limit,omitempty"`                  // Gas 限制
-	GasUsed                  int64    `json:"gas_used,omitempty"`                   // 已使用的 Gas
-	HeightCreated            int64    `json:"height_created,omitempty"`             // 创建高度
-	HeightIncluded           int64    `json:"height_included,omitempty"`            // 包含高度
-	OutcomeRoot              string   `json:"outcome_root,omitempty"`               // 结果根
-	OutgoingReceiptsRoot     string   `json:"outgoing_receipts_root,omitempty"`     // 发出的收据根
-	PrevBlockHash            string   `json:"prev_block_hash,omitempty"`            // 上一个区块哈希
-	PrevStateRoot            string   `json:"prev_state_root,omitempty"`            // 上一个状态根
-	RentPaid                 string   `json:"rent_paid,omitempty"`                  // 租金支付
-	ShardID                  int64    `json:"shard_id,omitempty"`                   // 分片ID
-	Signature                string   `json:"signature,omitempty"`                  // 签名
-	TxRoot                   string   `json:"tx_root,omitempty"`                    // 交易根
-	ValidatorFrozenProposals []string `json:"validator_frozen_proposals,omitempty"` // 验证者冻结提案
-	ValidatorPowerProposals  []string `json:"validator_power_proposals,omitempty"`  // 验证者权力提案
-	ValidatorReward          string   `json:"validator_reward,omitempty"`           // 验证者奖励
+	BalanceBurnt             string   `json:"balance_burnt"`              // 燃烧的余额
+	ChunkHash                string   `json:"chunk_hash"`                 // 区块哈希
+	EncodedLength            int64    `json:"encoded_length"`             // 编码长度
+	EncodedMerkleRoot        string   `json:"encoded_merkle_root"`        // 编码默克尔根
+	GasLimit                 int64    `json:"gas_limit"`                  // Gas 限制
+	GasUsed                  int64    `json:"gas_used"`                   // 已使用的 Gas
+	HeightCreated            int64    `json:"height_created"`             // 创建高度
+	HeightIncluded           int64    `json:"height_included"`            // 包含高度
+	OutcomeRoot              string   `json:"outcome_root"`               // 结果根
+	OutgoingReceiptsRoot     string   `json:"outgoing_receipts_root"`     // 发出的收据根
+	PrevBlockHash            string   `json:"prev_block_hash"`            // 上一个区块哈希
+	PrevStateRoot            string   `json:"prev_state_root"`            // 上一个状态根
+	RentPaid                 string   `json:"rent_paid"`                  // 租金支付
+	ShardID                  int64    `json:"shard_id"`                   // 分片ID
+	Signature                string   `json:"signature"`                  // 签名
+	TxRoot                   string   `json:"tx_root"`                    // 交易根
+	ValidatorFrozenProposals []string `json:"validator_frozen_proposals"` // 验证者冻结提案
+	ValidatorPowerProposals  []string `json:"validator_power_proposals"`  // 验证者权力提案
+	ValidatorReward          string   `json:"validator_reward"`           // 验证者奖励
 }
 
 type BlockDetailsHeader struct {

@@ -107,40 +107,6 @@ func InsertLastHeight(ctx context.Context, client *elastic.Client, height int64,
 	return nil
 }
 
-func BlockQuery2() {
-	ctx, client := Init()
-	// 定义要查询的用户
-	userToQuery := "user0" // 假设我们要查询 user123 的推文
-
-	// 构建一个 term 查询
-	termQuery := elastic.NewTermQuery("user", userToQuery)
-	// 开始计时
-	//startTime := time.Now()
-	// 执行搜索
-	searchResult, err := client.Search().
-		Index("weibo").
-		Query(termQuery).
-		Sort("created", true). // 根据创建时间排序
-		From(0).Size(10).      // 分页参数
-		Pretty(true).
-		Do(ctx)
-	if err != nil {
-		fmt.Println(err)
-	}
-	var blk types.Weibo
-	for _, hit := range searchResult.Hits.Hits {
-		_ = json.Unmarshal(hit.Source, &blk)
-		//fmt.Printf("用户: %s, 推文: %s, 转发数: %d\n", wb.User, wb.Message, wb.Retweets)
-		// 可以进一步解析 hit.Source 以获取完整的推文数据
-		//fmt.Printf("推文 ID: %s\n", hit.Id)
-	}
-	pkg.PrintStruct(blk)
-	// 结束计时
-	//duration := time.Since(startTime)
-	//fmt.Printf("耗时: %v\n", duration)
-	//time.Sleep(100 * time.Millisecond)
-}
-
 // 查询Block详情
 func GetBlockDetails(queryType pkg.BlockQueryType, queryValue interface{}) (*types.BlockDetailsStoreBody, error) {
 	var queryName string
@@ -176,8 +142,25 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue interface{}) (*typ
 	return &body, nil
 }
 
-func GetLastBlock() (*types.BlockDetailsResult, error) {
-	ctx, client := GetESInstance()
+func GetLastBlock(ctx context.Context, client *elastic.Client) (*types.BlockDetailsResult, error) {
+	res, err := client.Search().
+		Index("block").
+		Sort("height", false). // Sort height
+		Size(1).
+		Do(ctx)
+	if err != nil {
+		log.Errorf("[GetLastBlock] Query error: %v\n", err)
+		return nil, err
+	}
+	var body types.BlockDetailsResult
+	if res.TotalHits() == 0 {
+		return nil, fmt.Errorf("[GetLastBlock] no blocks found")
+	}
+	_ = json.Unmarshal(res.Hits.Hits[0].Source, &body)
+	return &body, nil
+}
+
+func GetLastBlockByLastHeight(ctx context.Context, client *elastic.Client) (*types.BlockDetailsResult, error) {
 	last, err := GetLastHeightHash(client, ctx)
 	if err != nil {
 		log.Errorf("[GetLastBlock] GetLastHeight error: %v\n", err)
@@ -199,7 +182,31 @@ func GetLastBlock() (*types.BlockDetailsResult, error) {
 	return &body, nil
 }
 
-func GetLastBlocks() (*[]types.LastBlockResWeb, error) {
+func GetLastBlocks(ctx context.Context, client *elastic.Client) (*[]types.LastBlockResWeb, error) {
+	res, err := client.Search().
+		Index("block").
+		Sort("height", false). // Sort height
+		Size(10).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var blocks []types.LastBlockResWeb
+	for _, hit := range res.Hits.Hits {
+		var body types.LastBlockResWeb
+		_ = json.Unmarshal(hit.Source, &body)
+		changes, err := QueryFinalBlockChanges(body.Hash)
+		if err != nil {
+			return nil, err
+		}
+		body.Messages = len(changes.Changes)
+		blocks = append(blocks, body)
+	}
+	log.Debugf("[GetLastBlocks] Data Total: %d", res.TotalHits())
+	return &blocks, nil
+}
+
+func GetLastBlocksByLastHeight() (*[]types.LastBlockResWeb, error) {
 	ctx, client := GetESInstance()
 	last, err := GetLastHeightHash(client, ctx)
 	if err != nil {
@@ -237,7 +244,6 @@ func GetLastBlocks() (*[]types.LastBlockResWeb, error) {
 }
 
 func GetLastHeightHash(client *elastic.Client, ctx context.Context) (*types.LastHeightHash, error) {
-	// 查询最新 height
 	latestHeightResult, err := client.Get().
 		Index("last_height").
 		Id("latest").
@@ -245,19 +251,23 @@ func GetLastHeightHash(client *elastic.Client, ctx context.Context) (*types.Last
 	if err != nil {
 		// 检查是否因为索引不存在而出错
 		if elastic.IsNotFound(err) {
-			log.Warningln("[GetLastHeight] Index not found, creating a new one...")
+			log.Warningln("[GetLastHeightHash] Index not found, creating a new one...")
 			if err := InsertLastHeight(ctx, client, 0, ""); err != nil {
-				log.Warningf("[GetLastHeight] Error creating index: %v", err)
+				log.Warningf("[GetLastHeightHash] Error creating index: %v", err)
 			}
 		} else {
-			log.Fatalf("[GetLastHeight] Error fetching or storing blocks: %v", err)
+			log.Fatalf("[GetLastHeightHash] Error fetching or storing blocks: %v", err)
 			return nil, err
 		}
+	}
+	if latestHeightResult.Source == nil {
+		log.Errorf("[GetLastHeightHash] Nil data error: %v", err)
+		return nil, err
 	}
 	var latestHeight types.LastHeightHash
 	err = json.Unmarshal(latestHeightResult.Source, &latestHeight)
 	if err != nil {
-		log.Errorf("[GetLastHeight] Error fetching or storing blocks: %v", err)
+		log.Errorf("[GetLastHeightHash] Error fetching or storing blocks: %v", err)
 		return nil, err
 	}
 	return &latestHeight, nil
@@ -321,12 +331,11 @@ func QueryChunkDetails(ctx context.Context, client *elastic.Client, queryType pk
 
 func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64, hash string) (int64, error) {
 	// 定义在文档不存在时要插入的默认文档
-	upsert := map[string]interface{}{"height": height, "hash": hash}
+	update := map[string]interface{}{"height": height, "hash": hash}
 	latestHeightResult, err := client.Update().
 		Index("last_height").
 		Id("latest").
-		Doc(upsert).
-		Upsert(upsert).
+		Doc(update).
 		Do(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -337,11 +346,11 @@ func UpdateLastHeight(client *elastic.Client, ctx context.Context, height int64,
 	if err != nil {
 		return -1, err
 	}
-	if latestHeightResult.Result != "updated" {
-		log.Warningln("[UpdateLastHeight] update result:", latestHeightResult.Result)
-		return -1, errors.New("update last height failed")
+	if latestHeightResult.Result == "noop" {
+		log.Warningln("[UpdateLastHeight] Noop Height:", height)
+	} else {
+		log.Debug("[UpdateLastHeight] Success Height:", height)
 	}
-	log.Debug("[UpdateLastHeight] Update last height success height:", height)
 	return height, nil
 }
 
@@ -628,7 +637,7 @@ func QuerySupplyDiff24h(ctx context.Context, client *elastic.Client) float64 {
 		Sort("timestamp_milli", false).
 		Size(1)
 
-	lastResult, err := lastRecordSearch.Do(context.Background())
+	lastResult, err := lastRecordSearch.Do(ctx)
 	if err != nil {
 		log.Fatalf("Error executing the last record query: %s", err)
 	}
@@ -718,4 +727,37 @@ func BlockDetailsProcessed(ctx context.Context, client *elastic.Client, qType in
 		PrevHash:         res.PrevHash,
 	}
 	return &resWeb, nil
+}
+
+// CheckMissingHeights 检查指定范围内是否有缺失的高度
+func CheckMissingHeights(ctx context.Context, client *elastic.Client, index string, start, end int) ([]int, error) {
+	var missingHeights []int
+	heights := make(map[int]bool)
+
+	// 查询指定范围内的所有文档，并按height字段升序排序
+	searchResult, err := client.Search().
+		Index(index).
+		Query(elastic.NewRangeQuery("height").Gte(start).Lte(end)).
+		Sort("height", true).
+		Size(1000). // Elasticsearch 默认的最大值，如果数据量更大需要分页处理
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 收集存在的高度
+	for _, hit := range searchResult.Hits.Hits {
+		var block types.BlockDetailsStoreBody
+		if err := json.Unmarshal(hit.Source, &block); err != nil {
+			return nil, err
+		}
+		heights[int(block.Height)] = true
+	}
+	// 检查缺失的高度
+	for i := start; i <= end; i++ {
+		if !heights[i] {
+			missingHeights = append(missingHeights, i)
+		}
+	}
+	return missingHeights, nil
 }

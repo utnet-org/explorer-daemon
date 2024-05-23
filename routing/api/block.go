@@ -78,7 +78,12 @@ func BlockDetailsExe(req types.BlockDetailsReq) (*types.BlockDetailsResWeb, erro
 // @Success 200 {object} types.LastBlockRes "Success Response"
 // @Router /block/last [post]
 func LastBlock(c *fiber.Ctx) error {
-	res, _ := es.GetLastBlocks()
+	ctx, client := es.GetESInstance()
+	res, err := es.GetLastBlocks(ctx, client)
+	if err != nil {
+		log.Errorf("[LastBlock] GetLastBlocks error: %v", err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "error", ""))
+	}
 	log.Debugf("BlockDetails res success, res: %v", res)
 	return c.JSON(pkg.SuccessResponse(res))
 }

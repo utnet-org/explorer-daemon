@@ -33,8 +33,8 @@ func TestChangeInBlockByFinal(t *testing.T) {
 }
 
 func TestGasPriceByBlockHeight(t *testing.T) {
-	heights := []int{1}
-	remote.GasPriceByBlockHeight(heights)
+	heights := []int64{1}
+	_, _ = remote.GasPriceByBlockHeight(heights)
 }
 
 func TestGasPriceByBlockHash(t *testing.T) {
@@ -86,10 +86,6 @@ func TestTransactionSendAsync(t *testing.T) {
 
 func TestTransactionSendAwait(t *testing.T) {
 	remote.TransactionSendAwait()
-}
-
-func TestTransactionStatus(t *testing.T) {
-	remote.TransactionStatus()
 }
 
 func TestTransactionStatusReceipts(t *testing.T) {

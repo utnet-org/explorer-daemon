@@ -77,6 +77,7 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
 		return err
 	}
+	log.Debugf("[HandleChunkDetailsByChunkId] Success Height: %v", header.Height)
 	return nil
 }
 
@@ -106,16 +107,16 @@ func HandleBlock() error {
 	}
 	// TODO 待完善初始height逻辑
 	// init last height
-	if last.Height == 0 {
-		last.Height = rpcHeight - 1
-	}
+	//if last.Height == 0 {
+	//	last.Height = rpcHeight - 1
+	//}
 	// 存储从 lastHeight+1 到最新高度的所有区块
-	for height := last.Height + 1; height <= rpcHeight; height++ {
-		log.Infof("[HandleBlock] Start Handle Height: %v, RpcHeight: %v", height, rpcHeight)
+	for height := last.Height; height <= rpcHeight; height++ {
+		log.Infof("[HandleBlock] Start Height: %v, RpcHeight: %v", height, rpcHeight)
 		block, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
 			if err.Error() == "UNKNOWN_BLOCK" {
-				log.Warningf("[HandleBlock] Continue UNKNOWN_BLOCK height: %v", height)
+				log.Warningf("[HandleBlock] Continue UNKNOWN_BLOCK Height: %v", height)
 				continue
 			}
 			log.Error("[HandleBlock] BlockDetailsByBlockId error:", err)
@@ -125,21 +126,22 @@ func HandleBlock() error {
 			log.Error("[HandleBlock] HandleBlock rpc res nil")
 			return err
 		}
-		if err = es.InsertBlockDetails(ctx, client, block.Result); err != nil {
-			log.Error("[HandleBlock] InsertBlockDetails error:", err)
-			return err
-		}
+
 		err = HandleGasEveryHeight(height, err, block)
 		if err != nil {
 			return err
 		}
 		blkHeader := block.Result.Header
 		blkHash := block.Result.Header.Hash
-		// get chunk hash
+		// Get chunk hash
 		chunkHash := block.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
 		if block.Result.Header.Hash == "" {
 			log.Errorf("[HandleBlock] Hash null")
+			return err
+		}
+		if err = es.InsertBlockDetails(ctx, client, block.Result); err != nil {
+			log.Error("[HandleBlock] InsertBlockDetails error:", err)
 			return err
 		}
 		err = HandleChunkDetailsByChunkId(chunkHash, blkHeader)

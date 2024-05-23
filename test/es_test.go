@@ -4,13 +4,14 @@ import (
 	"explorer-daemon/es"
 	"explorer-daemon/pkg"
 	"explorer-daemon/service/fetch"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestEsInsert(t *testing.T) {
 	es.Init()
-	fetch.InitFetchData()
+	fetch.InitChainData()
 }
 
 func TestEsBlockDetailsQuery(t *testing.T) {
@@ -20,17 +21,14 @@ func TestEsBlockDetailsQuery(t *testing.T) {
 
 func TestEsGetLastBlocks(t *testing.T) {
 	es.Init()
-	es.GetLastBlocks()
+	es.GetLastBlocksByLastHeight()
 }
 
 func TestEsGetLastBlock(t *testing.T) {
 	es.Init()
-	res, _ := es.GetLastBlock()
+	ctx, client := es.Init()
+	res, _ := es.GetLastBlockByLastHeight(ctx, client)
 	pkg.PrintStruct(res)
-}
-
-func TestEsQuery2(t *testing.T) {
-	es.BlockQuery2()
 }
 
 func TestBlockChanges(t *testing.T) {
@@ -67,4 +65,15 @@ func TestNetWorkInfo(t *testing.T) {
 		return
 	}
 	pkg.PrintStruct(res)
+}
+
+func TestCheckHeight(t *testing.T) {
+	ctx, client := es.Init()
+	index := "chunk"
+	res, err := es.CheckMissingHeights(ctx, client, index, 0, 250)
+	if err != nil {
+		return
+	}
+	fmt.Println(res)
+	fmt.Println(len(res))
 }

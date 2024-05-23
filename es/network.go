@@ -3,6 +3,7 @@ package es
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/olivere/elastic/v7"
@@ -32,8 +33,10 @@ func GetNetworkInfo(ctx context.Context, client *elastic.Client) (*types.Network
 		Size(1).
 		Do(ctx)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
+	}
+	if res.TotalHits() == 0 {
+		return nil, errors.New("no data found")
 	}
 	var body types.NetworkInfoResult
 	_ = json.Unmarshal(res.Hits.Hits[0].Source, &body)

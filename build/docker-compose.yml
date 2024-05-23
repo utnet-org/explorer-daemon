@@ -2,28 +2,28 @@
 version: '3.7'
 
 services:
-#  explorer-db:
-#    image: postgres
-#    container_name: explorer-db
-#    restart: always
-#    ports:
-#      - "8012:5432"
-#    environment:
-#      POSTGRES_PASSWORD: explorer123
-#      POSTGRES_DB: explorer
-#      POSTGRES_USER: explorer
-#  volumes:
-#    - /root/dbdata/wwcc:/var/lib/postgresql/data
-  chip-db:
+  explorer-db:
     image: postgres
-    container_name: chip-db
+    container_name: explorer-db
     restart: always
     ports:
-      - "8013:5432"
+      - "8012:5432"
     environment:
-      POSTGRES_PASSWORD: utility12345
-      POSTGRES_DB: chipdb
-      POSTGRES_USER: utility
+      POSTGRES_PASSWORD: explorer123
+      POSTGRES_DB: explorer
+      POSTGRES_USER: explorer
+#  volumes:
+#    - /root/dbdata/wwcc:/var/lib/postgresql/data
+#  chip-db:
+#    image: postgres
+#    container_name: chip-db
+#    restart: always
+#    ports:
+#      - "8013:5432"
+#    environment:
+#      POSTGRES_PASSWORD: utility12345
+#      POSTGRES_DB: chipdb
+#      POSTGRES_USER: utility
   elasticsearch:
     #    elasticsearch 7.17版本后，jdbc连接通行证不再免费，为了兼容使用7.10.2版本，实测DataGrip driver不支持license
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
