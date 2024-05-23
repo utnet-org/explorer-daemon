@@ -7,30 +7,31 @@ import (
 	"explorer-daemon/types"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 	"time"
 )
 
 func HandleBlockChanges(rpcType pkg.BlockChangeRpcType, header types.BlockDetailsHeader) error {
 	var queryValue interface{}
-	if rpcType == pkg.BlockChangeRpcFinal {
-		queryValue = strconv.Itoa(int(header.Height))
-
-	} else if rpcType == pkg.BlockChangeRpcHeight {
+	switch rpcType {
+	case pkg.BlockChangeRpcFinal:
+		queryValue = "final"
+	case pkg.BlockChangeRpcHeight:
 		queryValue = header.Height
-	} else if rpcType == pkg.BlockChangeRpcHash {
+	case pkg.BlockChangeRpcHash:
 		queryValue = header.Hash
+	default:
+		queryValue = "final"
 	}
 	res, err := remote.ChangesInBlock(rpcType, queryValue)
 	if err != nil {
 		log.Errorf("[BlockChangesRpc] ChangesInBlock rpc error: %v", err)
 		return err
 	}
-	res.Result.Height = header.Height
-	res.Result.Timestamp = header.Timestamp
-	res.Result.TimestampNanosec = header.TimestampNanosec
+	res.Height = header.Height
+	res.Timestamp = header.Timestamp
+	res.TimestampNanosec = header.TimestampNanosec
 	ctx, client := es.GetESInstance()
-	err = es.InsertBlockChanges(ctx, client, res.Result)
+	err = es.InsertBlockChanges(ctx, client, res)
 	if err != nil {
 		log.Errorln("[BlockChangesRpc] InsertData error:", err)
 		return err
@@ -105,15 +106,14 @@ func HandleBlock() error {
 		log.Infof("[HandleBlock] No New Blocks, Height: %v, RpcHeight: %v", last.Height, rpcHeight)
 		return nil
 	}
-	// TODO 待完善初始height逻辑
+	// TODO 待完善初始Height逻辑
 	// init last height
 	//if last.Height == 0 {
 	//	last.Height = rpcHeight - 1
 	//}
-	// 存储从 lastHeight+1 到最新高度的所有区块
 	for height := last.Height; height <= rpcHeight; height++ {
 		log.Infof("[HandleBlock] Start Height: %v, RpcHeight: %v", height, rpcHeight)
-		block, err := remote.BlockDetailsByBlockId(height)
+		currBlk, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
 			if err.Error() == "UNKNOWN_BLOCK" {
 				log.Warningf("[HandleBlock] Continue UNKNOWN_BLOCK Height: %v", height)
@@ -122,25 +122,25 @@ func HandleBlock() error {
 			log.Error("[HandleBlock] BlockDetailsByBlockId error:", err)
 			return err
 		}
-		if block == nil {
+		if currBlk == nil {
 			log.Error("[HandleBlock] HandleBlock rpc res nil")
 			return err
 		}
 
-		err = HandleGasEveryHeight(height, err, block)
+		err = HandleGasEveryHeight(height, err, currBlk)
 		if err != nil {
 			return err
 		}
-		blkHeader := block.Result.Header
-		blkHash := block.Result.Header.Hash
+		blkHeader := currBlk.Result.Header
+		blkHash := currBlk.Result.Header.Hash
 		// Get chunk hash
-		chunkHash := block.Result.Chunks[0].ChunkHash
+		chunkHash := currBlk.Result.Chunks[0].ChunkHash
 		// 获取最新block中的chunk details
-		if block.Result.Header.Hash == "" {
+		if currBlk.Result.Header.Hash == "" {
 			log.Errorf("[HandleBlock] Hash null")
 			return err
 		}
-		if err = es.InsertBlockDetails(ctx, client, block.Result); err != nil {
+		if err = es.InsertBlockDetails(ctx, client, currBlk.Result); err != nil {
 			log.Error("[HandleBlock] InsertBlockDetails error:", err)
 			return err
 		}
@@ -149,7 +149,9 @@ func HandleBlock() error {
 			log.Errorf("[HandleBlock] HandleChunkDetailsByChunkId error: %v", err)
 			return err
 		}
-		err = HandleBlockChanges(2, res.Result.Header)
+		// Handle current height block detail
+		//err = HandleBlockChanges(pkg.BlockChangeRpcHeight, res.Result.Header)
+		err = HandleBlockChanges(pkg.BlockChangeRpcHeight, currBlk.Result.Header)
 		if err != nil {
 			log.Errorf("[HandleBlock] HandleBlockChanges error: %v", err)
 			return err

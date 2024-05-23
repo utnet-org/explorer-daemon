@@ -100,12 +100,12 @@ type TransactionOutcome struct {
 }
 
 type OutcomeOutcome struct {
-	ExecutorID  string   `json:"executor_id"`
-	GasBurnt    int64    `json:"gas_burnt"`
-	Metadata    string   `json:"metadata"`
-	Logs        []string `json:"logs"`
-	ReceiptIDS  []string `json:"receipt_ids"`
-	TokensBurnt string   `json:"tokens_burnt"`
+	ExecutorID  string      `json:"executor_id"`
+	GasBurnt    int64       `json:"gas_burnt"`
+	Metadata    interface{} `json:"metadata"`
+	Logs        []string    `json:"logs"`
+	ReceiptIDS  []string    `json:"receipt_ids"`
+	TokensBurnt string      `json:"tokens_burnt"`
 }
 type TransactionOutcomeOutcome struct {
 	OutcomeOutcome

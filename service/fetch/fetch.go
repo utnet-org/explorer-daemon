@@ -7,14 +7,27 @@ import (
 )
 
 func InitChainData() {
+	go TickerBlock()
+	TickerOther()
+}
+
+func TickerBlock() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		if err := HandleBlock(); err != nil {
-			// TODO 某些block没有数据
+			// some unknown block
 			log.Errorf("[InitFetchData] HandleBlock error: %v", err)
 		}
+	}
+}
+
+func TickerOther() {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
 		if err := HandleMiner(); err != nil {
 			log.Errorf("[InitFetchData] HandleMiner error: %v", err)
 		}

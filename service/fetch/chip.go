@@ -13,15 +13,15 @@ func HandleChipQuery() error {
 		return err
 	}
 	ctx, client := es.GetESInstance()
-	qRes, err := es.QueryChipByHeight(ctx, client, res.Result.BlockHeight)
-	if err != nil {
-		log.Errorf("[HandleChipQuery] query error: %v", err)
-		return err
-	}
-	if qRes.TotalHits() > 0 {
-		log.Debugf("[HandleChipQuery] Chip data exist, height: %v", res.Result.BlockHeight)
-		return nil
-	}
+	//qRes, err := es.QueryChipByHeight(ctx, client, res.Result.BlockHeight)
+	//if err != nil {
+	//	log.Errorf("[HandleChipQuery] query error: %v", err)
+	//	return err
+	//}
+	//if qRes.TotalHits() > 0 {
+	//	log.Debugf("[HandleChipQuery] Chip data exist, height: %v", res.Result.BlockHeight)
+	//	return nil
+	//}
 	err = es.InsertChip(ctx, client, res.Result)
 	if err != nil {
 		log.Errorf("[HandleChipQuery] insert error: %v", err)

@@ -48,12 +48,9 @@ func OverviewInfo(c *fiber.Ctx) error {
 	}
 	totalPower := pkg.DivisionPowerOfTen(float64(miners.TotalPower), 12)
 	var aveOut24 float64
-	if totalPower != 0 {
+	if totalPower != 0 && blockSupply24 != 0 {
 		formattedValue := fmt.Sprintf("%.6f", totalPower/blockSupply24)
-		aveOut24, err = strconv.ParseFloat(formattedValue, 64)
-		if err != nil {
-			fmt.Println("Error converting to float:", err)
-		}
+		aveOut24, _ = strconv.ParseFloat(formattedValue, 64)
 	}
 	totalMsgs24 := es.QueryBlockChangeMsg24h()
 	ex := types.OverviewInfoRes{

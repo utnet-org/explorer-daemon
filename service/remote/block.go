@@ -80,10 +80,10 @@ func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) 
 
 // Returns changes in block for given block height or hash. You can also use finality param to return latest block details.
 // rpcType 0 final 1 block_id
-func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.BlockChangesRes, error) {
+func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.BlockChangesResult, error) {
 	var params types.BlockChangesReq
 	if rpcType == pkg.BlockChangeRpcFinal {
-		params.Finality = "final"
+		params.Finality = value.(string)
 	} else {
 		params.BlockId = value
 	}
@@ -102,7 +102,7 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 		log.Errorf("Error unmarshalling JSON: %v", err)
 	}
 	log.Debugf("ChangeInBlockByFinal res: %v", res)
-	return res, err
+	return res.Result, err
 }
 
 // Returns details of a specific chunk. You can run a block details query to get a valid chunk hash.

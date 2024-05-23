@@ -8,19 +8,10 @@ import (
 )
 
 func InsertChip(ctx context.Context, client *elastic.Client, result types.ChipQueryResult) error {
-	//var cs = make([]types.Chip, 0)
-	//cs = append(cs, types.Chip{
-	//	MinerId:   "1",
-	//	Power:     1,
-	//	BusId:     "123",
-	//	PublicKey: "456",
-	//	ChipSN:    "789",
-	//	P2Key:     "123",
-	//})
-	//result.Chip = cs
 	createIndexIfNotExists(ctx, client, "chip")
 	_, err := client.Index().
 		Index("chip").
+		Id("chip").
 		BodyJson(&result).
 		Do(ctx)
 	if err != nil {
