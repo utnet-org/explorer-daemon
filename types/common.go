@@ -1,7 +1,7 @@
 package types
 
 type RpcRequest struct {
-	JsonRpc string      `json:"jsonrpc"`
+	Jsonrpc string      `json:"jsonrpc"`
 	ID      string      `json:"id"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params"`

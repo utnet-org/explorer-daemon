@@ -10,7 +10,7 @@ import (
 
 func ChipsQuery() (types.ChipQueryRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "query",
 		Params: types.ChipQueryReq{

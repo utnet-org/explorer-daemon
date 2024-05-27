@@ -12,7 +12,7 @@ import (
 func NetworkNodeStatus() {
 	params := make([]interface{}, 0)
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "status",
 		Params:  params,
@@ -27,7 +27,7 @@ func NetworkNodeStatus() {
 func NetworkInfo() (*types.NetworkInfoRes, error) {
 	params := make([]interface{}, 0)
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "network_info",
 		Params:  params,
@@ -50,7 +50,7 @@ func NetworkInfo() (*types.NetworkInfoRes, error) {
 // params: ["block hash"], [block number], {"epoch_id": "epoch id"}, {"block_id": block number}, {"block_id": "block hash"}, or [null] for the latest block
 func ValidationStatusByBlockNumber(blockNumber int) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "validators",
 		Params:  blockNumber,
@@ -63,7 +63,7 @@ func ValidationStatusByBlockNumber(blockNumber int) {
 
 func ValidationStatusByNull() (*types.ValidationStatusRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "validators",
 		Params:  []interface{}{nil},

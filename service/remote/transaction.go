@@ -16,7 +16,7 @@ func TransactionSendAsync() {
 	params := make([]string, 0)
 	params = append(params, "DgAAAHNlbmRlci50ZXN0bmV0AOrmAai64SZOv9e/naX4W15pJx0GAap35wTT1T/DwcbbDwAAAAAAAAAQAAAAcmVjZWl2ZXIudGVzdG5ldNMnL7URB1cxPOu3G8jTqlEwlcasagIbKlAJlF5ywVFLAQAAAAMAAACh7czOG8LTAAAAAAAAAGQcOG03xVSFQFjoagOb4NBBqWhERnnz45LY4+52JgZhm1iQKz7qAdPByrGFDQhQ2Mfga8RlbysuQ8D8LlA6bQE=")
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "broadcast_tx_async",
 		Params: types.SignedTransactionReq{
@@ -37,7 +37,7 @@ func TransactionSendAwait() {
 	params := make([]string, 0)
 	params = append(params, "DgAAAHNlbmRlci50ZXN0bmV0AOrmAai64SZOv9e/naX4W15pJx0GAap35wTT1T/DwcbbDwAAAAAAAAAQAAAAcmVjZWl2ZXIudGVzdG5ldNMnL7URB1cxPOu3G8jTqlEwlcasagIbKlAJlF5ywVFLAQAAAAMAAACh7czOG8LTAAAAAAAAAGQcOG03xVSFQFjoagOb4NBBqWhERnnz45LY4+52JgZhm1iQKz7qAdPByrGFDQhQ2Mfga8RlbysuQ8D8LlA6bQE=")
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "broadcast_tx_commit",
 		Params: types.SignedTransactionReq{
@@ -58,7 +58,7 @@ func TransactionSendAwait() {
 // sender account id
 func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusResult, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "tx",
 		Params: types.TxnStatusReq{
@@ -89,7 +89,7 @@ func TransactionStatusReceipts() {
 	params = append(params, "HEgnVQZfs9uJzrqTob4g2Xmebqodq9waZvApSkrbcAhd")
 	params = append(params, "bowen")
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_tx_status",
 		Params: types.SignedTransactionReq{
@@ -110,7 +110,7 @@ func TransactionStatusReceipts() {
 func TransactionReceiptsById(receiptId string) {
 
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_receipt",
 		Params: types.TransReceiptByIdReq{

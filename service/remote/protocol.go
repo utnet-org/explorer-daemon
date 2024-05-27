@@ -10,7 +10,7 @@ import (
 func GenesisConfig() {
 
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_genesis_config",
 	}
@@ -23,7 +23,7 @@ func GenesisConfig() {
 // Returns most recent protocol configuration or a specific queried block. Useful for finding current storage and transaction costs.
 func ProtocolConfigByFinal() {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_protocol_config",
 		Params: types.BlockFinalReq{
@@ -39,7 +39,7 @@ func ProtocolConfigByFinal() {
 // Returns most recent protocol configuration or a specific queried block. Useful for finding current storage and transaction costs.
 func ProtocolConfigByBlockId(blockId int) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_protocol_config",
 		Params: types.BlockIdReq{

@@ -60,7 +60,7 @@ func ExperimentalHttp() {
 
 	// 准备请求体结构体
 	requestBody := types.RpcRequest{
-		JsonRpc: "2.0",
+		Jsonrpc: "2.0",
 		ID:      "dontcare",
 		Method:  "EXPERIMENTAL_genesis_config",
 		Params: types.BlockIdReq{

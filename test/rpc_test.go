@@ -2,6 +2,7 @@ package test
 
 import (
 	"explorer-daemon/pkg"
+	"explorer-daemon/service/fetch"
 	"explorer-daemon/service/remote"
 	"testing"
 )
@@ -94,4 +95,8 @@ func TestTransactionStatusReceipts(t *testing.T) {
 
 func TestTransactionReceiptById(t *testing.T) {
 	remote.TransactionReceiptsById("2EbembRPJhREPtmHCrGv3Xtdm3xoc5BMVYHm3b2kjvMY")
+}
+
+func TestContract(t *testing.T) {
+	fetch.HandleContract()
 }

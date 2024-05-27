@@ -9,7 +9,7 @@ import (
 
 func AllMiners(blockHash interface{}) (*types.AllMinersRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "all_miners",
 		Params: types.BlockHashReq{
@@ -29,7 +29,7 @@ func AllMiners(blockHash interface{}) (*types.AllMinersRes, error) {
 
 func Validators(blockHash interface{}) (*types.AllMinersRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "all_miners",
 		Params: types.BlockHashReq{

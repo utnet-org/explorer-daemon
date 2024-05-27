@@ -16,7 +16,7 @@ The RPC API enables you to query the network and get details about specific bloc
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
 func BlockDetailsByFinal() (*types.BlockDetailsRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "block",
 		Params: types.BlockFinalReq{
@@ -41,7 +41,7 @@ func BlockDetailsByFinal() (*types.BlockDetailsRes, error) {
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
 func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "block",
 		Params: types.BlockIdReq{
@@ -67,7 +67,7 @@ func BlockDetailsByBlockId(blockId interface{}) (*types.BlockDetailsRes, error) 
 // Queries network and returns block for given height or hash. You can also use finality param to return latest block details.
 //func BlockDetailsByBlockHash(blockHash string) {
 //	requestBody := types.RpcRequest{
-//		JsonRpc: config.JsonRpc,
+//		Jsonrpc: config.Jsonrpc,
 //		ID:      config.RpcId,
 //		Method:  "block",
 //		Params: types.BlockHashReq{
@@ -88,7 +88,7 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 		params.BlockId = value
 	}
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_changes_in_block",
 		Params:  params,
@@ -108,7 +108,7 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 // Returns details of a specific chunk. You can run a block details query to get a valid chunk hash.
 func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "chunk",
 		Params: types.ChunkId{
@@ -128,7 +128,7 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 
 func ChunkDetailsByBlockId(chunkId string) (types.ChunkDetailsRes, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "chunk",
 		Params: types.ChunkId{

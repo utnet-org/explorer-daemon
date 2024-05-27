@@ -11,7 +11,7 @@ import (
 // Returns gas price for a specific block_height or block_hash.
 func GasPriceByBlockHeight(blockHeights []int64) (*types.GasPriceResult, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "gas_price",
 		Params:  blockHeights,
@@ -32,7 +32,7 @@ func GasPriceByBlockHeight(blockHeights []int64) (*types.GasPriceResult, error) 
 // Returns gas price for a specific block_height or block_hash.
 func GasPriceByBlockHash(blockHash []string) (*types.GasPriceResult, error) {
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "gas_price",
 		Params:  blockHash,
@@ -53,7 +53,7 @@ func GasPriceByBlockHash(blockHash []string) (*types.GasPriceResult, error) {
 func GasPriceByNull() (*types.GasPriceResult, error) {
 	params := []interface{}{nil}
 	requestBody := types.RpcRequest{
-		JsonRpc: config.JsonRpc,
+		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "gas_price",
 		Params:  params,
