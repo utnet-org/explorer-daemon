@@ -34,3 +34,8 @@ type Page struct {
 	PageNum  int `json:"page_num"`
 	PageSize int `json:"page_size"`
 }
+
+type QueryFilterRes struct {
+	QueryType int         `json:"query_type"`
+	Keyword   interface{} `json:"keyword"`
+}

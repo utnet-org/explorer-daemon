@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
+	"strconv"
 )
 
 func AccountDetail(c *fiber.Ctx) error {
@@ -26,8 +27,16 @@ func AccountDetailExe(accId string) (*types.AccountResult, error) {
 		log.Errorf("[AccountDetailExe] ViewAccount error: %v", err)
 		return nil, err
 	}
+	if res == nil {
+		log.Warningln("[AccountDetailExe] Account nil")
+		return nil, errors.New("account not found")
+	}
+	pledge, _ := pkg.DivisionBigPowerOfTen(res.Pledging, 24)
+	power, _ := pkg.DivisionBigPowerOfTen(res.Power, 12)
+	res.Pledging = strconv.FormatFloat(pledge, 'f', -1, 64)
+	res.Power = strconv.FormatFloat(power, 'f', -1, 64)
 	log.Debugf("AccountDetailExe res success, res: %v", res)
-	return nil, errors.New("account not exist")
+	return res, nil
 }
 
 func ContractDetail(c *fiber.Ctx) error {

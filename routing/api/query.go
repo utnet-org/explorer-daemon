@@ -100,15 +100,14 @@ func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 
 	}
 	// Account Query
-	if len(strKey) == 64 {
-		res, err := AccountDetailExe(strKey)
+	if len(strKey) == 64 || strKey == "unc" {
 		//res, err := GetValidatorExe(strKey)
-		if err != nil {
-			return nil, err
-		}
 		//log.Debugf("[ExecuteQuery] GetValidatorExe:%v", res)
-		log.Debugf("[ExecuteQuery] AccountDetailExe:%v", res)
-		return pkg.QueryResponse(res, pkg.SearchAccount), nil
+		res := types.QueryFilterRes{
+			QueryType: int(pkg.SearchAccount),
+			Keyword:   strKey,
+		}
+		return pkg.SuccessResponse(res), nil
 	}
 	// Chip Query
 	if strings.HasPrefix(strings.TrimSpace(strKey), "UTC") {

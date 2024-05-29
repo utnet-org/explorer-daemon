@@ -132,8 +132,9 @@ func GetBlockDetails(queryType pkg.BlockQueryType, queryValue interface{}) (*typ
 		return nil, err
 	}
 	if searchResult.TotalHits() == 0 {
-		log.Printf("[BlockDetailsQuery] Total Hits:%s", searchResult.TotalHits())
-		return nil, errors.New("nil data")
+		log.Printf("[BlockDetailsQuery] Nil data, Total Hits:%d", searchResult.TotalHits())
+		//return nil, errors.New("nil data")
+		return nil, nil
 	}
 	var body types.BlockDetailsStoreBody
 	for _, hit := range searchResult.Hits.Hits {

@@ -17,3 +17,8 @@ type Miner struct {
 	PublicKey                   string `json:"public_key"`
 	ValidatorPowerStructVersion string `json:"validator_power_struct_version"`
 }
+
+type MinerData struct {
+	timestamp int64
+	result    AllMinersResult
+}
