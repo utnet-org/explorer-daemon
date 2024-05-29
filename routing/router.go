@@ -39,6 +39,9 @@ func Setup(f *fiber.App) {
 	prep.Get("txn/list", api.GetTxnList)
 	prep.Post("txn/detail", api.GetTxnDetail)
 
+	//account
+	prep.Post("account/detail", api.AccountDetail)
+
 	//contract
 	prep.Post("contract/detail", api.ContractDetail)
 

@@ -1,9 +1,8 @@
 package types
 
 type AccountRes struct {
-	ID      string        `json:"id"`
-	Jsonrpc string        `json:"jsonrpc"`
-	Result  AccountResult `json:"result"`
+	CommonRes
+	Result AccountResult `json:"result"`
 }
 
 type AccountResult struct {
@@ -12,6 +11,8 @@ type AccountResult struct {
 	BlockHeight   int64  `json:"block_height"`
 	CodeHash      string `json:"code_hash"`
 	Locked        string `json:"locked"`
+	Pledging      string `json:"pledging"`
+	Power         string `json:"power"`
 	StoragePaidAt int64  `json:"storage_paid_at"`
 	StorageUsage  int64  `json:"storage_usage"`
 }
@@ -48,7 +49,7 @@ type ChangeChange struct {
 	StorageUsage  int64  `json:"storage_usage"`
 }
 
-type ContractReq struct {
+type AccountReq struct {
 	AccountID   string `json:"account_id"`
 	Finality    string `json:"finality"`
 	RequestType string `json:"request_type"`

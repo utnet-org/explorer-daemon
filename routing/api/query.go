@@ -59,6 +59,7 @@ func (q QueryConditionReq) ExecuteQuery() interface{} {
 func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 	numberRegex := regexp.MustCompile(`^\d+$`)
 	strKey := fmt.Sprintf("%v", keyword)
+	// Block Height Query
 	if numberRegex.MatchString(strKey) {
 		intKey, err := strconv.ParseInt(strKey, 10, 64)
 		if err != nil {
@@ -75,6 +76,7 @@ func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 		log.Debugf("[ExecuteQuery] BlockDetailsExe:%v", res)
 		return pkg.QueryResponse(res, pkg.SearchBlockHeight), nil
 	}
+	// Block Hash or Transaction Hash Query
 	if len(strKey) == 44 {
 		req := types.BlockDetailsReq{
 			QueryType: pkg.BlockQueryHash,
@@ -84,17 +86,31 @@ func ExecuteQuery2(keyword interface{}) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Debugf("[ExecuteQuery] BlockDetailsExe:%v", res)
-		return pkg.QueryResponse(res, pkg.SearchBlockHash), nil
+		if res != nil {
+			log.Debugf("[ExecuteQuery] BlockDetailsExe:%v", res)
+			return pkg.QueryResponse(res, pkg.SearchBlockHash), nil
+		} else {
+			resTxn, err := GetTxnDetailExe(strKey)
+			if err != nil {
+				return nil, err
+			}
+			log.Debugf("[ExecuteQuery] GetTxnDetailExe:%v", res)
+			return pkg.QueryResponse(resTxn, pkg.SearchTransaction), nil
+		}
+
 	}
+	// Account Query
 	if len(strKey) == 64 {
-		res, err := GetValidatorExe(strKey)
+		res, err := AccountDetailExe(strKey)
+		//res, err := GetValidatorExe(strKey)
 		if err != nil {
 			return nil, err
 		}
-		log.Debugf("[ExecuteQuery] GetValidatorExe:%v", res)
+		//log.Debugf("[ExecuteQuery] GetValidatorExe:%v", res)
+		log.Debugf("[ExecuteQuery] AccountDetailExe:%v", res)
 		return pkg.QueryResponse(res, pkg.SearchAccount), nil
 	}
+	// Chip Query
 	if strings.HasPrefix(strings.TrimSpace(strKey), "UTC") {
 		res, err := QueryChipInfoExe(strKey)
 		if err != nil {
