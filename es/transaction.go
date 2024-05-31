@@ -59,3 +59,21 @@ func QueryTxnStatusByHash(ctx context.Context, client *elastic.Client, hash stri
 	}
 	return &txn, nil
 }
+
+// Query transaction status by block height
+func QueryTxnByHeight(ctx context.Context, client *elastic.Client, height int64) (*types.TxnStoreResult, error) {
+	termQuery := elastic.NewTermQuery("height", height)
+	result, err := client.Search().
+		Index("transaction").
+		Query(termQuery).
+		Size(1).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var txn types.TxnStoreResult
+	if err := json.Unmarshal(result.Hits.Hits[0].Source, &txn); err != nil {
+		return nil, err
+	}
+	return &txn, nil
+}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"explorer-daemon/es"
 	"explorer-daemon/pkg"
 	"explorer-daemon/service/remote"
 	"explorer-daemon/types"
@@ -40,11 +41,27 @@ func AccountDetailExe(accId string) (*types.AccountResult, error) {
 }
 
 func ContractDetail(c *fiber.Ctx) error {
-	res, err := remote.ViewContractCode("unc")
+	accId := gjson.Get(string(c.Body()), "account_id").String()
+	res, err := remote.ViewContractCode(accId)
 	if err != nil {
 		log.Errorf("[ContractDetail] ViewContractCode error: %v", err)
 		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "error", ""))
 	}
 	log.Debugf("ContractDetail res success, res: %v", res)
-	return c.JSON(pkg.SuccessResponse(res.CodeBase64))
+	ctx, client := es.GetESInstance()
+	esRes, err := es.QueryTxnByHeight(ctx, client, res.BlockHeight)
+	if err != nil {
+		log.Errorf("[TxnDetailExe] Es QueryTxnByHeight Height: %v, error: %s", res.BlockHeight, err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "error", ""))
+	}
+	webRes := types.ContractDetailResultWeb{
+		BlockHash:   res.BlockHash,
+		BlockHeight: res.BlockHeight,
+		TimeStamp:   pkg.NanoToUTCStr(esRes.Timestamp),
+		TxnHash:     esRes.Transaction.Hash,
+		Locked:      "Yes",
+		CodeHash:    res.Hash,
+		CodeBase64:  res.CodeBase64,
+	}
+	return c.JSON(pkg.SuccessResponse(webRes))
 }
