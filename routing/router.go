@@ -35,9 +35,10 @@ func Setup(f *fiber.App) {
 	prep.Post("query/chipinfo", api.QueryChipInfo)
 	prep.Get("chip/list", api.GetChipList)
 
-	//transaction
+	//Transaction
 	prep.Get("txn/list", api.GetTxnList)
 	prep.Post("txn/detail", api.GetTxnDetail)
+	prep.Get("txn/account", api.GetAccountTxns)
 
 	//account
 	prep.Post("account/detail", api.AccountDetail)

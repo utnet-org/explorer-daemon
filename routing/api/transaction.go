@@ -96,3 +96,40 @@ func isTransactionSuccessful(txStatus interface{}) string {
 	}
 	return ""
 }
+
+func GetAccountTxns(c *fiber.Ctx) error {
+	accId := c.Query("account_id")
+	num := c.QueryInt("page_num")
+	size := c.QueryInt("page_size")
+	if num <= 1 {
+		num = 1
+	}
+	if size <= 0 {
+		size = 10
+	}
+	ctx, client := es.GetESInstance()
+	esRes, total, err := es.QueryAccountTxns(ctx, client, num, size, accId)
+	if err != nil {
+		return c.JSON(pkg.MessageResponse(-1, err.Error(), "查询交易失败"))
+	}
+
+	var result []types.TxnResWeb
+	for _, v := range esRes {
+		tb, _ := pkg.DivisionBigPowerOfTen(v.TransactionOutcome.Outcome.TokensBurnt, 24)
+		result = append(result, types.TxnResWeb{
+			Height:     v.Height,
+			Timestamp:  v.Timestamp,
+			Hash:       v.Transaction.Hash,
+			TxnType:    "", // unknown
+			ReceiverID: v.Transaction.ReceiverID,
+			SignerID:   v.Transaction.SignerID,
+			Deposit:    "", // only function call has deposit
+			TxnFee:     tb,
+		})
+	}
+	webRes := types.TxnListResWeb{
+		Total:   total,
+		TxnList: result,
+	}
+	return c.JSON(pkg.SuccessResponse(webRes))
+}

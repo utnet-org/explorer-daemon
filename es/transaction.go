@@ -77,3 +77,29 @@ func QueryTxnByHeight(ctx context.Context, client *elastic.Client, height int64)
 	}
 	return &txn, nil
 }
+
+func QueryAccountTxns(ctx context.Context, client *elastic.Client, pageNum, pageSize int, accId string) ([]types.TxnStoreResult, int64, error) {
+	termQuery := elastic.NewBoolQuery().Should(
+		elastic.NewTermQuery("transaction.receiver_id", accId),
+		elastic.NewTermQuery("transaction.signer_id", accId),
+	)
+	from := (pageNum - 1) * pageSize
+	searchResult, err := client.Search().
+		Index("transaction").
+		From(from).
+		Size(pageSize).
+		Query(termQuery).
+		Do(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var txns []types.TxnStoreResult
+	for _, hit := range searchResult.Hits.Hits {
+		var res types.TxnStoreResult
+		if err := json.Unmarshal(hit.Source, &res); err == nil {
+			txns = append(txns, res)
+		}
+	}
+	return txns, searchResult.TotalHits(), nil
+}
