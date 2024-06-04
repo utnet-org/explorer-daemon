@@ -3,6 +3,7 @@ package es
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"explorer-daemon/types"
 	"fmt"
 	"github.com/olivere/elastic/v7"
@@ -72,6 +73,9 @@ func QueryTxnByHeight(ctx context.Context, client *elastic.Client, height int64)
 		return nil, err
 	}
 	var txn types.TxnStoreResult
+	if result.TotalHits() == 0 {
+		return nil, errors.New("no data found")
+	}
 	if err := json.Unmarshal(result.Hits.Hits[0].Source, &txn); err != nil {
 		return nil, err
 	}
