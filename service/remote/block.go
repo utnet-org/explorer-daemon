@@ -106,7 +106,7 @@ func ChangesInBlock(rpcType pkg.BlockChangeRpcType, value interface{}) (types.Bl
 }
 
 // Returns details of a specific chunk. You can run a block details query to get a valid chunk hash.
-func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
+func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsResult, error) {
 	requestBody := types.RpcRequest{
 		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
@@ -123,7 +123,7 @@ func ChunkDetailsByChunkId(chunkId string) (types.ChunkDetailsRes, error) {
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
 	log.Debugln("ChunkDetailsByChunkId res:", res)
-	return res, err
+	return res.Result, err
 }
 
 func ChunkDetailsByBlockId(chunkId string) (types.ChunkDetailsRes, error) {

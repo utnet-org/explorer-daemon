@@ -50,8 +50,13 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 	}
 	ctx, client := es.GetESInstance()
 	// Handle transactions not nil
-	if len(res.Result.Transactions) != 0 {
-		for _, txn := range res.Result.Transactions {
+	if len(res.Receipts) != 0 {
+		for i, rec := range res.Receipts {
+			res.Receipts[i].Receipt.Action.Actions = convertActions(rec.Receipt.Action.Actions)
+		}
+	}
+	if len(res.Transactions) != 0 {
+		for i, txn := range res.Transactions {
 			txnHash := txn.Hash
 			senderId := txn.SignerID
 			// Remote txns data
@@ -60,8 +65,10 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 				log.Errorf("[HandleChunkDetailsByChunkId] Remote TransactionStatus error: %v", err)
 				return err
 			}
+			tRes.Transaction.Actions = convertActions(tRes.Transaction.Actions)
+			res.Transactions[i].Actions = convertActions(txn.Actions)
 			result := types.TxnStoreResult{
-				Height:          res.Result.Header.HeightCreated,
+				Height:          res.Header.HeightCreated,
 				Timestamp:       ts,
 				TxnStatusResult: *tRes,
 			}
@@ -73,7 +80,7 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 			}
 		}
 	}
-	err = es.InsertChunkDetails(ctx, client, res.Result, blkHash, ts)
+	err = es.InsertChunkDetails(ctx, client, res, blkHash, ts)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
 		return err
@@ -164,4 +171,17 @@ func HandleBlock() error {
 		time.Sleep(200 * time.Millisecond)
 	}
 	return nil
+}
+
+func convertActions(actions []interface{}) []interface{} {
+	var convertedActions []interface{}
+	for _, action := range actions {
+		switch v := action.(type) {
+		case string:
+			convertedActions = append(convertedActions, map[string]interface{}{v: v})
+		default:
+			convertedActions = append(convertedActions, v)
+		}
+	}
+	return convertedActions
 }

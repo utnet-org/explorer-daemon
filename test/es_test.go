@@ -77,3 +77,12 @@ func TestCheckHeight(t *testing.T) {
 	fmt.Println(res)
 	fmt.Println(len(res))
 }
+
+func TestChunkDetail(t *testing.T) {
+	ctx, client := es.Init()
+	res, err := es.QueryChunkDetails(ctx, client, pkg.ChunkQueryBlockHeight, 74691)
+	if err != nil {
+		return
+	}
+	pkg.PrintStruct(res)
+}
