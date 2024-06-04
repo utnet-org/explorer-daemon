@@ -65,3 +65,34 @@ func ContractDetail(c *fiber.Ctx) error {
 	}
 	return c.JSON(pkg.SuccessResponse(webRes))
 }
+
+func ContractInfo(c *fiber.Ctx) error {
+	accId := gjson.Get(string(c.Body()), "account_id").String()
+	ctx, client := es.GetESInstance()
+	esRes, _, err := es.QueryDeployContractTxn(ctx, client, accId)
+	if err != nil {
+		return c.JSON(pkg.MessageResponse(-1, err.Error(), ""))
+	}
+
+	var result []types.TxnDeployContractResWeb
+	var codeHash string
+	for _, v := range esRes {
+		action := v.Transaction.Actions[0]
+		switch a := action.(type) {
+		case map[string]interface{}:
+			if value, exists := a["DeployContract"]; exists {
+				codeHash = value.(map[string]interface{})["code"].(string)
+			}
+		default:
+			action = ""
+		}
+		result = append(result, types.TxnDeployContractResWeb{
+			TxnHash:   v.Transaction.Hash,
+			Timestamp: v.Timestamp,
+			TimeUTC:   pkg.NanoToUTCStr(v.Timestamp),
+			CodeHash:  codeHash,
+			Height:    v.Height,
+		})
+	}
+	return c.JSON(pkg.SuccessResponse(result[0]))
+}

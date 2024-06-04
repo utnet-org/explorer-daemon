@@ -107,3 +107,33 @@ func QueryAccountTxns(ctx context.Context, client *elastic.Client, pageNum, page
 	}
 	return txns, searchResult.TotalHits(), nil
 }
+
+func QueryDeployContractTxn(ctx context.Context, client *elastic.Client, accId string) ([]types.TxnStoreResult, int64, error) {
+	// Construct the query
+	termQuery := elastic.NewBoolQuery().
+		Must(elastic.NewMatchQuery("transaction.signer_id", accId)).
+		Filter(elastic.NewExistsQuery("transaction.actions.DeployContract"))
+
+	searchResult, err := client.Search().
+		Index("transaction").
+		Query(termQuery).
+		Size(1). // Only one deploy contract of each account
+		Do(ctx)
+	if err != nil {
+		log.Errorf("[QueryDeployContractTxn] error: %v", err)
+		return nil, 0, err
+	}
+	if searchResult.TotalHits() == 0 {
+		log.Warningln("[QueryDeployContractTxn] no data found")
+		return nil, 0, errors.New("no data found")
+	}
+
+	var txns []types.TxnStoreResult
+	for _, hit := range searchResult.Hits.Hits {
+		var res types.TxnStoreResult
+		if err := json.Unmarshal(hit.Source, &res); err == nil {
+			txns = append(txns, res)
+		}
+	}
+	return txns, searchResult.TotalHits(), nil
+}

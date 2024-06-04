@@ -1,0 +1,631 @@
+{
+  "mappings": {
+    "properties": {
+      "final_execution_status": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "height": {
+        "type": "long"
+      },
+      "receipts_outcome": {
+        "properties": {
+          "block_hash": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "id": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "outcome": {
+            "properties": {
+              "executor_id": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "gas_burnt": {
+                "type": "long"
+              },
+              "metadata": {
+                "properties": {
+                  "gas_profile": {
+                    "properties": {
+                      "cost": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "cost_category": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "gas_used": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "version": {
+                    "type": "long"
+                  }
+                }
+              },
+              "receipt_ids": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "status": {
+                "properties": {
+                  "Failure": {
+                    "properties": {
+                      "ActionError": {
+                        "properties": {
+                          "index": {
+                            "type": "long"
+                          },
+                          "kind": {
+                            "properties": {
+                              "AccountDoesNotExist": {
+                                "properties": {
+                                  "account_id": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "FunctionCallError": {
+                                "properties": {
+                                  "ExecutionError": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "TriesToPledge": {
+                                "properties": {
+                                  "account_id": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  },
+                                  "balance": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  },
+                                  "pledge": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  },
+                                  "pledging": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "SuccessValue": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "tokens_burnt": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "proof": {
+            "properties": {
+              "direction": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "hash": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "status": {
+        "properties": {
+          "Failure": {
+            "properties": {
+              "ActionError": {
+                "properties": {
+                  "index": {
+                    "type": "long"
+                  },
+                  "kind": {
+                    "properties": {
+                      "AccountDoesNotExist": {
+                        "properties": {
+                          "account_id": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "FunctionCallError": {
+                        "properties": {
+                          "ExecutionError": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "TriesToPledge": {
+                        "properties": {
+                          "account_id": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "balance": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "pledge": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "pledging": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "SuccessValue": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "timestamp": {
+        "type": "long"
+      },
+      "transaction": {
+        "properties": {
+          "actions": {
+            "type": "nested",
+            "properties": {
+              "AddKey": {
+                "properties": {
+                  "access_key": {
+                    "properties": {
+                      "nonce": {
+                        "type": "long"
+                      },
+                      "permission": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "public_key": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "CreateAccount": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "CreateRsa2048Challenge": {
+                "properties": {
+                  "args": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "challenge_key": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "public_key": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "DeployContract": {
+                "properties": {
+                  "code": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "FunctionCall": {
+                "properties": {
+                  "args": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "deposit": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "gas": {
+                    "type": "long"
+                  },
+                  "method_name": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "Pledge": {
+                "properties": {
+                  "pledge": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "public_key": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "Transfer": {
+                "properties": {
+                  "deposit": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "hash": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "nonce": {
+            "type": "long"
+          },
+          "public_key": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "receiver_id": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "signature": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "signer_id": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "transaction_outcome": {
+        "properties": {
+          "block_hash": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "id": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "outcome": {
+            "properties": {
+              "executor_id": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "gas_burnt": {
+                "type": "long"
+              },
+              "metadata": {
+                "properties": {
+                  "version": {
+                    "type": "long"
+                  }
+                }
+              },
+              "receipt_ids": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "status": {
+                "properties": {
+                  "SuccessReceiptId": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "tokens_burnt": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "proof": {
+            "properties": {
+              "direction": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "hash": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

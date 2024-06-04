@@ -31,3 +31,11 @@ type TxnDetailResWeb struct {
 	Deposit          string        `json:"deposit"`
 	TxnFee           float64       `json:"txn_fee"`
 }
+
+type TxnDeployContractResWeb struct {
+	TxnHash   string `json:"txn_hash"`
+	Timestamp int64  `json:"timestamp"`
+	TimeUTC   string `json:"time_utc"`
+	CodeHash  string `json:"code_hash"`
+	Height    int64  `json:"height"`
+}
