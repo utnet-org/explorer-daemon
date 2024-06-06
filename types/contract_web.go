@@ -9,3 +9,8 @@ type ContractDetailResultWeb struct {
 	CodeHash    string `json:"code_hash"`
 	CodeBase64  string `json:"code_base64"`
 }
+
+type ContractCodeResultWeb struct {
+	CodeHash   string `json:"code_hash"`
+	CodeBase64 string `json:"code_base64"`
+}

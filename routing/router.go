@@ -46,6 +46,7 @@ func Setup(f *fiber.App) {
 	//contract
 	prep.Post("contract/detail", api.ContractDetail)
 	prep.Post("contract/info", api.ContractInfo)
+	prep.Post("contract/code", api.ContractCode)
 
 	// coin
 	prep.Get("/coin/price", api.CoinPrice)

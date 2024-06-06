@@ -96,3 +96,18 @@ func ContractInfo(c *fiber.Ctx) error {
 	}
 	return c.JSON(pkg.SuccessResponse(result[0]))
 }
+
+func ContractCode(c *fiber.Ctx) error {
+	accId := gjson.Get(string(c.Body()), "account_id").String()
+	res, err := remote.ViewContractCode(accId)
+	if err != nil {
+		log.Errorf("[ContractCode] ViewContractCode error: %v", err)
+		return c.JSON(pkg.MessageResponse(pkg.MESSAGE_FAIL, "error", ""))
+	}
+	log.Debugf("[ContractCode] res success, res: %v", res)
+	webRes := types.ContractCodeResultWeb{
+		CodeHash:   res.Hash,
+		CodeBase64: res.CodeBase64,
+	}
+	return c.JSON(pkg.SuccessResponse(webRes))
+}
