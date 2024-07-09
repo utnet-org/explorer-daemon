@@ -9,8 +9,8 @@ import (
 
 func TestCompleteTxn(t *testing.T) {
 	es.Init()
-	err := fetch.CompleteTransactionDetails()
+	err := fetch.CompleteTxnDetails()
 	if err != nil {
-		fmt.Println("TestCompleteTxn err:", err)
+		fmt.Println("[TestCompleteTxn] err:", err)
 	}
 }

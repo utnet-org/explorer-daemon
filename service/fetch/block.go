@@ -55,23 +55,34 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 			res.Receipts[i].Receipt.Action.Actions = convertActions(rec.Receipt.Action.Actions)
 		}
 	}
+	// Ergodic chunk transactions not nil
 	if len(res.Transactions) != 0 {
 		for i, txn := range res.Transactions {
 			txnHash := txn.Hash
 			senderId := txn.SignerID
 			// Remote txns data
-			//tRes, err := remote.TxnStatus(txnHash, senderId, "")
+			// tRes, err := remote.TxnStatus(txnHash, senderId, "")
 			tRes, err := remote.TransactionStatusReceipts(txnHash, senderId, "NONE")
 			if err != nil {
 				log.Errorf("[HandleChunkDetailsByChunkId] Remote TransactionStatus error: %v", err)
 				return err
 			}
+			// Convert txn status actions only key
+			// (ex: "CreatedAccount" -> {"CreatedAccount": "CreatedAccount"})
 			tRes.Transaction.Actions = convertActions(tRes.Transaction.Actions)
+			// Convert complete chunk details transaction actions
 			res.Transactions[i].Actions = convertActions(txn.Actions)
+			// Ergodic txn status receipts
+			if len(tRes.Receipts) != 0 {
+				for j, rec := range tRes.Receipts {
+					rActions := convertActions(rec.Receipt.Action.Actions)
+					tRes.Receipts[j].Receipt.Action.Actions = rActions
+				}
+			}
 			result := types.TxnStoreResult{
 				Height:    res.Header.HeightCreated,
 				Timestamp: ts,
-				//TxnStatusResult: *tRes,
+				// TxnStatusResult: *tRes,
 				TxnStatusReceiptsResult: *tRes,
 			}
 			// Store Es data
@@ -82,6 +93,12 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 			}
 		}
 	}
+	//if len(res.Receipts) != 0 {
+	//	for k, rec := range res.Transactions {
+	//		// Convert complete chunk details receipt actions
+	//		res.Receipts[k].Receipt.Action.Actions = convertActions(rec.Actions)
+	//	}
+	//}
 	err = es.InsertChunkDetails(ctx, client, res, blkHash, ts)
 	if err != nil {
 		log.Errorf("[HandleChunkDetailsByChunkId] InsertChunkDetails error: %v", err)
