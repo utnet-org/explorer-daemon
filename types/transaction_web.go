@@ -19,18 +19,20 @@ type TxnListResWeb struct {
 }
 
 type TxnDetailResWeb struct {
-	Hash      string `json:"hash"`
-	Status    string `json:"status"`
-	Height    int64  `json:"height"`
-	Timestamp int64  `json:"timestamp"`
-	TimeUTC   string `json:"time_utc"`
+	FinalExeStatus string `json:"final_execution_status"`
+	Hash           string `json:"hash"`
+	Status         string `json:"status"`
+	Height         int64  `json:"height"`
+	Timestamp      int64  `json:"timestamp"`
+	TimeUTC        string `json:"time_utc"`
 	//TxnType   string `json:"txn_type"`
 	SignerID         string            `json:"signer_id"`
 	ReceiverID       string            `json:"receiver_id"`
 	TokenTransferred []interface{}     `json:"token_transferred"`
 	Deposit          string            `json:"deposit"`
 	TxnFee           float64           `json:"txn_fee"`
-	Receipts         []ReceiptsOutcome `json:"receipts"`
+	Receipts         []ReceiptElement  `json:"receipts"`
+	ReceiptsOutcome  []ReceiptsOutcome `json:"receipts_outcome"`
 }
 
 type TxnDeployContractResWeb struct {
