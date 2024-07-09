@@ -1,31 +1,32 @@
 package fetch
 
 import (
+	"explorer-daemon/es"
 	"explorer-daemon/service/remote"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-// CompleteTransactionDetails complete transaction details
-func CompleteTransactionDetails() error {
-	completeHeights := make([]int64, 0)
-	completeHeights = append(completeHeights, 74691)
-	//_, client := es.Init()
+// CompleteTxnDetails complete transaction details
+func CompleteTxnDetails() error {
+	//completeHeights := make([]int64, 0)
+	//completeHeights = append(completeHeights, 74691)
+	_, client := es.Init()
 	// Get needful heights
-	//completeHeights := es.QueryTxnHeights(client)
+	completeHeights := es.QueryTxnHeights(client)
 	for _, height := range completeHeights {
 		//for height := last.Height; height <= rpcHeight; height++ {
 		currBlk, err := remote.BlockDetailsByBlockId(height)
 		if err != nil {
 			if err.Error() == "UNKNOWN_BLOCK" {
-				log.Warningf("[HandleBlock] Continue UNKNOWN_BLOCK Height: %v", height)
+				log.Warningf("[CompleteTxnDetails] Continue UNKNOWN_BLOCK Height: %v", height)
 				continue
 			}
-			log.Error("[HandleBlock] BlockDetailsByBlockId error:", err)
+			log.Error("[CompleteTxnDetails] BlockDetailsByBlockId error:", err)
 			return err
 		}
 		if currBlk == nil {
-			log.Error("[HandleBlock] HandleBlock rpc res nil")
+			log.Error("[CompleteTxnDetails] HandleBlock rpc res nil")
 			return err
 		}
 
@@ -38,16 +39,16 @@ func CompleteTransactionDetails() error {
 		chunkHash := currBlk.Result.Chunks[0].ChunkHash
 		// Get final block's chunk details
 		if currBlk.Result.Header.Hash == "" {
-			log.Errorf("[HandleBlock] Hash null")
+			log.Errorf("[CompleteTxnDetails] Hash null")
 			return err
 		}
 		err = HandleChunkDetailsByChunkId(chunkHash, blkHeader)
 		if err != nil {
-			log.Errorf("[HandleBlock] HandleChunkDetailsByChunkId error: %v", err)
+			log.Errorf("[CompleteTxnDetails] HandleChunkDetailsByChunkId error: %v", err)
 			return err
 		}
 		time.Sleep(200 * time.Millisecond)
-		log.Infof("CompleteTransactionDetails height: %v", height)
+		log.Infof("[CompleteTxnDetails] success height: %v", height)
 	}
 	return nil
 }
