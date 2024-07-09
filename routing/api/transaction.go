@@ -69,6 +69,7 @@ func GetTxnDetailExe(txnHash string) (*types.TxnDetailResWeb, error) {
 	}
 	tb, _ := pkg.DivisionBigPowerOfTen(esRes.TransactionOutcome.Outcome.TokensBurnt, 24)
 	resWeb := &types.TxnDetailResWeb{
+		FinalExeStatus:   esRes.FinalExeStatus,
 		Hash:             esRes.Transaction.Hash,
 		Status:           isTransactionSuccessful(esRes.TransactionOutcome.Outcome.Status),
 		Height:           esRes.Height,
@@ -79,7 +80,8 @@ func GetTxnDetailExe(txnHash string) (*types.TxnDetailResWeb, error) {
 		TokenTransferred: nil,
 		Deposit:          "",
 		TxnFee:           tb,
-		Receipts:         esRes.ReceiptsOutcome,
+		Receipts:         esRes.Receipts,
+		ReceiptsOutcome:  esRes.ReceiptsOutcome,
 	}
 	return resWeb, nil
 }
