@@ -25,11 +25,12 @@ type TxnDetailResWeb struct {
 	Timestamp int64  `json:"timestamp"`
 	TimeUTC   string `json:"time_utc"`
 	//TxnType   string `json:"txn_type"`
-	SignerID         string        `json:"signer_id"`
-	ReceiverID       string        `json:"receiver_id"`
-	TokenTransferred []interface{} `json:"token_transferred"`
-	Deposit          string        `json:"deposit"`
-	TxnFee           float64       `json:"txn_fee"`
+	SignerID         string            `json:"signer_id"`
+	ReceiverID       string            `json:"receiver_id"`
+	TokenTransferred []interface{}     `json:"token_transferred"`
+	Deposit          string            `json:"deposit"`
+	TxnFee           float64           `json:"txn_fee"`
+	Receipts         []ReceiptsOutcome `json:"receipts"`
 }
 
 type TxnDeployContractResWeb struct {

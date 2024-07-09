@@ -60,7 +60,8 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 			txnHash := txn.Hash
 			senderId := txn.SignerID
 			// Remote txns data
-			tRes, err := remote.TxnStatus(txnHash, senderId, "")
+			//tRes, err := remote.TxnStatus(txnHash, senderId, "")
+			tRes, err := remote.TransactionStatusReceipts(txnHash, senderId, "NONE")
 			if err != nil {
 				log.Errorf("[HandleChunkDetailsByChunkId] Remote TransactionStatus error: %v", err)
 				return err
@@ -68,9 +69,10 @@ func HandleChunkDetailsByChunkId(chunkHash string, header types.BlockDetailsHead
 			tRes.Transaction.Actions = convertActions(tRes.Transaction.Actions)
 			res.Transactions[i].Actions = convertActions(txn.Actions)
 			result := types.TxnStoreResult{
-				Height:          res.Header.HeightCreated,
-				Timestamp:       ts,
-				TxnStatusResult: *tRes,
+				Height:    res.Header.HeightCreated,
+				Timestamp: ts,
+				//TxnStatusResult: *tRes,
+				TxnStatusReceiptsResult: *tRes,
 			}
 			// Store Es data
 			err = es.InsertTxnStatus(ctx, client, result)

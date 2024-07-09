@@ -79,6 +79,7 @@ func GetTxnDetailExe(txnHash string) (*types.TxnDetailResWeb, error) {
 		TokenTransferred: nil,
 		Deposit:          "",
 		TxnFee:           tb,
+		Receipts:         esRes.ReceiptsOutcome,
 	}
 	return resWeb, nil
 }

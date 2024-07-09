@@ -68,6 +68,10 @@ func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusResult, error
 		},
 	}
 	jsonRes, err := SendRemoteCall(requestBody, url)
+	if err != nil {
+		log.Errorf("[TxnStatus] Error:%s", err)
+		return nil, err
+	}
 	log.Debugf("[TransactionStatus] Json Response:%s", jsonRes)
 	var res types.TxnStatusRes
 	err = json.Unmarshal(jsonRes, &res)
@@ -84,22 +88,32 @@ func TxnStatus(hash, accountId, waitUntil string) (*types.TxnStatusResult, error
 // params:
 // transaction hash (see UtilityBlocks Explorer for a valid transaction hash)
 // sender account id (used to determine which shard to query for transaction)
-func TransactionStatusReceipts() {
-	params := make([]string, 0)
-	params = append(params, "HEgnVQZfs9uJzrqTob4g2Xmebqodq9waZvApSkrbcAhd")
-	params = append(params, "bowen")
+func TransactionStatusReceipts(hash, accountId, waitUntil string) (*types.TxnStatusReceiptsResult, error) {
+	//params = append(params, "HEgnVQZfs9uJzrqTob4g2Xmebqodq9waZvApSkrbcAhd")
+	//params = append(params, "bowen")
 	requestBody := types.RpcRequest{
 		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,
 		Method:  "EXPERIMENTAL_tx_status",
-		Params: types.SignedTransactionReq{
-			SignedTransaction: params,
+		Params: types.TxnStatusReq{
+			TxHash:          hash,
+			SenderAccountId: accountId,
+			WaitUntil:       waitUntil,
 		},
 	}
-
-	body, _ := SendRemoteCall(requestBody, url)
-
-	fmt.Printf("TransactionStatusReceipts Response:%s", body)
+	jsonRes, err := SendRemoteCall(requestBody, url)
+	if err != nil {
+		log.Errorf("[TransactionStatus] Error:%s", err)
+		return nil, err
+	}
+	log.Debugf("[TransactionStatus] Json Response:%s", jsonRes)
+	var res types.TxnStatusReceiptsRes
+	err = json.Unmarshal(jsonRes, &res)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+	}
+	log.Debugln("[TransactionStatus] res:", res)
+	return &res.Result, nil
 }
 
 // Fetches a receipt by it's ID (as is, without a status or execution outcome)
@@ -108,7 +122,6 @@ func TransactionStatusReceipts() {
 // params:
 // receipt_id (see Utility Explorer for a valid receipt id)
 func TransactionReceiptsById(receiptId string) {
-
 	requestBody := types.RpcRequest{
 		Jsonrpc: config.Jsonrpc,
 		ID:      config.RpcId,

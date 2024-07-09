@@ -33,7 +33,8 @@ type ChunkDetailsStoreResult struct {
 type TxnStoreResult struct {
 	Height    int64 `json:"height"`
 	Timestamp int64 `json:"timestamp"`
-	TxnStatusResult
+	TxnStatusReceiptsResult
+	//TxnStatusResult
 	//FinalExeStatus     string             `json:"final_execution_status"`
 	//ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
 	//Status             interface{}        `json:"status"`
