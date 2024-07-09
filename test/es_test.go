@@ -86,3 +86,9 @@ func TestChunkDetail(t *testing.T) {
 	}
 	pkg.PrintStruct(res)
 }
+
+func TestTxnHeights(t *testing.T) {
+	_, client := es.Init()
+	heights := es.QueryTxnHeights(client)
+	fmt.Println(heights)
+}

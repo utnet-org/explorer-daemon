@@ -43,15 +43,10 @@ type TxnStatusResult struct {
 }
 
 type ReceiptsOutcome struct {
-	BlockHash string                 `json:"block_hash"`
-	ID        string                 `json:"id"`
-	Outcome   ReceiptsOutcomeOutcome `json:"outcome"`
-	Proof     []OutcomeProof         `json:"proof"`
-}
-
-type ReceiptsOutcomeOutcome struct {
-	OutcomeOutcome
-	Status interface{} `json:"status"`
+	BlockHash string         `json:"block_hash"`
+	ID        string         `json:"id"`
+	Outcome   OutcomeOutcome `json:"outcome"`
+	Proof     []OutcomeProof `json:"proof"`
 }
 
 type ReceiptsMetadata struct {
@@ -93,10 +88,10 @@ type Transfer struct {
 }
 
 type TransactionOutcome struct {
-	BlockHash string                    `json:"block_hash"`
-	ID        string                    `json:"id"`
-	Outcome   TransactionOutcomeOutcome `json:"outcome"`
-	Proof     []OutcomeProof            `json:"proof"`
+	BlockHash string         `json:"block_hash"`
+	ID        string         `json:"id"`
+	Outcome   OutcomeOutcome `json:"outcome"`
+	Proof     []OutcomeProof `json:"proof"`
 }
 
 type OutcomeOutcome struct {
@@ -105,11 +100,8 @@ type OutcomeOutcome struct {
 	Metadata    interface{} `json:"metadata"`
 	Logs        []string    `json:"logs"`
 	ReceiptIDS  []string    `json:"receipt_ids"`
+	Status      interface{} `json:"status"`
 	TokensBurnt string      `json:"tokens_burnt"`
-}
-type TransactionOutcomeOutcome struct {
-	OutcomeOutcome
-	Status interface{} `json:"status"`
 }
 
 type FluffyStatus struct {
@@ -118,18 +110,18 @@ type FluffyStatus struct {
 
 // Transaction Status Response With Receipts
 
-type TransStatusReceiptsRes struct {
-	ID      string                  `json:"id"`
-	Jsonrpc string                  `json:"jsonrpc"`
-	Result  TransStatusReceiptsBody `json:"result"`
+type TxnStatusReceiptsRes struct {
+	CommonRes
+	Result TxnStatusReceiptsResult `json:"result"`
 }
 
-type TransStatusReceiptsBody struct {
+type TxnStatusReceiptsResult struct {
+	FinalExeStatus     string             `json:"final_execution_status"`
 	Receipts           []ReceiptElement   `json:"receipts"`
-	ReceiptsOutcome    []ReceiptsOutcome  `json:"receiptsOutcome"`
+	ReceiptsOutcome    []ReceiptsOutcome  `json:"receipts_outcome"`
 	Status             ResultStatus       `json:"status"`
 	Transaction        Transaction        `json:"transaction"`
-	TransactionOutcome TransactionOutcome `json:"transactionOutcome"`
+	TransactionOutcome TransactionOutcome `json:"transaction_outcome"`
 }
 
 type ReceiptElement struct {
@@ -146,12 +138,13 @@ type ReceiptReceipt struct {
 type ReceiptAction struct {
 	// TODO many type actions
 	//Actions             []ActionAction `json:"actions"`
-	Actions             []interface{} `json:"actions"`
-	GasPrice            string        `json:"gas_price"`
-	InputDataIDS        []string      `json:"input_data_ids"`
-	OutputDataReceivers []string      `json:"output_data_receivers"`
-	SignerID            string        `json:"signer_id"`
-	SignerPublicKey     string        `json:"signer_public_key"`
+	Actions []interface{} `json:"actions"`
+	//Actions             json.RawMessage `json:"actions"`
+	GasPrice            string   `json:"gas_price"`
+	InputDataIDS        []string `json:"input_data_ids"`
+	OutputDataReceivers []string `json:"output_data_receivers"`
+	SignerID            string   `json:"signer_id"`
+	SignerPublicKey     string   `json:"signer_public_key"`
 }
 
 type ActionAction struct {

@@ -89,10 +89,6 @@ func TestTransactionSendAwait(t *testing.T) {
 	remote.TransactionSendAwait()
 }
 
-func TestTransactionStatusReceipts(t *testing.T) {
-	remote.TransactionStatusReceipts()
-}
-
 func TestTransactionReceiptById(t *testing.T) {
 	remote.TransactionReceiptsById("2EbembRPJhREPtmHCrGv3Xtdm3xoc5BMVYHm3b2kjvMY")
 }

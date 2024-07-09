@@ -137,3 +137,33 @@ func QueryDeployContractTxn(ctx context.Context, client *elastic.Client, accId s
 	}
 	return txns, searchResult.TotalHits(), nil
 }
+
+func QueryTxnHeights(client *elastic.Client) []int64 {
+	ctx := context.Background()
+
+	agg := elastic.NewTermsAggregation().Field("height").Size(10000)
+
+	searchResult, err := client.Search().
+		Index("transaction").
+		Aggregation("unique_heights", agg).
+		Do(ctx)
+	if err != nil {
+		log.Fatalf("Error executing the search: %s", err)
+	}
+
+	termsAgg, found := searchResult.Aggregations.Terms("unique_heights")
+	if !found {
+		log.Fatalf("Aggregation not found")
+	}
+
+	var heights []int64
+	for _, bucket := range termsAgg.Buckets {
+		height, ok := bucket.Key.(float64)
+		if ok {
+			heights = append(heights, int64(height))
+		}
+	}
+
+	log.Infof("[QueryTxnHeights]Unique heights: %v\n", heights)
+	return heights
+}
